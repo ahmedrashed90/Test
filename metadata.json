@@ -1,0 +1,5 @@
+{
+  "name": "MZJ Workspace",
+  "description": "A comprehensive workspace management system for Muhammad bin Thaar Al-Ajmi Cars, including inventory tracking, sales management, photoshoot requests, and vehicle transfers with real-time Firebase synchronization.",
+  "requestFramePermissions": []
+}
