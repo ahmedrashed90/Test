@@ -123,6 +123,58 @@
   width: 100vw;
 }
 
+
+/* جدول النقل في تاب نقل السيارات بعرض الصفحة */
+#view-transfer .tableWrap{
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  margin-right: calc(-50vw + 50%);
+  border-radius: 0;
+}
+#view-transfer .tableWrap table{
+  width: 100%;
+}
+
+
+
+/* نقل السيارات: خليه نفس شكل تاب الطلبات (كارت بعرض الصفحة + جدول داخل الكارت) */
+#view-transfer .grid{
+  grid-template-columns: 1fr !important;
+}
+
+#view-transfer .card{
+  width: 100%;
+}
+
+#tr_tableWrap{
+  width: 100%;
+  margin: 0;
+}
+
+#tr_tableWrap table{
+  width: 100%;
+}
+
+
+/* FIX FINAL: خلي تاب نقل السيارات نفس Layout تاب الطلبات */
+#view-transfer{
+  max-width: 100%;
+}
+#view-transfer > .card{
+  max-width: 100%;
+  margin: 0 auto;
+}
+#view-transfer .body{
+  padding: 16px;
+}
+#view-transfer .tableWrap{
+  width: 100%;
+  margin: 0;
+}
+#view-transfer table{
+  width: 100%;
+}
+
 </style>
 </head>
 <body>
@@ -191,9 +243,7 @@
 
         <!-- الإدارة -->
         <div class="view active" id="view-admin" role="tabpanel">
-          <div class="grid">
-
-            <div class="card">
+          <div class="card">
               <h3>إضافة / تعديل سيارة</h3>
               <div class="body">
                 <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
@@ -397,7 +447,7 @@
                   </div>
                 </div>
 
-                <div class="tableWrap" style="max-height:260px;margin-bottom:10px">
+                <div class="tableWrap" id="tr_tableWrap" style="max-height:260px;margin-bottom:10px">
                   <table id="tr_vinTable">
                     <thead>
                       <tr>
@@ -435,61 +485,43 @@
                 </div>
 
                 <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
-                  <button class="btn secondary" id="tr_preview">معاينة</button>
-                  <button class="btn primary" id="tr_submit">تنفيذ طلب النقل</button>
+<button class="btn primary" id="tr_submit">تنفيذ طلب النقل</button>
                 </div>
 
                 <div class="small" id="tr_hint" style="margin-top:10px">
                   المسموح بالنقل: <b>الادارة / اداري</b>. سيتم تسجيل آخر الحركات مع البريد المنفذ.
-                </div>
-
-              </div>
-            </div>
-
-            <div class="card">
-              <h3>معاينة الطلب</h3>
+                
+            <div class="card" style="margin-top:14px">
+              <h3>سجل آخر الحركات</h3>
               <div class="body">
-                <div class="tableWrap" style="max-height:320px">
-                  <table id="tr_table">
+                <div class="tableWrap" style="max-height:360px">
+                  <table id="log_table">
                     <thead>
                       <tr>
-                        <th>VIN</th>
-                        <th>السيارة</th>
-                        <th>المكان الحالي</th>
-                        <th>الحالة</th>
-                        <th>الموافقات</th>
+                        <th>نوع الطلب</th>
+                        <th>رقم الهيكل</th>
+                        <th>من</th>
+                        <th>إلى</th>
+                        <th>ملاحظات</th>
+                        <th>المستخدم</th>
                       </tr>
                     </thead>
                     <tbody></tbody>
                   </table>
                 </div>
-                <div class="small" id="tr_meta" style="margin-top:10px">—</div>
+                <div class="small" id="log_meta" style="margin-top:8px">آخر الحركات: 0</div>
+              </div>
+            </div>
+</div>
+
+              </div>
+            </div>
+<div class="small" id="tr_meta" style="margin-top:10px">—</div>
               </div>
             </div>
 
           </div>
-
-          <div class="card" style="margin-top:14px">
-            <h3>سجل آخر الحركات</h3>
-            <div class="body">
-              <div class="tableWrap" style="max-height:360px">
-                <table id="log_table">
-                  <thead>
-                    <tr>
-                      <th>الوقت</th>
-                      <th>المستخدم</th>
-                      <th>VIN</th>
-                      <th>من</th>
-                      <th>إلى</th>
-                      <th>ملاحظة</th>
-                    </tr>
-                  </thead>
-                  <tbody></tbody>
-                </table>
-              </div>
-              <div class="small" id="log_meta" style="margin-top:10px">—</div>
-            </div>
-          </div>
+</div>
         </div>
 
 </div>
@@ -575,11 +607,7 @@
                       <option value="">— اختر —</option>
                     </select>
                   </div>
-                  <div>
-                    <label>ملاحظات عامة (اختياري)</label>
-                    <input id="req_general_note" placeholder="أي ملاحظة عامة على الطلب (اختياري)" />
-                  </div>
-                </div>
+</div>
 
                 <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
                   <button class="btn primary" id="req_submit">إرسال الطلب</button>
@@ -1710,8 +1738,6 @@
       tb.innerHTML = '';
       // add 3 empty rows by default
       addTransferRow();
-      addTransferRow();
-      addTransferRow();
     }
 
     function approvalsTextLocal(a){
@@ -1819,41 +1845,6 @@
       }
       return res;
     }
-
-    function renderTransferPreview(list){
-      const tb = document.querySelector('#tr_table tbody');
-      tb.innerHTML = '';
-      let missing = 0;
-      list.forEach(d=>{
-        const tr = document.createElement('tr');
-        const appr = approvalsText(d.approvals);
-        const cells = [
-          d.vin||'',
-          d._missing ? 'غير موجود' : (d.carName||''),
-          d._missing ? '—' : (d.location||''),
-          d._missing ? '—' : (d.status||''),
-          d._missing ? '—' : appr
-        ];
-        cells.forEach(t=>{
-          const td = document.createElement('td');
-          td.textContent = t;
-          tr.appendChild(td);
-        });
-        tb.appendChild(tr);
-        if(d._missing) missing++;
-      });
-      $('tr_meta').textContent = `عدد الهياكل: ${list.length} | غير موجود: ${missing}`;
-    }
-
-    async function doPreview(){
-      if(!canTransfer) return toast('غير مصرح لك بالنقل');
-      const vins = getTransferVinsFromTable();
-      if(vins.length===0) return toast('اكتب VIN واحد على الأقل');
-      const cars = await fetchCarsByVins(vins);
-      renderTransferPreview(cars);
-      return cars;
-    }
-
     async function submitTransfer(){
       if(!canTransfer) return toast('غير مصرح لك بالنقل');
       const user = auth.currentUser;
@@ -1948,10 +1939,7 @@
       $('tr_to').value = '';
       $('tr_note').value = '';
       $('tr_note_box').classList.add('hidden');
-      document.querySelector('#tr_table tbody').innerHTML = '';
-      $('tr_meta').textContent = '—';
-
-      toast('تم إنشاء طلب النقل وتحديث السيارات');
+toast('تم إنشاء طلب النقل وتحديث السيارات');
       // تحديث السجل فوراً
       startLogsLive();
     }
@@ -1984,19 +1972,18 @@
     // Logs live (last movements)
     let logUnsub = null;
     function stopLogsLive(){ if(logUnsub){logUnsub(); logUnsub=null;} }
-    function startLogsLive(){
+    function startLogsLive(tableId='log_table', metaId='log_meta'){
       if(logUnsub) return;
       logUnsub = db.collection('logs').orderBy('at','desc').limit(50).onSnapshot((snap)=>{
-        const tb = document.querySelector('#log_table tbody');
+        const tb = document.querySelector('#'+tableId+' tbody');
         if(!tb) return;
         tb.innerHTML = '';
         let count = 0;
         snap.forEach(doc=>{
           const d = doc.data()||{};
           const tr = document.createElement('tr');
-          const dt = d.at && d.at.toDate ? d.at.toDate() : null;
-          const time = dt ? dt.toLocaleString('ar-SA') : '';
-          const cells = [time, d.by||'', d.vin||'', d.fromLocation||'', d.toLocation||'', d.note||''];
+          const type = (d.action||'').includes('request_') ? 'طلبات' : ((d.action||'')==='transfer' ? 'نقل' : (d.action||''));
+          const cells = [type, d.vin||'', d.fromLocation||d.from||'', d.toLocation||d.to||'', d.note||'', d.by||''];
           cells.forEach(t=>{
             const td = document.createElement('td');
             td.textContent = t;
@@ -2005,7 +1992,7 @@
           tb.appendChild(tr);
           count++;
         });
-        const meta = document.getElementById('log_meta');
+        const meta = document.getElementById(metaId);
         if(meta) meta.textContent = `آخر الحركات: ${count}`;
       }, (err)=>toast(err.message||'فشل تحميل السجل'));
     }
@@ -2014,8 +2001,15 @@
     const _openView = openView;
     openView = function(viewId){
       _openView(viewId);
-      if(viewId==='view-transfer') startLogsLive();
-      else stopLogsLive();
+      if(viewId==='view-transfer'){
+        stopLogsLive();
+        startLogsLive('log_table','log_meta');
+      }else if(viewId==='view-requests'){
+        stopLogsLive();
+        startLogsLive('log_table_req','log_meta_req');
+      }else{
+        stopLogsLive();
+      }
       if(viewId==='view-logs') loadLogs().catch(e=>toast(e.message||'فشل تحميل السجل'));
     }
 
@@ -2260,7 +2254,6 @@
         const c = car.checklist || {};
         const a = car.approvals || {};
         const dt = l.at && l.at.toDate ? l.at.toDate() : null;
-        const time = dt ? dt.toLocaleString('ar-SA') : '';
 
         const row = [
           time,
@@ -2355,7 +2348,66 @@
       return t==='photo' ? 'تصوير' : 'نقل';
     }
 
-    function reqStatusLabel(r){
+    
+
+    function buildReqBody(r, carMap){
+      const items = r.items || [];
+      const statusTxt = reqStatusLabel(r);
+      const meta = `
+        <div class="small">
+          <div><b>نوع الطلب:</b> ${reqTypeLabel(r.type)}</div>
+          <div><b>المكان المستهدف:</b> ${r.toLocation||''}</div>
+          <div><b>الحالة:</b> ${statusTxt}</div>
+          ${r.type==='photo' ? `<div><b>تاريخ التصوير:</b> ${r.photoDate||''}</div>` : ``}
+          <div><b>تاريخ الطلب:</b> ${fmtDate(r.createdAt)}</div>
+          <div><b>المنشئ:</b> ${r.createdBy||''}</div>
+        </div>`;
+
+      const rows = items.map(it=>{
+        const c = (carMap && carMap[it.vin]) ? carMap[it.vin] : {};
+        return `
+          <tr>
+            <td>${escapeHtml(it.vin||'')}</td>
+            <td>${escapeHtml(c.carName||'')}</td>
+            <td>${escapeHtml(c.statement||'')}</td>
+            <td>${escapeHtml(c.model||'')}</td>
+            <td>${escapeHtml(c.location||'')}</td>
+            <td>${escapeHtml(it.note||'')}</td>
+          </tr>`;
+      }).join('');
+
+      const carsTable = `
+        <div style="margin-top:12px">
+          <div style="font-weight:900;color:var(--brown);margin-bottom:8px">تفاصيل الطلب</div>
+          <div class="tableWrap" style="max-height:320px">
+            <table>
+              <thead>
+                <tr>
+                  <th>رقم الهيكل</th>
+                  <th>السيارة</th>
+                  <th>الفئة</th>
+                  <th>الموديل</th>
+                  <th>المكان الحالي</th>
+                  <th>ملاحظات</th>
+                </tr>
+              </thead>
+              <tbody>${rows || ''}</tbody>
+            </table>
+          </div>
+        </div>`;
+
+      const steps = `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+          <div class="checkItem" style="background:#fff"><span>تم استلام الطلب</span><div>${r.step1At ? '<span class="tag ok">✓</span>' : '<span class="tag no">✗</span>'}</div></div>
+          <div class="checkItem" style="background:#fff"><span>تم ارسال السيارة</span><div>${r.step2At ? '<span class="tag ok">✓</span>' : '<span class="tag no">✗</span>'}</div></div>
+          <div class="checkItem" style="background:#fff"><span>تم استلام السيارة</span><div>${r.step3At ? '<span class="tag ok">✓</span>' : '<span class="tag no">✗</span>'}</div></div>
+          <div class="checkItem" style="background:#fff"><span>تم الانتهاء</span><div>${r.step4At ? '<span class="tag ok">✓</span>' : '<span class="tag no">✗</span>'}</div></div>
+        </div>`;
+
+      return meta + carsTable + steps;
+    }
+
+function reqStatusLabel(r){
       const s1 = !!r.step1At;
       const s2 = !!r.step2At;
       const s3 = !!r.step3At;
@@ -2377,8 +2429,6 @@
       const tb = document.querySelector('#req_vinTable tbody');
       if(!tb) return;
       tb.innerHTML = '';
-      addReqRow();
-      addReqRow();
       addReqRow();
     }
 
@@ -2516,7 +2566,7 @@
         vins: items.map(x=>x.vin),
         toLocation,
         photoDate: type==='photo' ? photoDate : null,
-        note: $('req_general_note').value.trim(),
+
         createdBy: user.email,
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         step1At: null, step2At: null, step3At: null, step4At: null,
@@ -2529,8 +2579,7 @@
       // reset
       clearReqRows();
       $('req_to').value = '';
-      $('req_general_note').value = '';
-      if(type==='photo'){ $('req_photo_date').value=''; }
+if(type==='photo'){ $('req_photo_date').value=''; }
       // انتقل لمتابعة الطلبات
       $('req_mode').value='track';
       switchReqMode();
@@ -2673,45 +2722,6 @@
       logAction('requests','request_delete',{requestId:reqId, type:r.type||'', toLocation:r.toLocation||'', vins:(r.vins||[])});
       closeReqModal();
     }
-
-    function buildReqBody(r){
-      const items = r.items || [];
-      const rows = items.map(it=>`
-        <tr>
-          <td>${it.vin||''}</td>
-          <td>${(it.note||'')}</td>
-        </tr>`).join('');
-
-      const steps = `
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
-          <div class="checkItem" style="background:#fff"><span>تم استلام الطلب</span><div>${r.step1At ? '<span class="tag ok">✓</span>' : '<span class="tag no">✗</span>'}</div></div>
-          <div class="checkItem" style="background:#fff"><span>تم ارسال السيارة</span><div>${r.step2At ? '<span class="tag ok">✓</span>' : '<span class="tag no">✗</span>'}</div></div>
-          <div class="checkItem" style="background:#fff"><span>تم استلام السيارة</span><div>${r.step3At ? '<span class="tag ok">✓</span>' : '<span class="tag no">✗</span>'}</div></div>
-          <div class="checkItem" style="background:#fff"><span>تم الانتهاء</span><div>${r.step4At ? '<span class="tag ok">✓</span>' : '<span class="tag no">✗</span>'}</div></div>
-        </div>`;
-
-      const meta = `
-        <div class="small">
-          <div><b>النوع:</b> ${reqTypeLabel(r.type)}</div>
-          ${r.type==='photo' ? `<div><b>تاريخ التصوير:</b> ${r.photoDate||''}</div>` : ``}
-          <div><b>المكان المستهدف:</b> ${r.toLocation||''}</div>
-          <div><b>المنشئ:</b> ${r.createdBy||''}</div>
-          <div><b>تاريخ الإنشاء:</b> ${fmtDate(r.createdAt)}</div>
-          ${r.note ? `<div><b>ملاحظة عامة:</b> ${r.note}</div>` : ``}
-        </div>`;
-
-      return meta + `
-        <div style="margin-top:12px">
-          <div style="font-weight:900;color:var(--brown);margin-bottom:8px">الهياكل</div>
-          <div class="tableWrap" style="max-height:240px">
-            <table>
-              <thead><tr><th>VIN</th><th>ملاحظة</th></tr></thead>
-              <tbody>${rows || ''}</tbody>
-            </table>
-          </div>
-        </div>` + steps;
-    }
-
     async function openReqModal(r, keepOpen=false){
       if(!r || !r.id){
         toast('لا يمكن فتح الطلب');
@@ -2719,7 +2729,17 @@
       }
       reqModal.dataset.id = r.id;
       reqModalTitle.textContent = `تفاصيل الطلب — ${reqTypeLabel(r.type)} (${(r.vins||[]).length})`;
-      reqModalBody.innerHTML = buildReqBody(r);
+      
+      const carMap = {};
+      const its = r.items || [];
+      await Promise.all(its.map(async (it)=>{
+        try{
+          const cs = await db.collection('cars').doc(it.vin).get();
+          if(cs.exists) carMap[it.vin] = cs.data() || {};
+        }catch(e){}
+      }));
+      reqModalBody.innerHTML = buildReqBody(r, carMap);
+    
 
       const id = r.id;
       reqModalFoot.innerHTML = '';
