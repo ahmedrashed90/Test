@@ -1,5 +1,7 @@
 
 
+
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -93,7 +95,146 @@
     .modalFoot{padding:14px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-start;flex-wrap:wrap}
 
     .small{font-size:12px;color:var(--muted);line-height:1.7}
-  </style>
+  
+/* توسيع جدول المخزون فقط */
+#view-inventory .body{
+  padding: 0;
+}
+
+
+/* سطر واحد لكل خلايا جدول المخزون */
+#inv_table th,
+#inv_table td{
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+
+/* جعل جدول المخزون بعرض الصفحة بالكامل */
+#view-inventory{
+  margin-left: calc(-50vw + 50%);
+  margin-right: calc(-50vw + 50%);
+}
+
+#view-inventory .card{
+  border-radius: 0;
+}
+
+#view-inventory .tableWrap{
+  width: 100vw;
+}
+
+
+/* جدول النقل في تاب نقل السيارات بعرض الصفحة */
+#view-transfer .tableWrap{
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  margin-right: calc(-50vw + 50%);
+  border-radius: 0;
+}
+#view-transfer .tableWrap table{
+  width: 100%;
+}
+
+
+
+/* نقل السيارات: خليه نفس شكل تاب الطلبات (كارت بعرض الصفحة + جدول داخل الكارت) */
+#view-transfer .grid{
+  grid-template-columns: 1fr !important;
+}
+
+#view-transfer .card{
+  width: 100%;
+}
+
+#tr_tableWrap{
+  width: 100%;
+  margin: 0;
+}
+
+#tr_tableWrap table{
+  width: 100%;
+}
+
+
+/* FIX FINAL: خلي تاب نقل السيارات نفس Layout تاب الطلبات */
+#view-transfer{
+  max-width: 100%;
+}
+#view-transfer > .card{
+  max-width: 100%;
+  margin: 0 auto;
+}
+#view-transfer .body{
+  padding: 16px;
+}
+#view-transfer .tableWrap{
+  width: 100%;
+  margin: 0;
+}
+#view-transfer table{
+  width: 100%;
+}
+
+
+    /* ===== Dashboard ===== */
+    .dashGrid{display:grid;grid-template-columns:repeat(3, minmax(0,1fr));gap:14px;margin-top:14px}
+    .dashCard .body{display:grid;gap:10px}
+    .dashKpis{display:grid;grid-template-columns:repeat(2, minmax(0,1fr));gap:10px}
+    .dashKpi{background:#fff;border:1px solid #f0e6dc;border-radius:12px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .dashKpi span{color:var(--muted);font-size:13px;font-weight:700}
+    .dashKpi b{font-size:18px;color:var(--brown)}
+    .dashBtns{display:flex;gap:8px;flex-wrap:wrap}
+    .dashFilters{display:grid;grid-template-columns:220px 1fr 220px;gap:12px;align-items:end}
+    .dashStatusBox{border:1px solid #f0e6dc;border-radius:12px;background:#fff;padding:10px 12px}
+    .dashChecks{display:flex;gap:10px;flex-wrap:wrap}
+    .dashChk{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--brown);font-weight:700}
+    .dashFilterActions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+
+    @media (max-width:1100px){
+      .dashGrid{grid-template-columns:repeat(2, minmax(0,1fr))}
+      .dashFilters{grid-template-columns:1fr}
+      .dashFilterActions{justify-content:flex-start}
+    }
+    @media (max-width:720px){
+      .dashGrid{grid-template-columns:1fr}
+    }
+
+
+/* داش بورد: تمييز الإجمالي الفعلي وإجمالي المفاتيح */
+#stk_totalActual, #stk_keysTotal,
+#ag_totalActual,  #ag_keysTotal,
+#b1_totalActual,  #b1_keysTotal,
+#b2_totalActual,  #b2_keysTotal,
+#b3_totalActual,  #b3_keysTotal{
+  color: #d97706; /* برتقالي مناسب */
+}
+
+
+/* داش بورد: إبراز الإجمالي الفعلي وإجمالي المفاتيح */
+#view-dashboard .dashKpi:has(#stk_totalActual),
+#view-dashboard .dashKpi:has(#stk_keysTotal),
+#view-dashboard .dashKpi:has(#ag_totalActual),
+#view-dashboard .dashKpi:has(#ag_keysTotal),
+#view-dashboard .dashKpi:has(#b1_totalActual),
+#view-dashboard .dashKpi:has(#b1_keysTotal),
+#view-dashboard .dashKpi:has(#b2_totalActual),
+#view-dashboard .dashKpi:has(#b2_keysTotal),
+#view-dashboard .dashKpi:has(#b3_totalActual),
+#view-dashboard .dashKpi:has(#b3_keysTotal){
+  border: 2px solid #d97706;
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+#view-dashboard #stk_totalActual, #view-dashboard #stk_keysTotal,
+#view-dashboard #ag_totalActual,  #view-dashboard #ag_keysTotal,
+#view-dashboard #b1_totalActual,  #view-dashboard #b1_keysTotal,
+#view-dashboard #b2_totalActual,  #view-dashboard #b2_keysTotal,
+#view-dashboard #b3_totalActual,  #view-dashboard #b3_keysTotal{
+  color:#d97706;
+}
+
+</style>
 </head>
 <body>
   <div class="wrap">
@@ -151,19 +292,204 @@
 
         <!-- الداش بورد -->
         <div class="view" id="view-dashboard" role="tabpanel">
+
+          <!-- Saved View Filters -->
           <div class="card">
             <h3>الداش بورد</h3>
             <div class="body">
-              <div class="small">—</div>
+              <div class="dashFilters">
+                <div>
+                  <label>المكان</label>
+                  <select id="dash_filter_location" class="selWithAdd">
+                    <option value="">— اختر —</option>
+                  </select>
+                </div>
+                <div class="dashStatusBox">
+                  <div class="small" style="margin-bottom:6px">الحالات (يمكن اختيار أكثر من حالة)</div>
+                  <div class="dashChecks" id="dash_filter_statuses">
+                    <label class="dashChk"><input type="checkbox" value="متاح للبيع"> متاح للبيع</label>
+                    <label class="dashChk"><input type="checkbox" value="محجوز"> محجوز</label>
+                    <label class="dashChk"><input type="checkbox" value="بها ملاحظات"> بها ملاحظات</label>
+                    <label class="dashChk"><input type="checkbox" value="مباع تحت التسليم"> مباع تحت التسليم</label>
+                    <label class="dashChk"><input type="checkbox" value="مباع تم التسليم"> مباع تم التسليم</label>
+                  </div>
+                </div>
+                <div class="dashFilterActions">
+                  <button class="btn secondary" id="dash_filter_show">عرض</button>
+                  <button class="btn primary" id="dash_filter_save">حفظ</button>
+                  <button class="btn danger" id="dash_filter_clear">تفريغ</button>
+                </div>
+              </div>
+              <div class="small" id="dash_filter_meta" style="margin-top:10px">—</div>
             </div>
+          </div>
+
+          <!-- Cards -->
+          <div class="dashGrid">
+
+            <div class="card dashCard">
+              <h3>كارت النواقص</h3>
+              <div class="body">
+                <div class="dashKpis">
+                  <div class="dashKpi"><span>إجمالي النواقص (كل الفروع)</span><b id="miss_total">—</b></div>
+                </div>
+                <div class="dashBtns">
+                  <button class="btn secondary" data-miss-branch="الوكالة">الوكالة</button>
+                  <button class="btn secondary" data-miss-branch="الصالة">فرع 1: الصالة</button>
+                  <button class="btn secondary" data-miss-branch="الملتقى">فرع 2: الملتقى</button>
+                  <button class="btn secondary" data-miss-branch="القادسية">فرع 3: القادسية</button>
+                </div>
+                <div class="small" id="miss_meta" style="margin-top:10px">يُحسب من الإجمالي الفعلي (متاح للبيع + محجوز + بها ملاحظات) بالاعتماد على catalog.</div>
+              </div>
+            </div>
+
+            <div class="card dashCard">
+              <h3>كارت المخزون (عام)</h3>
+              <div class="body">
+                <div class="dashKpis">
+                  <div class="dashKpi"><span>الإجمالي الفعلي</span><b id="stk_totalActual">—</b></div>
+                  <div class="dashKpi"><span>إجمالي المفاتيح</span><b id="stk_keysTotal">—</b></div>
+                </div>
+                <div class="dashKpis">
+                  <div class="dashKpi"><span>متاح</span><b id="stk_avail">—</b></div>
+                  <div class="dashKpi"><span>محجوز</span><b id="stk_reserved">—</b></div>
+                  <div class="dashKpi"><span>بها ملاحظات</span><b id="stk_notes">—</b></div>
+                  <div class="dashKpi"><span>مباع تحت التسليم</span><b id="stk_under">—</b></div>
+                  <div class="dashKpi"><span>مباع تم التسليم</span><b id="stk_delivered">—</b></div>
+                </div>
+                <div class="dashBtns">
+                  <button class="btn secondary" id="btn_go_agency">الوكالة</button>
+                  <button class="btn secondary" data-go-status="متاح للبيع">المتاح للبيع</button>
+                  <button class="btn secondary" data-go-status="بها ملاحظات">سيارات بها ملاحظات</button>
+                  <button class="btn secondary" data-go-status="مباع تحت التسليم">مباع تحت التسليم</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="card dashCard">
+              <h3>كارت الوكالة</h3>
+              <div class="body">
+                <div class="dashKpis">
+                  <div class="dashKpi"><span>الإجمالي الفعلي</span><b id="ag_totalActual">—</b></div>
+                  <div class="dashKpi"><span>إجمالي المفاتيح</span><b id="ag_keysTotal">—</b></div>
+                </div>
+                <div class="dashKpis">
+                  <div class="dashKpi"><span>متاح</span><b id="ag_avail">—</b></div>
+                  <div class="dashKpi"><span>محجوز</span><b id="ag_reserved">—</b></div>
+                  <div class="dashKpi"><span>بها ملاحظات</span><b id="ag_notes">—</b></div>
+                  <div class="dashKpi"><span>مباع تحت التسليم</span><b id="ag_under">—</b></div>
+                  <div class="dashKpi"><span>مباع تم التسليم</span><b id="ag_delivered">—</b></div>
+                </div>
+                <div class="dashBtns">
+                  <button class="btn secondary" data-go-location="الوكالة">عرض سيارات الوكالة</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="card dashCard">
+              <h3>كارت فرع 1 : الصالة</h3>
+              <div class="body">
+                <div class="dashKpis">
+                  <div class="dashKpi"><span>الإجمالي الفعلي</span><b id="b1_totalActual">—</b></div>
+                  <div class="dashKpi"><span>إجمالي المفاتيح</span><b id="b1_keysTotal">—</b></div>
+                </div>
+                <div class="dashKpis">
+                  <div class="dashKpi"><span>متاح</span><b id="b1_avail">—</b></div>
+                  <div class="dashKpi"><span>محجوز</span><b id="b1_reserved">—</b></div>
+                  <div class="dashKpi"><span>بها ملاحظات</span><b id="b1_notes">—</b></div>
+                  <div class="dashKpi"><span>مباع تحت التسليم</span><b id="b1_under">—</b></div>
+                  <div class="dashKpi"><span>مباع تم التسليم</span><b id="b1_delivered">—</b></div>
+                </div>
+                <div class="dashBtns"><button class="btn secondary" data-go-location="الصالة">عرض سيارات الصالة</button></div>
+              </div>
+            </div>
+
+            <div class="card dashCard">
+              <h3>كارت فرع 2 : الملتقى</h3>
+              <div class="body">
+                <div class="dashKpis">
+                  <div class="dashKpi"><span>الإجمالي الفعلي</span><b id="b2_totalActual">—</b></div>
+                  <div class="dashKpi"><span>إجمالي المفاتيح</span><b id="b2_keysTotal">—</b></div>
+                </div>
+                <div class="dashKpis">
+                  <div class="dashKpi"><span>متاح</span><b id="b2_avail">—</b></div>
+                  <div class="dashKpi"><span>محجوز</span><b id="b2_reserved">—</b></div>
+                  <div class="dashKpi"><span>بها ملاحظات</span><b id="b2_notes">—</b></div>
+                  <div class="dashKpi"><span>مباع تحت التسليم</span><b id="b2_under">—</b></div>
+                  <div class="dashKpi"><span>مباع تم التسليم</span><b id="b2_delivered">—</b></div>
+                </div>
+                <div class="dashBtns"><button class="btn secondary" data-go-location="الملتقى">عرض سيارات الملتقى</button></div>
+              </div>
+            </div>
+
+            <div class="card dashCard">
+              <h3>كارت فرع 3 : القادسية</h3>
+              <div class="body">
+                <div class="dashKpis">
+                  <div class="dashKpi"><span>الإجمالي الفعلي</span><b id="b3_totalActual">—</b></div>
+                  <div class="dashKpi"><span>إجمالي المفاتيح</span><b id="b3_keysTotal">—</b></div>
+                </div>
+                <div class="dashKpis">
+                  <div class="dashKpi"><span>متاح</span><b id="b3_avail">—</b></div>
+                  <div class="dashKpi"><span>محجوز</span><b id="b3_reserved">—</b></div>
+                  <div class="dashKpi"><span>بها ملاحظات</span><b id="b3_notes">—</b></div>
+                  <div class="dashKpi"><span>مباع تحت التسليم</span><b id="b3_under">—</b></div>
+                  <div class="dashKpi"><span>مباع تم التسليم</span><b id="b3_delivered">—</b></div>
+                </div>
+                <div class="dashBtns"><button class="btn secondary" data-go-location="القادسية">عرض سيارات القادسية</button></div>
+              </div>
+            </div>
+
+            <div class="card dashCard">
+              <h3>كارت الموافقة المالية والإدارية</h3>
+              <div class="body">
+                <div class="dashKpis">
+                  <div class="dashKpi"><span>ناقص موافقة مالية</span><b id="ap_need_fin">—</b></div>
+                  <div class="dashKpi"><span>ناقص موافقة إدارية</span><b id="ap_need_adm">—</b></div>
+                  <div class="dashKpi"><span>جاهزة للأرشيف</span><b id="ap_ready">—</b></div>
+                </div>
+                <div class="dashBtns">
+                  <button class="btn secondary" id="ap_show_fin">عرض الناقص المالي</button>
+                  <button class="btn secondary" id="ap_show_adm">عرض الناقص الإداري</button>
+                  <button class="btn secondary" id="ap_show_ready">عرض الجاهز للأرشيف</button>
+                </div>
+                <div class="small" style="margin-top:10px">مربوط بالحالة: مباع تحت التسليم</div>
+              </div>
+            </div>
+
+            <div class="card dashCard">
+              <h3>كارت الطلبات</h3>
+              <div class="body">
+                <div class="dashKpis">
+                  <div class="dashKpi"><span>تم استلام الطلب</span><b id="rq_s1">—</b></div>
+                  <div class="dashKpi"><span>تم ارسال السيارة</span><b id="rq_s2">—</b></div>
+                  <div class="dashKpi"><span>تم استلام السيارة</span><b id="rq_s3">—</b></div>
+                  <div class="dashKpi"><span>تم الانتهاء</span><b id="rq_s4">—</b></div>
+                </div>
+                <div class="dashBtns">
+                  <button class="btn secondary" data-req-stage="1">تم استلام الطلب</button>
+                  <button class="btn secondary" data-req-stage="2">تم ارسال السيارة</button>
+                  <button class="btn secondary" data-req-stage="3">تم استلام السيارة</button>
+                  <button class="btn secondary" data-req-stage="4">تم الانتهاء</button>
+                </div>
+                <div class="small" style="margin-top:10px">الأرشفة تتم من تاب المخزون بعد اكتمال الطلب.</div>
+              </div>
+            </div>
+
+            <div class="card dashCard">
+              <h3>كارت تتبع طلبات البيع (Tracking)</h3>
+              <div class="body">
+                <div class="small">—</div>
+              </div>
+            </div>
+
           </div>
         </div>
 
+
         <!-- الإدارة -->
         <div class="view active" id="view-admin" role="tabpanel">
-          <div class="grid">
-
-            <div class="card">
+          <div class="card">
               <h3>إضافة / تعديل سيارة</h3>
               <div class="body">
                 <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
@@ -367,7 +693,7 @@
                   </div>
                 </div>
 
-                <div class="tableWrap" style="max-height:260px;margin-bottom:10px">
+                <div class="tableWrap" id="tr_tableWrap" style="max-height:260px;margin-bottom:10px">
                   <table id="tr_vinTable">
                     <thead>
                       <tr>
@@ -405,61 +731,43 @@
                 </div>
 
                 <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
-                  <button class="btn secondary" id="tr_preview">معاينة</button>
-                  <button class="btn primary" id="tr_submit">تنفيذ طلب النقل</button>
+<button class="btn primary" id="tr_submit">تنفيذ طلب النقل</button>
                 </div>
 
                 <div class="small" id="tr_hint" style="margin-top:10px">
                   المسموح بالنقل: <b>الادارة / اداري</b>. سيتم تسجيل آخر الحركات مع البريد المنفذ.
-                </div>
-
-              </div>
-            </div>
-
-            <div class="card">
-              <h3>معاينة الطلب</h3>
+                
+            <div class="card" style="margin-top:14px">
+              <h3>سجل آخر الحركات</h3>
               <div class="body">
-                <div class="tableWrap" style="max-height:320px">
-                  <table id="tr_table">
+                <div class="tableWrap" style="max-height:360px">
+                  <table id="log_table">
                     <thead>
                       <tr>
-                        <th>VIN</th>
-                        <th>السيارة</th>
-                        <th>المكان الحالي</th>
-                        <th>الحالة</th>
-                        <th>الموافقات</th>
+                        <th>نوع الطلب</th>
+                        <th>رقم الهيكل</th>
+                        <th>من</th>
+                        <th>إلى</th>
+                        <th>ملاحظات</th>
+                        <th>المستخدم</th>
                       </tr>
                     </thead>
                     <tbody></tbody>
                   </table>
                 </div>
-                <div class="small" id="tr_meta" style="margin-top:10px">—</div>
+                <div class="small" id="log_meta" style="margin-top:8px">آخر الحركات: 0</div>
+              </div>
+            </div>
+</div>
+
+              </div>
+            </div>
+<div class="small" id="tr_meta" style="margin-top:10px">—</div>
               </div>
             </div>
 
           </div>
-
-          <div class="card" style="margin-top:14px">
-            <h3>سجل آخر الحركات</h3>
-            <div class="body">
-              <div class="tableWrap" style="max-height:360px">
-                <table id="log_table">
-                  <thead>
-                    <tr>
-                      <th>الوقت</th>
-                      <th>المستخدم</th>
-                      <th>VIN</th>
-                      <th>من</th>
-                      <th>إلى</th>
-                      <th>ملاحظة</th>
-                    </tr>
-                  </thead>
-                  <tbody></tbody>
-                </table>
-              </div>
-              <div class="small" id="log_meta" style="margin-top:10px">—</div>
-            </div>
-          </div>
+</div>
         </div>
 
 </div>
@@ -545,11 +853,7 @@
                       <option value="">— اختر —</option>
                     </select>
                   </div>
-                  <div>
-                    <label>ملاحظات عامة (اختياري)</label>
-                    <input id="req_general_note" placeholder="أي ملاحظة عامة على الطلب (اختياري)" />
-                  </div>
-                </div>
+</div>
 
                 <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
                   <button class="btn primary" id="req_submit">إرسال الطلب</button>
@@ -763,6 +1067,9 @@
 
   
         <script>
+    // Helper: short selector by id
+    const $ = (id)=>document.getElementById(id);
+
     // ===== Firebase Config (mzj-workflow) =====
     const firebaseConfig = {
       apiKey: "AIzaSyBaor-9gU1XYmTD-3YCP14Kstf7HvMEC_M",
@@ -1064,6 +1371,532 @@
       if(invUnsub){ invUnsub(); invUnsub=null; }
     }
 
+
+    /****************************************************
+     * Dashboard
+     ****************************************************/
+    let dashCarsUnsub = null;
+    let dashCatalogUnsub = null;
+    let dashCars = [];
+    let dashCatalog = [];
+
+    function normStatus(s){
+      s = (s||'').toString().trim();
+      // توحيد مسميات تحت/تم التسليم
+      if(s === 'تحت التسليم') return 'مباع تحت التسليم';
+      if(s === 'تم التسليم') return 'مباع تم التسليم';
+      if(s === 'مباع تحت التسلم') return 'مباع تحت التسليم';
+      if(s === 'مباع تحت التسليم') return 'مباع تحت التسليم';
+      if(s === 'مباع تم التسليم') return 'مباع تم التسليم';
+      return s;
+    }
+
+    function isActualStatus(st){
+      const s = normStatus(st);
+      return (s==='متاح للبيع' || s==='محجوز' || s==='حجز' || s==='بها ملاحظات');
+    }
+
+    function statusBucket(st){
+      const s = normStatus(st);
+      if(s==='متاح للبيع') return 'avail';
+      if(s==='محجوز' || s==='حجز') return 'reserved';
+      if(s==='بها ملاحظات') return 'notes';
+      if(s==='مباع تحت التسليم') return 'under';
+      if(s==='مباع تم التسليم') return 'delivered';
+      return 'other';
+    }
+
+    function countAgg(cars){
+      const out = {avail:0,reserved:0,notes:0,under:0,delivered:0,other:0};
+      cars.forEach(c=>{ out[statusBucket(c.status)] += 1; });
+      out.totalActual = out.avail + out.reserved + out.notes;
+      out.keysTotal = out.totalActual + out.under;
+      return out;
+    }
+
+    function setText(id, val){
+      const el = document.getElementById(id);
+      if(el) el.textContent = (val===null||val===undefined) ? '—' : String(val);
+    }
+
+    function applyAgg(prefix, agg){
+      setText(prefix+'_totalActual', agg.totalActual);
+      setText(prefix+'_keysTotal', agg.keysTotal);
+      setText(prefix+'_avail', agg.avail);
+      setText(prefix+'_reserved', agg.reserved);
+      setText(prefix+'_notes', agg.notes);
+      setText(prefix+'_under', agg.under);
+      setText(prefix+'_delivered', agg.delivered);
+    }
+
+    
+    async 
+    async function loadDashLocationsIntoSelect(){
+      const sel = document.getElementById('dash_filter_location');
+      const statusesWrap = document.getElementById('dash_filter_statuses');
+      if(!sel) return;
+
+      const curLoc = (sel.value||'').toString();
+      const checkedStatuses = new Set((statusesWrap ? Array.from(statusesWrap.querySelectorAll('input[type="checkbox"]:checked')).map(i=>i.value) : []));
+
+      let branches = [];
+      let statuses = [];
+
+      // Read from meta/lists (fields: branches, statuses)
+      try{
+        const mDoc = await db.collection('meta').doc('lists').get();
+        if(mDoc.exists){
+          const d = mDoc.data() || {};
+          branches = Array.isArray(d.branches) ? d.branches : [];
+          statuses = Array.isArray(d.statuses) ? d.statuses : [];
+        }
+      }catch(e){
+        console.warn('meta/lists read failed', e);
+      }
+
+      // Fallback branches from cars snapshot
+      if(!branches.length){
+        branches = Array.from(new Set(dashCars.map(c=>(c.location||'').toString().trim()).filter(Boolean)))
+          .sort((a,b)=>a.localeCompare(b,'ar'));
+      }
+
+      // Final fallback safe
+      if(!branches.length){
+        branches = ['الملتقى','القادسية','الصالة','الوكالة','المستودع'];
+      }
+
+      sel.innerHTML = '<option value="">— اختر —</option>' + branches.map(b=>`<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`).join('');
+      if(curLoc && branches.includes(curLoc)) sel.value = curLoc;
+
+      // Rebuild statuses checkboxes from meta (if container exists)
+      if(statusesWrap){
+        if(!statuses.length){
+          statuses = ['متاح للبيع','محجوز','بها ملاحظات','مباع تحت التسليم','مباع تم التسليم'];
+        }
+        statusesWrap.innerHTML = statuses.map((st, idx)=>{
+          const checked = checkedStatuses.has(st) ? 'checked' : '';
+          return `<label class="dashChk"><input type="checkbox" value="${escapeHtml(st)}" ${checked}> ${escapeHtml(st)}</label>`;
+        }).join('');
+      }
+    }
+
+      }catch(e){ /* ignore */ }
+
+      // 2) Fallback to distinct locations in cars
+      if(!branches.length){
+        branches = Array.from(new Set(dashCars.map(c=>(c.location||'').toString().trim()).filter(Boolean)))
+          .sort((a,b)=>a.localeCompare(b,'ar'));
+      }
+
+      // 3) Final fallback (safe)
+      if(!branches.length){
+        branches = ['الملتقى','القادسية','الصالة','الوكالة','المستودع'];
+      }
+
+      sel.innerHTML = '<option value="">— اختر —</option>' + branches.map(b=>`<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`).join('');
+      if(cur && branches.includes(cur)) sel.value = cur;
+    }
+
+
+    function readSavedDashFilter(){
+      try{
+        const raw = localStorage.getItem('mzj_dash_filter');
+        return raw ? JSON.parse(raw) : null;
+      }catch(e){ return null; }
+    }
+
+    function writeSavedDashFilter(obj){
+      try{ localStorage.setItem('mzj_dash_filter', JSON.stringify(obj||{})); }catch(e){}
+    }
+
+    function getDashFilterFromUI(){
+      const loc = (document.getElementById('dash_filter_location')?.value || '').trim();
+      const checks = Array.from(document.querySelectorAll('#dash_filter_statuses input[type="checkbox"]'));
+      const statuses = checks.filter(c=>c.checked).map(c=>c.value);
+      return {location: loc, statuses};
+    }
+
+    function applyDashFilterToUI(obj){
+      
+
+    function applyDashFilterToUI(obj){
+      obj = obj || {};
+      const sel = document.getElementById('dash_filter_location');
+      if(sel) sel.value = obj.location || '';
+      const checks = Array.from(document.querySelectorAll('#dash_filter_statuses input[type="checkbox"]'));
+      const set = new Set(obj.statuses || []);
+      checks.forEach(c=> c.checked = set.has(c.value));
+    }
+
+    function renderDashboard(){
+      // global
+      const allAgg = countAgg(dashCars);
+      applyAgg('stk', allAgg);
+
+      // agency + branches
+      const byLoc = (loc)=> dashCars.filter(c=>(c.location||'').toString().trim()===loc);
+      applyAgg('ag', countAgg(byLoc('الوكالة')));
+      applyAgg('b1', countAgg(byLoc('الصالة')));
+      applyAgg('b2', countAgg(byLoc('الملتقى')));
+      applyAgg('b3', countAgg(byLoc('القادسية')));
+
+      // approvals (status under delivery)
+      const under = dashCars.filter(c=>normStatus(c.status)==='مباع تحت التسليم');
+      const needFin = under.filter(c=>!(c.approvals && c.approvals.financial===true));
+      const needAdm = under.filter(c=>!(c.approvals && c.approvals.admin===true));
+      const ready   = under.filter(c=>(c.approvals && c.approvals.financial===true && c.approvals.admin===true));
+      setText('ap_need_fin', needFin.length);
+      setText('ap_need_adm', needAdm.length);
+      setText('ap_ready', ready.length);
+
+      // Missing (catalog)
+      const missMeta = document.getElementById('miss_meta');
+      if(!dashCatalog.length){
+        setText('miss_total', '—');
+        if(missMeta) missMeta.textContent = 'لم يتم العثور على catalog. أنشئ catalog لتفعيل كارت النواقص.';
+      }else{
+        if(missMeta) missMeta.textContent = 'يُحسب من الإجمالي الفعلي (متاح للبيع + محجوز + بها ملاحظات) بالاعتماد على catalog.';
+        let total=0;
+        ['الوكالة','الصالة','الملتقى','القادسية'].forEach(loc=>{
+          total += computeMissingForBranch(loc).length;
+        });
+        setText('miss_total', total);
+      }
+
+      // Saved filter meta
+      const fmeta = document.getElementById('dash_filter_meta');
+      const saved = readSavedDashFilter();
+      if(fmeta){
+        if(saved && (saved.location || (saved.statuses||[]).length)){
+          fmeta.textContent = `محفوظ: ${saved.location||'—'} | حالات: ${(saved.statuses||[]).join('، ')||'—'}`;
+        }else{
+          fmeta.textContent = '—';
+        }
+      }
+    }
+
+
+    function catKey(obj){
+      const carName = (obj.carName||obj['السيارة']||'').toString().trim();
+      const statement = (obj.statement||obj['البيان']||'').toString().trim();
+      const interiorColor = (obj.interiorColor||obj.colorInside||obj['اللون الداخلي']||'').toString().trim();
+      const exteriorColor = (obj.exteriorColor||obj.colorOutside||obj['اللون الخارجي']||'').toString().trim();
+      const model = (obj.model||obj['موديل']||'').toString().trim();
+      return '|' + [carName, statement, interiorColor, exteriorColor, model].join('|') + '|';
+    }
+
+    function carToCatKey(c){
+      return '|' + [
+        (c.carName||'').toString().trim(),
+        (c.statement||'').toString().trim(),
+        (c.interiorColor||'').toString().trim(),
+        (c.exteriorColor||'').toString().trim(),
+        (c.model||'').toString().trim()
+      ].join('|') + '|';
+    }
+
+    function computeMissingForBranch(branch){
+      if(!dashCatalog.length) return [];
+      const actualCars = dashCars.filter(c=>(c.location||'').toString().trim()===branch && isActualStatus(c.status));
+      const set = new Set(actualCars.map(carToCatKey));
+      const missing = [];
+      dashCatalog.forEach(item=>{
+        const key = catKey(item);
+        if(!set.has(key)) missing.push(item);
+      });
+      return missing;
+    }
+
+    function openMissingModal(branch){
+      const arr = computeMissingForBranch(branch);
+      const rows = arr.map((it)=>{
+        const d = it._raw || it;
+        const carName = (d.carName||d['السيارة']||'—');
+        const statement = (d.statement||d['البيان']||'—');
+        const interiorColor = (d.interiorColor||d.colorInside||d['اللون الداخلي']||'—');
+        const exteriorColor = (d.exteriorColor||d.colorOutside||d['اللون الخارجي']||'—');
+        const model = (d.model||d['موديل']||'—');
+        return `<tr><td>${escapeHtml(carName)}</td><td>${escapeHtml(statement)}</td><td>${escapeHtml(interiorColor)}</td><td>${escapeHtml(exteriorColor)}</td><td>${escapeHtml(model)}</td></tr>`;
+      }).join('');
+
+      const html = `
+        <div class="tableWrap" style="max-height:520px">
+          <table>
+            <thead><tr><th>السيارة</th><th>البيان</th><th>اللون الداخلي</th><th>اللون الخارجي</th><th>موديل</th></tr></thead>
+            <tbody>${rows || '<tr><td colspan="5" class="small">لا توجد نواقص</td></tr>'}</tbody>
+          </table>
+        </div>`;
+      openDetailsModal(html, `نواقص: ${branch}`);
+    }
+
+    function goInventoryFilter(location, status){
+      openView('view-inventory');
+      const locSel = document.getElementById('inv_location');
+      const stSel  = document.getElementById('inv_status');
+      if(locSel && location){ locSel.value = location; }
+      if(stSel && status){ stSel.value = status; }
+      renderInventory();
+    }
+
+    function openApprovalsModal(mode){
+      const under = dashCars.filter(c=>normStatus(c.status)==='مباع تحت التسليم');
+      let arr = under;
+      let title = 'الموافقات';
+      if(mode==='fin') { arr = under.filter(c=>!(c.approvals && c.approvals.financial===true)); title='ناقص موافقة مالية'; }
+      if(mode==='adm') { arr = under.filter(c=>!(c.approvals && c.approvals.admin===true)); title='ناقص موافقة إدارية'; }
+      if(mode==='ready'){ arr = under.filter(c=>(c.approvals && c.approvals.financial===true && c.approvals.admin===true)); title='جاهزة للأرشيف'; }
+
+      const rows = arr.map(c=>`
+        <tr>
+          <td>${escapeHtml(c.vin)}</td>
+          <td>${escapeHtml(c.carName||'')}</td>
+          <td>${escapeHtml(c.statement||'')}</td>
+          <td>${escapeHtml(c.location||'')}</td>
+          <td>${escapeHtml(normStatus(c.status)||'')}</td>
+          <td>${(c.approvals && c.approvals.admin===true) ? '<span class="tag ok">✓</span>' : '<span class="tag no">✗</span>'}</td>
+          <td>${(c.approvals && c.approvals.financial===true) ? '<span class="tag ok">✓</span>' : '<span class="tag no">✗</span>'}</td>
+        </tr>`).join('');
+
+      const html = `
+        <div class="tableWrap" style="max-height:520px">
+          <table>
+            <thead><tr><th>VIN</th><th>السيارة</th><th>البيان</th><th>المكان</th><th>الحالة</th><th>إداري</th><th>مالي</th></tr></thead>
+            <tbody>${rows || '<tr><td colspan="7" class="small">لا توجد بيانات</td></tr>'}</tbody>
+          </table>
+        </div>`;
+      openDetailsModal(html, title);
+    }
+
+    // Requests (light summary)
+    let dashReqUnsub = null;
+    let dashReq = [];
+
+    function reqStage(r){
+      const s1 = !!r.step1At;
+      const s2 = !!r.step2At;
+      const s3 = !!r.step3At;
+      const s4 = !!r.step4At;
+      if(s4) return 4;
+      if(s3) return 3;
+      if(s2) return 2;
+      if(s1) return 1;
+      return 0;
+    }
+
+    function renderRequestsCounts(){
+      const s1 = dashReq.filter(r=>reqStage(r)==1).length;
+      const s2 = dashReq.filter(r=>reqStage(r)==2).length;
+      const s3 = dashReq.filter(r=>reqStage(r)==3).length;
+      const s4 = dashReq.filter(r=>reqStage(r)==4).length;
+      setText('rq_s1', s1);
+      setText('rq_s2', s2);
+      setText('rq_s3', s3);
+      setText('rq_s4', s4);
+    }
+
+    function openReqStageModal(stage){
+      const arr = dashReq.filter(r=>reqStage(r)==stage);
+      const rows = arr.map(r=>{
+        const type = (r.type==='transfer') ? 'نقل' : (r.type==='photo' ? 'تصوير' : (r.type||''));
+        const itemsCount = (r.items||[]).length;
+        return `<tr><td>${escapeHtml(type)}</td><td>${escapeHtml(r.toLocation||'')}</td><td>${itemsCount}</td><td>${escapeHtml(r.createdBy||'')}</td><td>${escapeHtml(fmtDate(r.createdAt)||'')}</td></tr>`;
+      }).join('');
+      const html = `
+        <div class="tableWrap" style="max-height:520px">
+          <table>
+            <thead><tr><th>نوع الطلب</th><th>المكان المستهدف</th><th>عدد السيارات</th><th>المنشئ</th><th>تاريخ الطلب</th></tr></thead>
+            <tbody>${rows || '<tr><td colspan="5" class="small">لا توجد طلبات</td></tr>'}</tbody>
+          </table>
+        </div>`;
+      const titles = {1:'تم استلام الطلب',2:'تم ارسال السيارة',3:'تم استلام السيارة',4:'تم الانتهاء'};
+      openDetailsModal(html, titles.get(stage, 'طلبات'));
+    }
+
+    function bindDashboardActions(){
+      // missing buttons
+      document.querySelectorAll('[data-miss-branch]').forEach(btn=>{
+        btn.addEventListener('click', ()=> openMissingModal(btn.getAttribute('data-miss-branch')));
+      });
+
+      // go inventory by status/location
+      document.querySelectorAll('[data-go-status]').forEach(btn=>{
+        btn.addEventListener('click', ()=> goInventoryFilter('', btn.getAttribute('data-go-status')));
+      });
+      document.querySelectorAll('[data-go-location]').forEach(btn=>{
+        btn.addEventListener('click', ()=> goInventoryFilter(btn.getAttribute('data-go-location'), ''));
+      });
+      const goAgency = document.getElementById('btn_go_agency');
+      if(goAgency) goAgency.addEventListener('click', ()=> goInventoryFilter('الوكالة',''));
+
+      // approvals
+      document.getElementById('ap_show_fin')?.addEventListener('click', ()=>openApprovalsModal('fin'));
+      document.getElementById('ap_show_adm')?.addEventListener('click', ()=>openApprovalsModal('adm'));
+      document.getElementById('ap_show_ready')?.addEventListener('click', ()=>openApprovalsModal('ready'));
+
+      // requests stages
+      document.querySelectorAll('[data-req-stage]').forEach(btn=>{
+        btn.addEventListener('click', ()=> openReqStageModal(parseInt(btn.getAttribute('data-req-stage')||'0',10)));
+      });
+
+      // saved filter buttons
+      document.getElementById('dash_filter_save')?.addEventListener('click', ()=>{
+        const obj = getDashFilterFromUI();
+        writeSavedDashFilter(obj);
+        renderDashboard();
+        toast('تم الحفظ');
+      });
+      document.getElementById('dash_filter_show')?.addEventListener('click', ()=>{
+        const obj = getDashFilterFromUI();
+        const cars = dashCars.filter(c=>{
+          if(obj.location && (c.location||'').toString().trim() != obj.location) return false;
+          if(obj.statuses && obj.statuses.length){
+            return obj.statuses.map(normStatus).includes(normStatus(c.status));
+          }
+          return true;
+        });
+        const agg = countAgg(cars);
+        const rows = `
+          <div class="dashKpis" style="margin-bottom:10px">
+            <div class="dashKpi"><span>الإجمالي الفعلي</span><b>${agg.totalActual}</b></div>
+            <div class="dashKpi"><span>إجمالي المفاتيح</span><b>${agg.keysTotal}</b></div>
+          </div>
+          <div class="dashKpis">
+            <div class="dashKpi"><span>متاح</span><b>${agg.avail}</b></div>
+            <div class="dashKpi"><span>محجوز</span><b>${agg.reserved}</b></div>
+            <div class="dashKpi"><span>بها ملاحظات</span><b>${agg.notes}</b></div>
+            <div class="dashKpi"><span>مباع تحت التسليم</span><b>${agg.under}</b></div>
+            <div class="dashKpi"><span>مباع تم التسليم</span><b>${agg.delivered}</b></div>
+          </div>`;
+        openDetailsModal(rows, 'عرض مخصص');
+      });
+      document.getElementById('dash_filter_clear')?.addEventListener('click', ()=>{
+        applyDashFilterToUI({location:'', statuses:[]});
+        writeSavedDashFilter({});
+        renderDashboard();
+        toast('تم التفريغ');
+      });
+
+      // KPI clicks (الكروت نفسها)
+      document.querySelectorAll('#view-dashboard .dashKpi').forEach(kpi=>{
+        kpi.style.cursor = 'pointer';
+        kpi.addEventListener('click', ()=>{
+          const b = kpi.querySelector('b[id]');
+          if(!b) return;
+          const id = b.id || '';
+
+          // Stock / branches KPIs
+          const map = {
+            'stk_avail': {location:'', status:'متاح للبيع'},
+            'stk_reserved': {location:'', status:'محجوز'},
+            'stk_notes': {location:'', status:'بها ملاحظات'},
+            'stk_under': {location:'', status:'مباع تحت التسليم'},
+            'stk_delivered': {location:'', status:'مباع تم التسليم'},
+
+            'ag_avail': {location:'الوكالة', status:'متاح للبيع'},
+            'ag_reserved': {location:'الوكالة', status:'محجوز'},
+            'ag_notes': {location:'الوكالة', status:'بها ملاحظات'},
+            'ag_under': {location:'الوكالة', status:'مباع تحت التسليم'},
+            'ag_delivered': {location:'الوكالة', status:'مباع تم التسليم'},
+
+            'b1_avail': {location:'الصالة', status:'متاح للبيع'},
+            'b1_reserved': {location:'الصالة', status:'محجوز'},
+            'b1_notes': {location:'الصالة', status:'بها ملاحظات'},
+            'b1_under': {location:'الصالة', status:'مباع تحت التسليم'},
+            'b1_delivered': {location:'الصالة', status:'مباع تم التسليم'},
+
+            'b2_avail': {location:'الملتقى', status:'متاح للبيع'},
+            'b2_reserved': {location:'الملتقى', status:'محجوز'},
+            'b2_notes': {location:'الملتقى', status:'بها ملاحظات'},
+            'b2_under': {location:'الملتقى', status:'مباع تحت التسليم'},
+            'b2_delivered': {location:'الملتقى', status:'مباع تم التسليم'},
+
+            'b3_avail': {location:'القادسية', status:'متاح للبيع'},
+            'b3_reserved': {location:'القادسية', status:'محجوز'},
+            'b3_notes': {location:'القادسية', status:'بها ملاحظات'},
+            'b3_under': {location:'القادسية', status:'مباع تحت التسليم'},
+            'b3_delivered': {location:'القادسية', status:'مباع تم التسليم'},
+          };
+
+          if(map[id]){
+            goInventoryFilter(map[id].location, map[id].status);
+            return;
+          }
+
+          // Approvals KPIs
+          if(id === 'ap_need_fin') return openApprovalsModal('fin');
+          if(id === 'ap_need_adm') return openApprovalsModal('adm');
+          if(id === 'ap_ready') return openApprovalsModal('ready');
+
+          // Requests KPIs
+          if(id === 'rq_s1') return openReqStageModal(1);
+          if(id === 'rq_s2') return openReqStageModal(2);
+          if(id === 'rq_s3') return openReqStageModal(3);
+          if(id === 'rq_s4') return openReqStageModal(4);
+        });
+      });
+
+    }
+
+    function startDashboardLive(){
+      if(dashCarsUnsub) return;
+      bindDashboardActions();
+
+      // load saved filter into UI
+      const saved = readSavedDashFilter();
+      if(saved) applyDashFilterToUI(saved);
+      loadDashLocationsIntoSelect();
+
+      dashCarsUnsub = db.collection('cars').onSnapshot((snap)=>{
+        dashCars = [];
+        snap.forEach(doc=>{
+          const d = doc.data() || {};
+          dashCars.push({
+            vin: doc.id,
+            carName: d.carName || '',
+            statement: d.statement || '',
+            interiorColor: d.interiorColor || '',
+            exteriorColor: d.exteriorColor || '',
+            model: d.model || '',
+            location: d.location || '',
+            status: d.status || '',
+            approvals: d.approvals || {financial:false, admin:false}
+          });
+        });
+        loadDashLocationsIntoSelect();
+        renderDashboard();
+      });
+
+      // catalog
+      dashCatalogUnsub = db.collection('catalog').where('active','==',true).onSnapshot((snap)=>{
+        dashCatalog = [];
+        snap.forEach(doc=>{
+          const d = doc.data() || {};
+          dashCatalog.push({...d, _raw:d, id:doc.id});
+        });
+        renderDashboard();
+      }, (err)=>{
+        console.error(err);
+      });
+    }
+
+
+      // requests summary
+      dashReqUnsub = db.collection('requests').limit(300).onSnapshot((snap)=>{
+        dashReq = [];
+        snap.forEach(doc=>{
+          const d = doc.data() || {};
+          dashReq.push({id:doc.id, ...d});
+        });
+        renderRequestsCounts();
+      }, (err)=>{ console.error(err); });
+    }
+
+    function stopDashboardLive(){
+      if(dashCarsUnsub){ dashCarsUnsub(); dashCarsUnsub=null; }
+      if(dashCatalogUnsub){ dashCatalogUnsub(); dashCatalogUnsub=null; }
+      if(dashReqUnsub){ dashReqUnsub(); dashReqUnsub=null; }
+    }
+
     // Inventory filters
     ['inv_search','inv_location','inv_status','inv_model'].forEach(id=>{
       const el=$(id);
@@ -1114,7 +1947,7 @@
     }
 
 
-    const $ = (id)=>document.getElementById(id);
+    
     const toastEl = $('toast');
     function toast(msg){
       toastEl.textContent = msg;
@@ -1141,6 +1974,8 @@
       document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active', v.id===viewId));
       if(viewId==='view-inventory') startInventoryLive();
       else stopInventoryLive();
+      if(viewId==='view-dashboard') startDashboardLive();
+      else stopDashboardLive();
     }
     tabs.forEach(t=>t.addEventListener('click', ()=>openView(t.dataset.view)));
 
@@ -1677,8 +2512,6 @@
       tb.innerHTML = '';
       // add 3 empty rows by default
       addTransferRow();
-      addTransferRow();
-      addTransferRow();
     }
 
     function approvalsTextLocal(a){
@@ -1786,41 +2619,6 @@
       }
       return res;
     }
-
-    function renderTransferPreview(list){
-      const tb = document.querySelector('#tr_table tbody');
-      tb.innerHTML = '';
-      let missing = 0;
-      list.forEach(d=>{
-        const tr = document.createElement('tr');
-        const appr = approvalsText(d.approvals);
-        const cells = [
-          d.vin||'',
-          d._missing ? 'غير موجود' : (d.carName||''),
-          d._missing ? '—' : (d.location||''),
-          d._missing ? '—' : (d.status||''),
-          d._missing ? '—' : appr
-        ];
-        cells.forEach(t=>{
-          const td = document.createElement('td');
-          td.textContent = t;
-          tr.appendChild(td);
-        });
-        tb.appendChild(tr);
-        if(d._missing) missing++;
-      });
-      $('tr_meta').textContent = `عدد الهياكل: ${list.length} | غير موجود: ${missing}`;
-    }
-
-    async function doPreview(){
-      if(!canTransfer) return toast('غير مصرح لك بالنقل');
-      const vins = getTransferVinsFromTable();
-      if(vins.length===0) return toast('اكتب VIN واحد على الأقل');
-      const cars = await fetchCarsByVins(vins);
-      renderTransferPreview(cars);
-      return cars;
-    }
-
     async function submitTransfer(){
       if(!canTransfer) return toast('غير مصرح لك بالنقل');
       const user = auth.currentUser;
@@ -1915,10 +2713,7 @@
       $('tr_to').value = '';
       $('tr_note').value = '';
       $('tr_note_box').classList.add('hidden');
-      document.querySelector('#tr_table tbody').innerHTML = '';
-      $('tr_meta').textContent = '—';
-
-      toast('تم إنشاء طلب النقل وتحديث السيارات');
+toast('تم إنشاء طلب النقل وتحديث السيارات');
       // تحديث السجل فوراً
       startLogsLive();
     }
@@ -1951,19 +2746,18 @@
     // Logs live (last movements)
     let logUnsub = null;
     function stopLogsLive(){ if(logUnsub){logUnsub(); logUnsub=null;} }
-    function startLogsLive(){
+    function startLogsLive(tableId='log_table', metaId='log_meta'){
       if(logUnsub) return;
       logUnsub = db.collection('logs').orderBy('at','desc').limit(50).onSnapshot((snap)=>{
-        const tb = document.querySelector('#log_table tbody');
+        const tb = document.querySelector('#'+tableId+' tbody');
         if(!tb) return;
         tb.innerHTML = '';
         let count = 0;
         snap.forEach(doc=>{
           const d = doc.data()||{};
           const tr = document.createElement('tr');
-          const dt = d.at && d.at.toDate ? d.at.toDate() : null;
-          const time = dt ? dt.toLocaleString('ar-SA') : '';
-          const cells = [time, d.by||'', d.vin||'', d.fromLocation||'', d.toLocation||'', d.note||''];
+          const type = (d.action||'').includes('request_') ? 'طلبات' : ((d.action||'')==='transfer' ? 'نقل' : (d.action||''));
+          const cells = [type, d.vin||'', d.fromLocation||d.from||'', d.toLocation||d.to||'', d.note||'', d.by||''];
           cells.forEach(t=>{
             const td = document.createElement('td');
             td.textContent = t;
@@ -1972,7 +2766,7 @@
           tb.appendChild(tr);
           count++;
         });
-        const meta = document.getElementById('log_meta');
+        const meta = document.getElementById(metaId);
         if(meta) meta.textContent = `آخر الحركات: ${count}`;
       }, (err)=>toast(err.message||'فشل تحميل السجل'));
     }
@@ -1981,8 +2775,15 @@
     const _openView = openView;
     openView = function(viewId){
       _openView(viewId);
-      if(viewId==='view-transfer') startLogsLive();
-      else stopLogsLive();
+      if(viewId==='view-transfer'){
+        stopLogsLive();
+        startLogsLive('log_table','log_meta');
+      }else if(viewId==='view-requests'){
+        stopLogsLive();
+        startLogsLive('log_table_req','log_meta_req');
+      }else{
+        stopLogsLive();
+      }
       if(viewId==='view-logs') loadLogs().catch(e=>toast(e.message||'فشل تحميل السجل'));
     }
 
@@ -2227,7 +3028,6 @@
         const c = car.checklist || {};
         const a = car.approvals || {};
         const dt = l.at && l.at.toDate ? l.at.toDate() : null;
-        const time = dt ? dt.toLocaleString('ar-SA') : '';
 
         const row = [
           time,
@@ -2322,7 +3122,66 @@
       return t==='photo' ? 'تصوير' : 'نقل';
     }
 
-    function reqStatusLabel(r){
+    
+
+    function buildReqBody(r, carMap){
+      const items = r.items || [];
+      const statusTxt = reqStatusLabel(r);
+      const meta = `
+        <div class="small">
+          <div><b>نوع الطلب:</b> ${reqTypeLabel(r.type)}</div>
+          <div><b>المكان المستهدف:</b> ${r.toLocation||''}</div>
+          <div><b>الحالة:</b> ${statusTxt}</div>
+          ${r.type==='photo' ? `<div><b>تاريخ التصوير:</b> ${r.photoDate||''}</div>` : ``}
+          <div><b>تاريخ الطلب:</b> ${fmtDate(r.createdAt)}</div>
+          <div><b>المنشئ:</b> ${r.createdBy||''}</div>
+        </div>`;
+
+      const rows = items.map(it=>{
+        const c = (carMap && carMap[it.vin]) ? carMap[it.vin] : {};
+        return `
+          <tr>
+            <td>${escapeHtml(it.vin||'')}</td>
+            <td>${escapeHtml(c.carName||'')}</td>
+            <td>${escapeHtml(c.statement||'')}</td>
+            <td>${escapeHtml(c.model||'')}</td>
+            <td>${escapeHtml(c.location||'')}</td>
+            <td>${escapeHtml(it.note||'')}</td>
+          </tr>`;
+      }).join('');
+
+      const carsTable = `
+        <div style="margin-top:12px">
+          <div style="font-weight:900;color:var(--brown);margin-bottom:8px">تفاصيل الطلب</div>
+          <div class="tableWrap" style="max-height:320px">
+            <table>
+              <thead>
+                <tr>
+                  <th>رقم الهيكل</th>
+                  <th>السيارة</th>
+                  <th>الفئة</th>
+                  <th>الموديل</th>
+                  <th>المكان الحالي</th>
+                  <th>ملاحظات</th>
+                </tr>
+              </thead>
+              <tbody>${rows || ''}</tbody>
+            </table>
+          </div>
+        </div>`;
+
+      const steps = `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+          <div class="checkItem" style="background:#fff"><span>تم استلام الطلب</span><div>${r.step1At ? '<span class="tag ok">✓</span>' : '<span class="tag no">✗</span>'}</div></div>
+          <div class="checkItem" style="background:#fff"><span>تم ارسال السيارة</span><div>${r.step2At ? '<span class="tag ok">✓</span>' : '<span class="tag no">✗</span>'}</div></div>
+          <div class="checkItem" style="background:#fff"><span>تم استلام السيارة</span><div>${r.step3At ? '<span class="tag ok">✓</span>' : '<span class="tag no">✗</span>'}</div></div>
+          <div class="checkItem" style="background:#fff"><span>تم الانتهاء</span><div>${r.step4At ? '<span class="tag ok">✓</span>' : '<span class="tag no">✗</span>'}</div></div>
+        </div>`;
+
+      return meta + carsTable + steps;
+    }
+
+function reqStatusLabel(r){
       const s1 = !!r.step1At;
       const s2 = !!r.step2At;
       const s3 = !!r.step3At;
@@ -2344,8 +3203,6 @@
       const tb = document.querySelector('#req_vinTable tbody');
       if(!tb) return;
       tb.innerHTML = '';
-      addReqRow();
-      addReqRow();
       addReqRow();
     }
 
@@ -2483,7 +3340,7 @@
         vins: items.map(x=>x.vin),
         toLocation,
         photoDate: type==='photo' ? photoDate : null,
-        note: $('req_general_note').value.trim(),
+
         createdBy: user.email,
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         step1At: null, step2At: null, step3At: null, step4At: null,
@@ -2496,8 +3353,7 @@
       // reset
       clearReqRows();
       $('req_to').value = '';
-      $('req_general_note').value = '';
-      if(type==='photo'){ $('req_photo_date').value=''; }
+if(type==='photo'){ $('req_photo_date').value=''; }
       // انتقل لمتابعة الطلبات
       $('req_mode').value='track';
       switchReqMode();
@@ -2640,45 +3496,6 @@
       logAction('requests','request_delete',{requestId:reqId, type:r.type||'', toLocation:r.toLocation||'', vins:(r.vins||[])});
       closeReqModal();
     }
-
-    function buildReqBody(r){
-      const items = r.items || [];
-      const rows = items.map(it=>`
-        <tr>
-          <td>${it.vin||''}</td>
-          <td>${(it.note||'')}</td>
-        </tr>`).join('');
-
-      const steps = `
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
-          <div class="checkItem" style="background:#fff"><span>تم استلام الطلب</span><div>${r.step1At ? '<span class="tag ok">✓</span>' : '<span class="tag no">✗</span>'}</div></div>
-          <div class="checkItem" style="background:#fff"><span>تم ارسال السيارة</span><div>${r.step2At ? '<span class="tag ok">✓</span>' : '<span class="tag no">✗</span>'}</div></div>
-          <div class="checkItem" style="background:#fff"><span>تم استلام السيارة</span><div>${r.step3At ? '<span class="tag ok">✓</span>' : '<span class="tag no">✗</span>'}</div></div>
-          <div class="checkItem" style="background:#fff"><span>تم الانتهاء</span><div>${r.step4At ? '<span class="tag ok">✓</span>' : '<span class="tag no">✗</span>'}</div></div>
-        </div>`;
-
-      const meta = `
-        <div class="small">
-          <div><b>النوع:</b> ${reqTypeLabel(r.type)}</div>
-          ${r.type==='photo' ? `<div><b>تاريخ التصوير:</b> ${r.photoDate||''}</div>` : ``}
-          <div><b>المكان المستهدف:</b> ${r.toLocation||''}</div>
-          <div><b>المنشئ:</b> ${r.createdBy||''}</div>
-          <div><b>تاريخ الإنشاء:</b> ${fmtDate(r.createdAt)}</div>
-          ${r.note ? `<div><b>ملاحظة عامة:</b> ${r.note}</div>` : ``}
-        </div>`;
-
-      return meta + `
-        <div style="margin-top:12px">
-          <div style="font-weight:900;color:var(--brown);margin-bottom:8px">الهياكل</div>
-          <div class="tableWrap" style="max-height:240px">
-            <table>
-              <thead><tr><th>VIN</th><th>ملاحظة</th></tr></thead>
-              <tbody>${rows || ''}</tbody>
-            </table>
-          </div>
-        </div>` + steps;
-    }
-
     async function openReqModal(r, keepOpen=false){
       if(!r || !r.id){
         toast('لا يمكن فتح الطلب');
@@ -2686,7 +3503,17 @@
       }
       reqModal.dataset.id = r.id;
       reqModalTitle.textContent = `تفاصيل الطلب — ${reqTypeLabel(r.type)} (${(r.vins||[]).length})`;
-      reqModalBody.innerHTML = buildReqBody(r);
+      
+      const carMap = {};
+      const its = r.items || [];
+      await Promise.all(its.map(async (it)=>{
+        try{
+          const cs = await db.collection('cars').doc(it.vin).get();
+          if(cs.exists) carMap[it.vin] = cs.data() || {};
+        }catch(e){}
+      }));
+      reqModalBody.innerHTML = buildReqBody(r, carMap);
+    
 
       const id = r.id;
       reqModalFoot.innerHTML = '';
