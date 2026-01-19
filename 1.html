@@ -778,6 +778,342 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
+    // ===== Inventory Live (Fix: startInventoryLive/stopInventoryLive) =====
+    let invUnsub = null;
+    let invAll = [];
+
+    function norm(v){ return (v ?? '').toString().trim(); }
+    function toKey(v){ return norm(v).toLowerCase(); }
+
+    function getInvFilters(){
+      const q = toKey($('inv_search')?.value || '');
+      const branch = norm($('inv_location')?.value || '').trim();
+      const status = norm($('inv_status')?.value || '').trim();
+      const model  = norm($('inv_model')?.value || '').trim();
+      return { q, branch, status, model };
+    }
+
+    function matchesSearch(car, q){
+      if(!q) return true;
+      const bag = [
+        car.vin, car.carName, car.statement, car.agent,
+        car.interiorColor, car.exteriorColor, car.model,
+        car.plate, car.batchName, car.location, car.status,
+        car.noteLocation, car.noteMissing, car.trackingLink
+      ].map(toKey).join(' | ');
+      return bag.includes(q);
+    }
+
+    function renderInventory(){
+      const table = $('inv_table');
+      if(!table) return;
+      let tbody = table.querySelector('tbody');
+      if(!tbody){ tbody = document.createElement('tbody'); table.appendChild(tbody); }
+
+      const { q, branch, status, model } = getInvFilters();
+      const filtered = invAll.filter(car=>{
+        if(branch && branch!=='الكل' && norm(car.location)!==branch) return false;
+        if(status && status!=='الكل' && norm(car.status)!==status) return false;
+        if(model  && model!=='الكل'  && norm(car.model)!==model) return false;
+        return matchesSearch(car, q);
+      });
+
+      tbody.innerHTML = '';
+      if(filtered.length===0){
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 18;
+        td.style.textAlign = 'center';
+        td.style.padding = '14px';
+        td.textContent = 'لا توجد بيانات مطابقة.';
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+        $('inv_meta').textContent = 'إجمالي: 0';
+        return;
+      }
+
+      filtered.forEach(car=>{
+        const tr = document.createElement('tr');
+
+        function tdText(v){
+          const td=document.createElement('td');
+          td.textContent = norm(v);
+          return td;
+        }
+
+        tr.appendChild(tdText(car.vin));
+        tr.appendChild(tdText(car.carName));
+        tr.appendChild(tdText(car.statement));
+        tr.appendChild(tdText(car.agent));
+        tr.appendChild(tdText(car.interiorColor));
+        tr.appendChild(tdText(car.exteriorColor));
+        tr.appendChild(tdText(car.model));
+        tr.appendChild(tdText(car.plate));
+        tr.appendChild(tdText(car.batchName));
+        tr.appendChild(tdText(car.location));
+        tr.appendChild(tdText(car.noteLocation));
+        tr.appendChild(tdText(car.noteMissing));
+        tr.appendChild(tdText(car.status));
+
+        // Tracking
+        {
+          const td=document.createElement('td');
+          if(car.trackingLink){
+            const a=document.createElement('a');
+            a.href = car.trackingLink;
+            a.target = '_blank';
+            a.rel='noopener';
+            a.textContent = 'فتح';
+            a.style.textDecoration='underline';
+            td.appendChild(a);
+          }else{
+            td.textContent='—';
+          }
+          tr.appendChild(td);
+        }
+
+        // Approvals
+        {
+          const td=document.createElement('td');
+          const b=document.createElement('button');
+          b.className='btn btn-sm';
+          b.textContent='عرض';
+          b.addEventListener('click', ()=>{
+            const fin = !!(car.approvals && car.approvals.financial);
+            const adm = !!(car.approvals && car.approvals.admin);
+            openDetailsModal(`
+              <div style="display:grid;gap:10px">
+                <div class="pill" style="display:flex;justify-content:space-between;align-items:center">
+                  <span>الموافقة المالية</span><strong>${fin?'✅':'❌'}</strong>
+                </div>
+                <div class="pill" style="display:flex;justify-content:space-between;align-items:center">
+                  <span>الموافقة الادارية</span><strong>${adm?'✅':'❌'}</strong>
+                </div>
+              </div>
+            `, 'الموافقات');
+          });
+          td.appendChild(b);
+          tr.appendChild(td);
+        }
+
+        // Checklist
+        {
+          const td=document.createElement('td');
+          const b=document.createElement('button');
+          b.className='btn btn-sm';
+          b.textContent='عرض';
+          b.addEventListener('click', ()=>{
+            const c = car.checklist || {};
+            const rows = [
+              ['حساس', c.sensor],
+              ['كاميرا', c.camera],
+              ['مكيف', c.ac],
+              ['مسجل', c.musajjal ?? c.recorder],
+              ['شاشة', c.screen],
+              ['ريموت', c.remote],
+              ['فرشات', c.farshat],
+              ['طفاية', c.tafaya],
+              ['شنطة سلامة', c.shanta],
+              ['اسبير', c.aspir],
+            ].map(([k,v])=>`
+              <div class="pill" style="display:flex;justify-content:space-between;align-items:center">
+                <span>${k}</span><strong>${v ? '✅' : '❌'}</strong>
+              </div>
+            `).join('');
+            openDetailsModal(`<div style="display:grid;gap:10px">${rows}</div>`, 'التشيك');
+          });
+          td.appendChild(b);
+          tr.appendChild(td);
+        }
+
+        // Transfers logs
+        {
+          const td=document.createElement('td');
+          const b=document.createElement('button');
+          b.className='btn btn-sm';
+          b.textContent='عرض';
+          b.addEventListener('click', async ()=>{
+            b.disabled = true;
+            b.textContent = '...';
+            try{
+              const snap = await db.collection('logs')
+                .where('vin','==',car.vin)
+                .orderBy('at','desc')
+                .limit(50)
+                .get();
+              if(snap.empty){
+                openDetailsModal('<div class="small">لا توجد حركات مسجلة لهذه السيارة.</div>', 'طلبات النقل');
+              }else{
+                const items = [];
+                snap.forEach(doc=>{
+                  const d = doc.data()||{};
+                  if(!(d.action||'').toString().includes('transfer')) return;
+                  const at = d.at && d.at.toDate ? d.at.toDate().toLocaleString('ar-SA') : (d.at||'');
+                  items.push(`
+                    <div class="pill" style="display:grid;gap:6px">
+                      <div style="display:flex;justify-content:space-between;gap:10px">
+                        <strong>${escapeHtml(at)}</strong>
+                        <span class="small">${escapeHtml(d.by||'')}</span>
+                      </div>
+                      <div class="small">من: ${escapeHtml(d.from||'—')} → إلى: ${escapeHtml(d.to||'—')}</div>
+                    </div>
+                  `);
+                });
+                openDetailsModal(`<div style="display:grid;gap:10px">${items.join('') || '<div class="small">لا توجد حركات نقل.</div>'}</div>`, 'طلبات النقل');
+              }
+            }catch(e){
+              console.error(e);
+              openDetailsModal('<div class="small">تعذر تحميل سجل النقل.</div>', 'طلبات النقل');
+            }finally{
+              b.disabled = false;
+              b.textContent = 'عرض';
+            }
+          });
+          td.appendChild(b);
+          tr.appendChild(td);
+        }
+
+        // Archive
+        {
+          const td=document.createElement('td');
+          const b=document.createElement('button');
+          b.className='btn btn-sm';
+          b.textContent='أرشيف';
+          const canShow = norm(car.status)==='مباع تم التسليم';
+          if(!canShow){
+            b.style.display='none';
+          }else{
+            const fin = !!(car.approvals && car.approvals.financial);
+            const adm = !!(car.approvals && car.approvals.admin);
+            const hasTrack = !!car.trackingLink;
+            // We require at least one transfer log (best-effort check: will be verified on click)
+            b.disabled = !(fin && adm && hasTrack);
+            b.title = b.disabled ? 'يجب اكتمال الموافقات + Tracking' : '';
+            b.addEventListener('click', async ()=>{
+              b.disabled = true;
+              b.textContent='...';
+              try{
+                // verify transfer exists
+                const trSnap = await db.collection('logs').where('vin','==',car.vin).limit(1).get();
+                if(trSnap.empty) { toast('لا يمكن الأرشفة بدون طلبات نقل'); b.disabled=false; b.textContent='أرشيف'; return; }
+
+                await db.collection('archives').doc(car.vin).set({
+                  ...car._raw,
+                  archivedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                  archivedBy: (auth.currentUser && auth.currentUser.email) || ''
+                }, { merge:true });
+
+                await db.collection('cars').doc(car.vin).delete();
+                toast('تم أرشفة السيارة');
+              }catch(e){
+                console.error(e);
+                toast('تعذر أرشفة السيارة');
+              }finally{
+                b.textContent='أرشيف';
+              }
+            });
+          }
+          td.appendChild(b);
+          tr.appendChild(td);
+        }
+
+        tbody.appendChild(tr);
+      });
+
+      $('inv_meta').textContent = `إجمالي: ${filtered.length}`;
+    }
+
+    function startInventoryLive(){
+      if(invUnsub) return;
+      const metaEl = $('inv_meta');
+      if(metaEl) metaEl.textContent = 'جاري التحميل...';
+      invUnsub = db.collection('cars').onSnapshot((snap)=>{
+        invAll = [];
+        snap.forEach(doc=>{
+          const d = doc.data() || {};
+          const car = {
+            vin: doc.id,
+            carName: d.carName || '',
+            statement: d.statement || '',
+            agent: d.agent || '',
+            interiorColor: d.interiorColor || '',
+            exteriorColor: d.exteriorColor || '',
+            model: d.model || '',
+            plate: d.plate || '',
+            batchName: d.batchName || '',
+            location: d.location || '',
+            noteLocation: d.noteLocation || '',
+            noteMissing: d.noteMissing || '',
+            status: d.status || '',
+            trackingLink: d.trackingLink || '',
+            approvals: d.approvals || {financial:false, admin:false},
+            checklist: d.checklist || {},
+            _raw: d
+          };
+          invAll.push(car);
+        });
+        renderInventory();
+      }, (err)=>{
+        console.error(err);
+        if($('inv_meta')) $('inv_meta').textContent = 'تعذر تحميل المخزون';
+        toast(err?.message || 'تعذر تحميل المخزون');
+      });
+    }
+
+    function stopInventoryLive(){
+      if(invUnsub){ invUnsub(); invUnsub=null; }
+    }
+
+    // Inventory filters
+    ['inv_search','inv_location','inv_status','inv_model'].forEach(id=>{
+      const el=$(id);
+      if(el){
+        el.addEventListener('input', renderInventory);
+        el.addEventListener('change', renderInventory);
+      }
+    });
+
+    // Export (CSV opens in Excel)
+    const invExport = $('inv_export');
+    if(invExport){
+      invExport.addEventListener('click', ()=>{
+        const { q, branch, status, model } = getInvFilters();
+        const rows = invAll.filter(car=>{
+          if(branch && branch!=='الكل' && norm(car.location)!==branch) return false;
+          if(status && status!=='الكل' && norm(car.status)!==status) return false;
+          if(model  && model!=='الكل'  && norm(car.model)!==model) return false;
+          return matchesSearch(car, q);
+        });
+
+        const headers = ['VIN','السيارة','البيان','الوكيل','اللون الداخلي','اللون الخارجي','الموديل','اللوحة','الدفعة','المكان','ملاحظة المكان','ملاحظة النواقص','الحالة','Tracking'];
+        const csv = [headers.join(',')].concat(rows.map(c=>[
+          c.vin, c.carName, c.statement, c.agent, c.interiorColor, c.exteriorColor, c.model, c.plate, c.batchName, c.location, c.noteLocation, c.noteMissing, c.status, c.trackingLink
+        ].map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(','))).join('\n');
+
+        const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+        const url = URL.createObjectURL(blob);
+        const a=document.createElement('a');
+        a.href=url;
+        a.download='inventory.csv';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      });
+    }
+
+    function openDetailsModal(htmlContent, title){
+      // reuse existing details modal
+      const modal = $('detailsModal');
+      const body = $('detailsBody');
+      if(!modal || !body) return;
+      const h = modal.querySelector('.modal-title');
+      if(h && title) h.textContent = title;
+      body.innerHTML = htmlContent;
+      modal.classList.add('show');
+    }
+
+
     const $ = (id)=>document.getElementById(id);
     const toastEl = $('toast');
     function toast(msg){
@@ -1144,7 +1480,6 @@
           tr.appendChild(td);
         });
         tb.appendChild(tr);
-      });
       $('inv_meta').textContent = `الإجمالي: ${invFiltered.length} من ${invAll.length}`;
     }
 
@@ -1292,8 +1627,8 @@
         invAll = invAll.filter(x=>x.vin!==vin);
         applyInvFilters();
         alert('تمت الأرشفة بنجاح ✅');
-      }catch(e):
-        print(e)
+      } catch(e){
+        console.error(e);
         alert('تعذر أرشفة السيارة.');
       }
     }
