@@ -2453,7 +2453,82 @@
 
     // ===== UI: Tabs =====
     const tabs = Array.from(document.querySelectorAll('.tab'));
+
+    // ===== Permissions (tabs/actions) =====
+    let currentUserPerms = null;
+    const DEFAULT_ALLOW_ALL = true;
+
+    function isAdminPerm(perms){
+      return !!(perms && (perms.role === 'admin' || perms.isAdmin === true));
+    }
+
+    function canViewTab(viewId){
+      // If we didn't load permissions yet, don't block (prevents flicker).
+      if (!currentUserPerms) return true;
+      if (isAdminPerm(currentUserPerms)) return true;
+      const tabsPerms = (currentUserPerms.tabs || {});
+      // Our permissions keys are like: view-dashboard, view-tracking, ...
+      // If key is missing, default to allow (so old users don't get locked out).
+      if (!(viewId in tabsPerms)) return DEFAULT_ALLOW_ALL;
+      return !!tabsPerms[viewId];
+    }
+
+    function applyTabsVisibility(){
+      tabs.forEach(btn => {
+        const v = btn.getAttribute('data-view');
+        if (!v) return;
+        btn.style.display = canViewTab(v) ? '' : 'none';
+      });
+    }
+
+    async function loadUserPerms(user){
+      try{
+        if (!user) return null;
+        // Prefer UID-based document (matches your console screenshot)
+        const byUid = await db.collection('users').doc(user.uid).get();
+        if (byUid.exists) return byUid.data() || null;
+        // Fallback: legacy doc id = email
+        const email = (user.email || '').toLowerCase().trim();
+        if (email){
+          const byEmail = await db.collection('users').doc(email).get();
+          if (byEmail.exists) return byEmail.data() || null;
+        }
+        return null;
+      }catch(e){
+        console.error('loadUserPerms failed', e);
+        return null;
+      }
+    }
+
+    function canViewTab(viewId){
+      if(!currentUserPerms) return DEFAULT_ALLOW_ALL;
+      if(isAdminPerm(currentUserPerms)) return true;
+      const t = currentUserPerms.tabs || {};
+      if(Object.prototype.hasOwnProperty.call(t, viewId)) return !!t[viewId];
+      return DEFAULT_ALLOW_ALL;
+    }
+
+    function applyTabsVisibility(){
+      // Hide/show top tabs based on permissions
+      tabs.forEach(t=>{
+        const viewId = t.dataset.view;
+        const allowed = canViewTab(viewId);
+        t.style.display = allowed ? '' : 'none';
+      });
+      // Ensure currently active view is allowed
+      const activeTab = tabs.find(t=>t.classList.contains('active'));
+      const activeView = activeTab ? activeTab.dataset.view : null;
+      if(activeView && !canViewTab(activeView)){
+        const firstAllowed = tabs.find(t=>t.style.display !== 'none');
+        if(firstAllowed) openView(firstAllowed.dataset.view);
+      }
+    }
     function openView(viewId){
+      // Permissions gate
+      if(!canViewTab(viewId)){
+        toast('غير مصرح لك بفتح هذا التاب');
+        return;
+      }
       tabs.forEach(t=>t.classList.toggle('active', t.dataset.view===viewId));
       document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active', v.id===viewId));
       if(viewId==='view-inventory') startInventoryLive();
@@ -2494,12 +2569,30 @@
 
     auth.onAuthStateChanged((user)=>{
       if(user){
+        currentUser = user;
         authPill.textContent = user.email;
         btnLogout.classList.remove('hidden');
         authBox.classList.add('hidden');
         app.classList.remove('hidden');
+
+        // Load tab/action permissions and hide non-allowed tabs in UI.
+        loadUserPerms(user).then((perms)=>{
+          currentUserPerms = perms;
+          applyTabsVisibility();
+
+          // If current active tab is not allowed, open the first allowed tab.
+          const activeTab = document.querySelector('.tab.active');
+          const activeView = activeTab ? activeTab.dataset.view : 'view-dashboard';
+          if(activeView && !canViewTab(activeView)){
+            const firstAllowed = tabs.find(t=>canViewTab(t.dataset.view));
+            if(firstAllowed) openView(firstAllowed.dataset.view);
+          }
+        }).catch(()=>{
+          currentUserPerms = null;
+          applyTabsVisibility();
+        });
         // تحميل صلاحية المستخدم للنقل
-        loadUserRole(user.email).then((role)=>{
+        loadUserRole(user).then((role)=>{
           canTransfer = roleAllows(role);
           const hint = document.getElementById('tr_hint');
           if(hint){
@@ -3107,11 +3200,22 @@
     // ===== Transfer Tab =====
     let canTransfer = false;
 
-    async function loadUserRole(email){
+    async function loadUserRole(userOrEmail){
       try{
-        const doc = await db.collection('users').doc(email).get();
-        if(!doc.exists) return null;
-        const d = doc.data() || {};
+        // Support both: users/{uid} (preferred) and users/{email} (legacy)
+        const user = (typeof userOrEmail === 'object' && userOrEmail) ? userOrEmail : null;
+        const email = user ? (user.email||'') : (userOrEmail||'');
+        const uid = user ? (user.uid||'') : '';
+
+        let docSnap = null;
+        if(uid){
+          docSnap = await db.collection('users').doc(uid).get();
+        }
+        if((!docSnap || !docSnap.exists) && email){
+          docSnap = await db.collection('users').doc(email).get();
+        }
+        if(!docSnap || !docSnap.exists) return null;
+        const d = docSnap.data() || {};
         return (d.role || d.type || d.permission || '').toString().trim();
       }catch(e){ return null; }
     }
