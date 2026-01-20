@@ -1149,116 +1149,116 @@
           </div>
         </div>
 
-                <!-- إدارة المستخدمين -->
+        <!-- إدارة المستخدمين والصلاحيات -->
         <div class="view" id="view-users" role="tabpanel">
-          <div class="grid">
-            <div class="card">
-              <h3>إدارة المستخدمين</h3>
-              <div class="body">
-                <div class="toolbar">
-                  <div class="field" style="flex:1;min-width:240px">
-                    <label>بحث</label>
-                    <input id="ua_search" placeholder="ابحث بالبريد أو الاسم أو UID" autocomplete="off" />
-                  </div>
-                  <div class="field" style="min-width:220px">
-                    <label>فلتر الحالة</label>
-                    <select id="ua_active_filter">
-                      <option value="all">الكل</option>
-                      <option value="active">نشط فقط</option>
-                      <option value="inactive">غير نشط فقط</option>
-                    </select>
-                  </div>
-                  <button id="ua_refresh" class="btn secondary">تحديث</button>
-                </div>
+  <div class="grid" style="grid-template-columns: 1.1fr .9fr;">
 
-                <div class="row" style="margin-top:8px">
-                  <div>
-                    <label>اسم المستخدم (لإنشاء سجل جديد)</label>
-                    <input id="ua_new_name" placeholder="اسم المستخدم" autocomplete="off" />
-                  </div>
-                  <div>
-                    <label>البريد الإلكتروني</label>
-                    <input id="ua_new_email" placeholder="email@example.com" autocomplete="off" />
-                  </div>
-                  <div>
-                    <label>UID (اختياري)</label>
-                    <input id="ua_new_uid" placeholder="UID" autocomplete="off" />
-                  </div>
-                  <div style="display:flex;align-items:flex-end;gap:8px">
-                    <button id="ua_create" class="btn primary">إنشاء سجل مستخدم</button>
-                  </div>
-                </div>
-                <div class="small" style="margin-top:8px;color:var(--muted)">
-                  ملاحظة: هذا التاب لإدارة صلاحيات المستخدمين في Firestore فقط (collection: <b>users</b>) حسب قالب الصلاحيات الذي اعتمدته.
-                </div>
+    <!-- قائمة المستخدمين -->
+    <div class="card">
+      <h3>إدارة المستخدمين</h3>
+      <div class="body">
+        <div class="toolbar" style="margin-bottom:12px">
+          <div class="field" style="flex:1;min-width:240px">
+            <label>بحث بالبريد أو UID</label>
+            <input id="ua_search" placeholder="ابحث..." autocomplete="off" />
+          </div>
+          <button id="ua_refresh" class="btn secondary">تحديث</button>
+        </div>
 
-                <div class="hr" style="margin:12px 0"></div>
+        <div class="small muted" style="margin-bottom:10px">المستخدمون يتم قراءتهم من collection: <b>users</b> (Doc ID = UID).</div>
 
-                <div class="tableWrap" style="max-height:520px">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>الاسم</th>
-                        <th>البريد</th>
-                        <th>UID</th>
-                        <th>الحالة</th>
-                        <th>آخر تحديث</th>
-                        <th>إجراء</th>
-                      </tr>
-                    </thead>
-                    <tbody id="ua_tbody">
-                      <tr><td colspan="6" class="small muted">—</td></tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
+        <div class="tableWrap" style="max-height:520px">
+          <table>
+            <thead>
+              <tr>
+                <th>البريد</th>
+                <th>UID</th>
+                <th>نشط</th>
+                <th>آخر تحديث</th>
+                <th>الإجراء</th>
+              </tr>
+            </thead>
+            <tbody id="ua_tbody">
+              <tr><td colspan="5" class="small muted">—</td></tr>
+            </tbody>
+          </table>
+        </div>
 
-            <div class="card" id="ua_editor" style="display:none">
-              <h3>صلاحيات المستخدم</h3>
-              <div class="body">
-                <div class="small muted" id="ua_editor_user">—</div>
-                <div class="hr" style="margin:12px 0"></div>
+        <div class="small muted" style="margin-top:10px;line-height:1.8">
+          ملاحظة: هذه الصفحة تتحكم في إظهار التابات وتعطيل/تشغيل الحقول والأزرار داخل التابات حسب قالب الصلاحيات.
+        </div>
+      </div>
+    </div>
 
-                <div class="row">
-                  <div>
-                    <label>الاسم</label>
-                    <input id="ua_name" />
-                  </div>
-                  <div>
-                    <label>البريد</label>
-                    <input id="ua_email" />
-                  </div>
-                  <div>
-                    <label>الحالة</label>
-                    <select id="ua_active">
-                      <option value="true">نشط</option>
-                      <option value="false">غير نشط</option>
-                    </select>
-                  </div>
-                  <div style="display:flex;align-items:flex-end;gap:8px">
-                    <button id="ua_save" class="btn primary">حفظ</button>
-                    <button id="ua_close" class="btn secondary">إغلاق</button>
-                  </div>
-                </div>
+    <!-- محرر الصلاحيات -->
+    <div class="card" id="ua_editor" style="display:none">
+      <h3>صلاحيات المستخدم</h3>
+      <div class="body">
+        <div class="small muted" id="ua_editor_user">—</div>
 
-                <div class="hr" style="margin:12px 0"></div>
-
-                <div class="small" style="margin-bottom:8px"><b>التابات</b></div>
-                <div id="ua_tabs_box" class="checks"></div>
-
-                <div class="hr" style="margin:12px 0"></div>
-
-                <div class="small" style="margin-bottom:8px"><b>الصلاحيات التفصيلية</b></div>
-                <div id="ua_perms_box"></div>
-
-                <div class="hr" style="margin:12px 0"></div>
-                <div class="small muted">تُحفظ الصلاحيات بنفس شكل القالب: tabs + permissions (buttons/fields/sections...)
-                </div>
-              </div>
-            </div>
+        <div class="row" style="margin-top:10px">
+          <div>
+            <label>البريد الإلكتروني</label>
+            <input id="ua_email" placeholder="name@email.com" autocomplete="off" />
+          </div>
+          <div>
+            <label>الاسم</label>
+            <input id="ua_name" placeholder="اسم المستخدم" autocomplete="off" />
+          </div>
+          <div>
+            <label>الحالة</label>
+            <select id="ua_active">
+              <option value="true">نشط</option>
+              <option value="false">غير نشط</option>
+            </select>
+          </div>
+          <div>
+            <label>الدور</label>
+            <select id="ua_role">
+              <option value="user">user</option>
+              <option value="admin">admin</option>
+              <option value="viewer">viewer</option>
+            </select>
           </div>
         </div>
+
+        <div class="dashBtns" style="margin-top:10px">
+          <button id="ua_save" class="btn primary">حفظ الصلاحيات</button>
+          <button id="ua_close" class="btn secondary">إغلاق</button>
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="small" style="margin-bottom:8px"><b>التابات (عرض/إخفاء)</b></div>
+        <div id="ua_tabs_box" class="grid" style="grid-template-columns: repeat(3,minmax(0,1fr)); gap:10px"></div>
+
+        <div class="hr"></div>
+
+        <div class="small" style="margin-bottom:8px"><b>صلاحيات الداش بورد</b></div>
+        <div id="ua_dash_box" class="grid" style="grid-template-columns: repeat(2,minmax(0,1fr)); gap:10px"></div>
+
+        <div class="hr"></div>
+
+        <div class="small" style="margin-bottom:8px"><b>صلاحيات المخزون</b></div>
+        <div id="ua_inv_box" class="grid" style="grid-template-columns: repeat(2,minmax(0,1fr)); gap:10px"></div>
+
+        <div class="hr"></div>
+
+        <div class="small" style="margin-bottom:8px"><b>تاب نقل السيارات</b></div>
+        <div id="ua_transfer_box" class="grid" style="grid-template-columns: repeat(2,minmax(0,1fr)); gap:10px"></div>
+
+        <div class="hr"></div>
+
+        <div class="small" style="margin-bottom:8px"><b>تاب الطلبات</b></div>
+        <div id="ua_requests_box" class="grid" style="grid-template-columns: repeat(2,minmax(0,1fr)); gap:10px"></div>
+
+        <div class="small muted" style="margin-top:10px">مهم: حفظ الصلاحيات يكتب داخل collection <b>users</b> حسب قالب الصلاحيات المتفق عليه.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 <script>
     // Helper: short selector by id
     const $ = (id)=>document.getElementById(id);
@@ -4344,29 +4344,26 @@ if(type==='photo'){ $('req_photo_date').value=''; }
     uiLogsFilterChanged();
 
 
-    // ===== Users Admin (Firestore users collection) =====
-    let usersUnsub = null;
+    // ===== Users & Permissions (UI Admin) =====
+    let uaUnsub = null;
     let uaCache = [];
     let uaSelected = null;
 
+    // قالب الصلاحيات (كما تم الاتفاق)
     const UA_TABS = [
-      { key: 'dashboard', label: 'الداش بورد' },
-      { key: 'admin', label: 'الإدارة' },
-      { key: 'inventory', label: 'المخزون' },
-      { key: 'car_transfer', label: 'نقل السيارات' },
-      { key: 'requests', label: 'الطلبات' },
-      { key: 'all_cars', label: 'كل السيارات' },
-      { key: 'movement_log', label: 'سجل الحركات' },
-      { key: 'tracking', label: 'التراكينج' },
-      { key: 'archive', label: 'الأرشيف' },
-      { key: 'users_admin', label: 'إدارة المستخدمين' },
+      {k:'dashboard',     label:'الداش بورد'},
+      {k:'admin',         label:'الإدارة'},
+      {k:'inventory',     label:'المخزون'},
+      {k:'car_transfer',  label:'نقل السيارات'},
+      {k:'requests',      label:'الطلبات'},
+      {k:'all_cars',      label:'كل السيارات'},
+      {k:'movement_log',  label:'سجل الحركات'},
+      {k:'tracking',      label:'التراكينج'},
+      {k:'archive',       label:'الأرشيف'},
+      {k:'users_admin',   label:'إدارة المستخدمين'}
     ];
 
-    // قالب الصلاحيات المعتمد (بنفس هيكل الرسالة)
-    const UA_TEMPLATE = {
-      name: '',
-      email: '',
-      active: true,
+    const UA_SCHEMA = {
       tabs: {
         dashboard: true,
         admin: false,
@@ -4380,32 +4377,69 @@ if(type==='photo'){ $('req_photo_date').value=''; }
         users_admin: false
       },
       permissions: {
-        dashboard: { buttons: { save: false, clear: false } },
-        inventory: { buttons: { add_car: false, clear_list: false, delete: false, execute_transfer_request: false } },
+        dashboard: { buttons: { save:false, clear:false } },
+        inventory: { buttons: { add_car:false, clear_list:false, delete:false, execute_transfer_request:false } },
         car_transfer: {
-          fields: { vin_input: false, target_location_select: false, status_select: false },
-          buttons: { send_transfer: false, clear_list: false, delete: false }
+          fields: { vin_input:false, target_location_select:false, status_select:false },
+          buttons: { send_transfer:false, clear_list:false, delete:false }
         },
         requests: {
-          dropdowns: { choose_section: false },
-          sections: { create_request: false, follow_requests: false, completed_requests: false },
-          fields: { request_type_select: false, vin_input: false, transfer_location_select: false },
-          buttons: { add_vin: false, clear_list: false, delete: false, send_request: false },
-          workflow_actions: { receive_order: false, send_car: false, receive_car: false, finish_order: false }
+          dropdowns: { choose_section:false },
+          sections: { create_request:false, follow_requests:false, completed_requests:false },
+          fields: { request_type_select:false, vin_input:false, transfer_location_select:false },
+          buttons: { add_vin:false, clear_list:false, delete:false, send_request:false },
+          workflow_actions: { receive_order:false, send_car:false, receive_car:false, finish_order:false }
         },
-        all_cars: { view: true },
-        movement_log: { view: true },
-        tracking: { view: true },
-        archive: { view: true },
-        users_admin: { view_users: false, edit_permissions: false, create_user_record: false, disable_user: false }
+        all_cars: { view:true },
+        movement_log: { view:true },
+        tracking: { view:true },
+        archive: { view:true },
+        users_admin: { view_users:false, edit_permissions:false, create_user_record:false, disable_user:false }
       }
     };
 
-    // JS doesn't have true/false literals in object above when written as string.
+    function uaClone(obj){
+      return JSON.parse(JSON.stringify(obj||{}));
+    }
 
-    function uaCloneTemplate(){
-      // deep clone
-      return JSON.parse(JSON.stringify(UA_TEMPLATE));
+    function uaMergeDefaults(src){
+      const base = uaClone(UA_SCHEMA);
+      const s = src || {};
+
+      // top fields
+      base.name   = s.name   || '';
+      base.email  = s.email  || '';
+      base.active = (typeof s.active === 'boolean') ? s.active : true;
+      base.role   = s.role   || 'user';
+
+      // tabs
+      base.tabs = Object.assign({}, UA_SCHEMA.tabs, (s.tabs||{}));
+
+      // permissions deep-ish
+      base.permissions = uaClone(UA_SCHEMA.permissions);
+      if(s.permissions){
+        // dashboard
+        if(s.permissions.dashboard?.buttons) Object.assign(base.permissions.dashboard.buttons, s.permissions.dashboard.buttons);
+        // inventory
+        if(s.permissions.inventory?.buttons) Object.assign(base.permissions.inventory.buttons, s.permissions.inventory.buttons);
+        // transfer
+        if(s.permissions.car_transfer?.fields) Object.assign(base.permissions.car_transfer.fields, s.permissions.car_transfer.fields);
+        if(s.permissions.car_transfer?.buttons) Object.assign(base.permissions.car_transfer.buttons, s.permissions.car_transfer.buttons);
+        // requests
+        if(s.permissions.requests?.dropdowns) Object.assign(base.permissions.requests.dropdowns, s.permissions.requests.dropdowns);
+        if(s.permissions.requests?.sections) Object.assign(base.permissions.requests.sections, s.permissions.requests.sections);
+        if(s.permissions.requests?.fields) Object.assign(base.permissions.requests.fields, s.permissions.requests.fields);
+        if(s.permissions.requests?.buttons) Object.assign(base.permissions.requests.buttons, s.permissions.requests.buttons);
+        if(s.permissions.requests?.workflow_actions) Object.assign(base.permissions.requests.workflow_actions, s.permissions.requests.workflow_actions);
+        // views
+        if(s.permissions.all_cars) Object.assign(base.permissions.all_cars, s.permissions.all_cars);
+        if(s.permissions.movement_log) Object.assign(base.permissions.movement_log, s.permissions.movement_log);
+        if(s.permissions.tracking) Object.assign(base.permissions.tracking, s.permissions.tracking);
+        if(s.permissions.archive) Object.assign(base.permissions.archive, s.permissions.archive);
+        if(s.permissions.users_admin) Object.assign(base.permissions.users_admin, s.permissions.users_admin);
+      }
+
+      return base;
     }
 
     function uaTs(v){
@@ -4417,61 +4451,38 @@ if(type==='photo'){ $('req_photo_date').value=''; }
       }catch(e){ return ''; }
     }
 
-    function uaNormalizeUser(docId, d){
-      const base = uaCloneTemplate();
-      // merge shallow
-      base.name = (d && d.name) ? d.name : '';
-      base.email = (d && d.email) ? d.email : '';
-      base.active = (d && typeof d.active === 'boolean') ? d.active : true;
-      base.tabs = Object.assign({}, base.tabs, (d && d.tabs) ? d.tabs : {});
-      base.permissions = Object.assign({}, base.permissions, (d && d.permissions) ? d.permissions : {});
-      return {
-        id: docId,
-        uid: d && (d.uid || d.UID) ? (d.uid || d.UID) : docId,
-        createdAt: d && d.createdAt ? d.createdAt : null,
-        updatedAt: d && d.updatedAt ? d.updatedAt : null,
-        updatedBy: d && d.updatedBy ? d.updatedBy : '',
-        data: base
-      };
-    }
-
-    function uaMatch(u, q){
-      if(!q) return true;
-      const bag = [u.data?.name, u.data?.email, u.uid, u.id].map(v=>String(v||'').toLowerCase()).join(' | ');
-      return bag.includes(q);
-    }
-
-    function uaFilterList(){
-      const q = (document.getElementById('ua_search')?.value || '').trim().toLowerCase();
-      const af = document.getElementById('ua_active_filter')?.value || 'all';
-      return uaCache.filter(u=>{
-        if(af==='active' && !u.data.active) return false;
-        if(af==='inactive' && u.data.active) return false;
-        return uaMatch(u, q);
-      });
+    function uaCheckbox(id, label, checked){
+      return `<label class="checkItem" style="justify-content:space-between">
+        <span>${escapeHtml(label)}</span>
+        <input type="checkbox" data-ua-id="${escapeHtml(id)}" ${checked?'checked':''} />
+      </label>`;
     }
 
     function uaRenderList(){
       const tb = document.getElementById('ua_tbody');
       if(!tb) return;
-      const list = uaFilterList();
+
+      const q = (document.getElementById('ua_search')?.value || '').trim().toLowerCase();
+      const list = !q ? uaCache : uaCache.filter(u=>{
+        return (u.email||'').toLowerCase().includes(q) || (u.id||'').toLowerCase().includes(q);
+      });
+
       if(!list.length){
-        tb.innerHTML = '<tr><td colspan="6" class="small muted">لا يوجد مستخدمون</td></tr>';
+        tb.innerHTML = '<tr><td colspan="5" class="small muted">لا يوجد مستخدمون</td></tr>';
         return;
       }
+
       tb.innerHTML = list.map(u=>{
-        const name = escapeHtml(u.data.name||'—');
-        const email = escapeHtml(u.data.email||'—');
-        const uid = escapeHtml(u.uid||u.id||'—');
-        const st = u.data.active ? '<span class="tag ok">نشط</span>' : '<span class="tag no">غير نشط</span>';
-        const upd = escapeHtml(uaTs(u.updatedAt||u.createdAt));
+        const email = escapeHtml(u.email||'');
+        const uid   = escapeHtml(u.id||'');
+        const active= u.active ? '<span class="tag ok">نشط</span>' : '<span class="tag no">غير نشط</span>';
+        const upd   = escapeHtml(uaTs(u.updatedAt||u.createdAt));
         return `<tr>
-          <td>${name}</td>
           <td>${email}</td>
-          <td dir="ltr">${uid}</td>
-          <td>${st}</td>
+          <td style="font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size:12px">${uid}</td>
+          <td>${active}</td>
           <td>${upd}</td>
-          <td><button class="btn secondary" data-ua-edit="${escapeHtml(u.id)}">تعديل</button></td>
+          <td><button class="btn secondary" data-ua-edit="${uid}">تعديل</button></td>
         </tr>`;
       }).join('');
 
@@ -4484,103 +4495,60 @@ if(type==='photo'){ $('req_photo_date').value=''; }
       });
     }
 
-    function uaTabItem(key, label, checked){
-      return `<label class="checkItem">
-        <span>${escapeHtml(label)}</span>
-        <input type="checkbox" data-ua-tab="${escapeHtml(key)}" ${checked?'checked':''} />
-      </label>`;
-    }
+    function uaFillBoxes(perms){
+      // Tabs
+      const tabsBox = document.getElementById('ua_tabs_box');
+      tabsBox.innerHTML = UA_TABS.map(t=>uaCheckbox(`tabs.${t.k}`, t.label, !!perms.tabs[t.k])).join('');
 
-    function uaPermBlock(title, html){
-      return `<div class="card" style="box-shadow:none;border:1px solid var(--line);margin-bottom:10px">
-        <h3 style="border:none;padding:12px 12px 0 12px;font-size:14px">${escapeHtml(title)}</h3>
-        <div class="body" style="padding:12px">${html}</div>
-      </div>`;
-    }
+      // Dashboard
+      const dashBox = document.getElementById('ua_dash_box');
+      dashBox.innerHTML = [
+        uaCheckbox('permissions.dashboard.buttons.save',  'زرار حفظ',   !!perms.permissions.dashboard.buttons.save),
+        uaCheckbox('permissions.dashboard.buttons.clear', 'زرار تفريغ', !!perms.permissions.dashboard.buttons.clear)
+      ].join('');
 
-    function uaRenderPerms(perms){
-      // perms is UA_TEMPLATE.permissions-like
-      const blocks = [];
+      // Inventory
+      const invBox = document.getElementById('ua_inv_box');
+      invBox.innerHTML = [
+        uaCheckbox('permissions.inventory.buttons.add_car', '➕ إضافة سيارة', !!perms.permissions.inventory.buttons.add_car),
+        uaCheckbox('permissions.inventory.buttons.clear_list', 'تفريغ القائمة', !!perms.permissions.inventory.buttons.clear_list),
+        uaCheckbox('permissions.inventory.buttons.delete', 'حذف', !!perms.permissions.inventory.buttons.delete),
+        uaCheckbox('permissions.inventory.buttons.execute_transfer_request', 'تنفيذ طلب النقل', !!perms.permissions.inventory.buttons.execute_transfer_request)
+      ].join('');
 
-      // dashboard buttons
-      blocks.push(uaPermBlock('Dashboard', [
-        uaBoolField('dashboard.buttons.save','حفظ (save)', !!perms.dashboard?.buttons?.save),
-        uaBoolField('dashboard.buttons.clear','مسح (clear)', !!perms.dashboard?.buttons?.clear)
-      ].join('')));
+      // Transfer tab (fields + basic buttons)
+      const trBox = document.getElementById('ua_transfer_box');
+      trBox.innerHTML = [
+        uaCheckbox('permissions.car_transfer.fields.vin_input', 'كتابة رقم الهيكل', !!perms.permissions.car_transfer.fields.vin_input),
+        uaCheckbox('permissions.car_transfer.fields.target_location_select', 'اختيار المكان المستهدف', !!perms.permissions.car_transfer.fields.target_location_select),
+        uaCheckbox('permissions.car_transfer.fields.status_select', 'اختيار الحالة', !!perms.permissions.car_transfer.fields.status_select),
+        uaCheckbox('permissions.car_transfer.buttons.send_transfer', 'تنفيذ/إرسال النقل', !!perms.permissions.car_transfer.buttons.send_transfer),
+        uaCheckbox('permissions.car_transfer.buttons.clear_list', 'تفريغ القائمة', !!perms.permissions.car_transfer.buttons.clear_list),
+        uaCheckbox('permissions.car_transfer.buttons.delete', 'حذف', !!perms.permissions.car_transfer.buttons.delete)
+      ].join('');
 
-      // inventory buttons
-      blocks.push(uaPermBlock('Inventory', [
-        uaBoolField('inventory.buttons.add_car','إضافة سيارة', !!perms.inventory?.buttons?.add_car),
-        uaBoolField('inventory.buttons.clear_list','مسح القائمة', !!perms.inventory?.buttons?.clear_list),
-        uaBoolField('inventory.buttons.delete','حذف', !!perms.inventory?.buttons?.delete),
-        uaBoolField('inventory.buttons.execute_transfer_request','تنفيذ طلب نقل', !!perms.inventory?.buttons?.execute_transfer_request)
-      ].join('')));
+      // Requests tab (dropdown + sections + fields + buttons + workflow actions)
+      const rqBox = document.getElementById('ua_requests_box');
+      rqBox.innerHTML = [
+        uaCheckbox('permissions.requests.dropdowns.choose_section', 'الدروب داون: اختر القسم', !!perms.permissions.requests.dropdowns.choose_section),
+        uaCheckbox('permissions.requests.sections.create_request', 'قسم: إنشاء طلب', !!perms.permissions.requests.sections.create_request),
+        uaCheckbox('permissions.requests.sections.follow_requests', 'قسم: متابعة الطلبات', !!perms.permissions.requests.sections.follow_requests),
+        uaCheckbox('permissions.requests.sections.completed_requests', 'قسم: الطلبات المكتملة', !!perms.permissions.requests.sections.completed_requests),
 
-      // car_transfer fields + buttons
-      blocks.push(uaPermBlock('Car Transfer', [
-        '<div class="small" style="margin-bottom:6px"><b>الحقول</b></div>',
-        uaBoolField('car_transfer.fields.vin_input','إدخال رقم الهيكل', !!perms.car_transfer?.fields?.vin_input),
-        uaBoolField('car_transfer.fields.target_location_select','اختيار المكان المستهدف', !!perms.car_transfer?.fields?.target_location_select),
-        uaBoolField('car_transfer.fields.status_select','اختيار الحالة', !!perms.car_transfer?.fields?.status_select),
-        '<div class="hr" style="margin:10px 0"></div>',
-        '<div class="small" style="margin-bottom:6px"><b>الأزرار</b></div>',
-        uaBoolField('car_transfer.buttons.send_transfer','إرسال النقل', !!perms.car_transfer?.buttons?.send_transfer),
-        uaBoolField('car_transfer.buttons.clear_list','مسح القائمة', !!perms.car_transfer?.buttons?.clear_list),
-        uaBoolField('car_transfer.buttons.delete','حذف', !!perms.car_transfer?.buttons?.delete)
-      ].join('')));
+        uaCheckbox('permissions.requests.fields.request_type_select', 'تحديد نوع الطلب', !!perms.permissions.requests.fields.request_type_select),
+        uaCheckbox('permissions.requests.fields.vin_input', 'كتابة رقم الهيكل', !!perms.permissions.requests.fields.vin_input),
+        uaCheckbox('permissions.requests.fields.transfer_location_select', 'اختيار مكان النقل', !!perms.permissions.requests.fields.transfer_location_select),
 
-      // requests (dropdowns, sections, fields, buttons, workflow_actions)
-      blocks.push(uaPermBlock('Requests', [
-        '<div class="small" style="margin-bottom:6px"><b>Dropdowns</b></div>',
-        uaBoolField('requests.dropdowns.choose_section','اختر القسم', !!perms.requests?.dropdowns?.choose_section),
-        '<div class="hr" style="margin:10px 0"></div>',
-        '<div class="small" style="margin-bottom:6px"><b>Sections</b></div>',
-        uaBoolField('requests.sections.create_request','إنشاء طلب', !!perms.requests?.sections?.create_request),
-        uaBoolField('requests.sections.follow_requests','متابعة الطلبات', !!perms.requests?.sections?.follow_requests),
-        uaBoolField('requests.sections.completed_requests','الطلبات المكتملة', !!perms.requests?.sections?.completed_requests),
-        '<div class="hr" style="margin:10px 0"></div>',
-        '<div class="small" style="margin-bottom:6px"><b>Fields</b></div>',
-        uaBoolField('requests.fields.request_type_select','تحديد نوع الطلب', !!perms.requests?.fields?.request_type_select),
-        uaBoolField('requests.fields.vin_input','كتابة رقم الهيكل', !!perms.requests?.fields?.vin_input),
-        uaBoolField('requests.fields.transfer_location_select','اختيار مكان النقل', !!perms.requests?.fields?.transfer_location_select),
-        '<div class="hr" style="margin:10px 0"></div>',
-        '<div class="small" style="margin-bottom:6px"><b>Buttons</b></div>',
-        uaBoolField('requests.buttons.add_vin','إضافة هيكل', !!perms.requests?.buttons?.add_vin),
-        uaBoolField('requests.buttons.clear_list','مسح القائمة', !!perms.requests?.buttons?.clear_list),
-        uaBoolField('requests.buttons.delete','حذف', !!perms.requests?.buttons?.delete),
-        uaBoolField('requests.buttons.send_request','إرسال الطلب', !!perms.requests?.buttons?.send_request),
-        '<div class="hr" style="margin:10px 0"></div>',
-        '<div class="small" style="margin-bottom:6px"><b>Workflow Actions</b></div>',
-        uaBoolField('requests.workflow_actions.receive_order','تم استلام الطلب', !!perms.requests?.workflow_actions?.receive_order),
-        uaBoolField('requests.workflow_actions.send_car','تم ارسال السيارة', !!perms.requests?.workflow_actions?.send_car),
-        uaBoolField('requests.workflow_actions.receive_car','تم استلام السيارة', !!perms.requests?.workflow_actions?.receive_car),
-        uaBoolField('requests.workflow_actions.finish_order','تم الانتهاء', !!perms.requests?.workflow_actions?.finish_order)
-      ].join('')));
+        uaCheckbox('permissions.requests.buttons.add_vin', '➕ إضافة رقم هيكل', !!perms.permissions.requests.buttons.add_vin),
+        uaCheckbox('permissions.requests.buttons.clear_list', 'تفريغ القائمة', !!perms.permissions.requests.buttons.clear_list),
+        uaCheckbox('permissions.requests.buttons.delete', 'حذف', !!perms.permissions.requests.buttons.delete),
+        uaCheckbox('permissions.requests.buttons.send_request', 'إرسال الطلب', !!perms.permissions.requests.buttons.send_request),
 
-      // view permissions
-      blocks.push(uaPermBlock('Views', [
-        uaBoolField('all_cars.view','عرض كل السيارات', !!perms.all_cars?.view),
-        uaBoolField('movement_log.view','عرض سجل الحركات', !!perms.movement_log?.view),
-        uaBoolField('tracking.view','عرض التراكينج', !!perms.tracking?.view),
-        uaBoolField('archive.view','عرض الأرشيف', !!perms.archive?.view)
-      ].join('')));
-
-      // users_admin
-      blocks.push(uaPermBlock('Users Admin', [
-        uaBoolField('users_admin.view_users','عرض المستخدمين', !!perms.users_admin?.view_users),
-        uaBoolField('users_admin.edit_permissions','تعديل الصلاحيات', !!perms.users_admin?.edit_permissions),
-        uaBoolField('users_admin.create_user_record','إنشاء سجل مستخدم', !!perms.users_admin?.create_user_record),
-        uaBoolField('users_admin.disable_user','تعطيل مستخدم', !!perms.users_admin?.disable_user)
-      ].join('')));
-
-      return blocks.join('');
-    }
-
-    function uaBoolField(pathKey, label, checked){
-      return `<label class="checkItem" style="background:#fff">
-        <span>${escapeHtml(label)}</span>
-        <input type="checkbox" data-ua-perm="${escapeHtml(pathKey)}" ${checked?'checked':''} />
-      </label>`;
+        uaCheckbox('permissions.requests.workflow_actions.receive_order', 'إجراء: تم استلام الطلب', !!perms.permissions.requests.workflow_actions.receive_order),
+        uaCheckbox('permissions.requests.workflow_actions.send_car', 'إجراء: تم ارسال السيارة', !!perms.permissions.requests.workflow_actions.send_car),
+        uaCheckbox('permissions.requests.workflow_actions.receive_car', 'إجراء: تم استلام السيارة', !!perms.permissions.requests.workflow_actions.receive_car),
+        uaCheckbox('permissions.requests.workflow_actions.finish_order', 'إجراء: تم الانتهاء', !!perms.permissions.requests.workflow_actions.finish_order)
+      ].join('');
     }
 
     function uaOpenEditor(u){
@@ -4588,113 +4556,117 @@ if(type==='photo'){ $('req_photo_date').value=''; }
       const ed = document.getElementById('ua_editor');
       if(!ed) return;
       ed.style.display = 'block';
-      document.getElementById('ua_editor_user').innerHTML = `المستخدم: <b>${escapeHtml(u.data.email||'')}</b> <span class="small muted">(uid: ${escapeHtml(u.uid||u.id||'')})</span>`;
-      document.getElementById('ua_name').value = u.data.name || '';
-      document.getElementById('ua_email').value = u.data.email || '';
-      document.getElementById('ua_active').value = (u.data.active ? 'true' : 'false');
 
-      const tabsBox = document.getElementById('ua_tabs_box');
-      tabsBox.innerHTML = UA_TABS.map(t=>uaTabItem(t.key, t.label, !!u.data.tabs?.[t.key])).join('');
+      const merged = uaMergeDefaults(u.raw || {});
+      u._merged = merged;
 
-      const permsBox = document.getElementById('ua_perms_box');
-      permsBox.innerHTML = uaRenderPerms(u.data.permissions || uaCloneTemplate().permissions);
+      document.getElementById('ua_editor_user').innerHTML = `المستخدم: <b>${escapeHtml(merged.email || u.email || '')}</b><div class="small muted">UID: ${escapeHtml(u.id)}</div>`;
+      document.getElementById('ua_email').value = merged.email || '';
+      document.getElementById('ua_name').value  = merged.name  || '';
+      document.getElementById('ua_active').value= merged.active ? 'true' : 'false';
+      document.getElementById('ua_role').value  = merged.role || 'user';
+
+      uaFillBoxes(merged);
     }
 
-    function uaSetDeep(obj, pathKey, val){
-      const parts = pathKey.split('.');
-      let cur = obj;
-      for(let i=0;i<parts.length-1;i++){
-        const k = parts[i];
-        if(!cur[k] || typeof cur[k] !== 'object') cur[k] = {};
-        cur = cur[k];
+    function uaReadCheckboxes(){
+      if(!uaSelected || !uaSelected._merged) return null;
+      const perms = uaClone(uaSelected._merged);
+
+      document.querySelectorAll('[data-ua-id]').forEach(ch=>{
+        const key = ch.getAttribute('data-ua-id');
+        const val = !!ch.checked;
+
+        // Simple dot-path setter
+        const parts = key.split('.');
+        let cur = perms;
+        for(let i=0;i<parts.length-1;i++){
+          const p = parts[i];
+          if(!cur[p] || typeof cur[p] !== 'object') cur[p] = {};
+          cur = cur[p];
+        }
+        cur[parts[parts.length-1]] = val;
+      });
+
+      // top fields
+      perms.email  = (document.getElementById('ua_email').value || '').trim();
+      perms.name   = (document.getElementById('ua_name').value || '').trim();
+      perms.active = (document.getElementById('ua_active').value === 'true');
+      perms.role   = (document.getElementById('ua_role').value || 'user');
+
+      // Admin override: كل شيء true
+      if(perms.role === 'admin'){
+        Object.keys(perms.tabs).forEach(k=>perms.tabs[k]=true);
+
+        // dashboard
+        Object.keys(perms.permissions.dashboard.buttons).forEach(k=>perms.permissions.dashboard.buttons[k]=true);
+        // inventory
+        Object.keys(perms.permissions.inventory.buttons).forEach(k=>perms.permissions.inventory.buttons[k]=true);
+        // transfer
+        Object.keys(perms.permissions.car_transfer.fields).forEach(k=>perms.permissions.car_transfer.fields[k]=true);
+        Object.keys(perms.permissions.car_transfer.buttons).forEach(k=>perms.permissions.car_transfer.buttons[k]=true);
+        // requests
+        Object.keys(perms.permissions.requests.dropdowns).forEach(k=>perms.permissions.requests.dropdowns[k]=true);
+        Object.keys(perms.permissions.requests.sections).forEach(k=>perms.permissions.requests.sections[k]=true);
+        Object.keys(perms.permissions.requests.fields).forEach(k=>perms.permissions.requests.fields[k]=true);
+        Object.keys(perms.permissions.requests.buttons).forEach(k=>perms.permissions.requests.buttons[k]=true);
+        Object.keys(perms.permissions.requests.workflow_actions).forEach(k=>perms.permissions.requests.workflow_actions[k]=true);
+        // users admin
+        Object.keys(perms.permissions.users_admin).forEach(k=>perms.permissions.users_admin[k]=true);
       }
-      cur[parts[parts.length-1]] = val;
+
+      return perms;
     }
 
     async function uaSave(){
       if(!uaSelected) return;
-      const name = (document.getElementById('ua_name')?.value || '').trim();
-      const email = (document.getElementById('ua_email')?.value || '').trim();
-      const active = (document.getElementById('ua_active')?.value || 'true') === 'true';
+      const payload = uaReadCheckboxes();
+      if(!payload) return;
 
-      const payload = uaCloneTemplate();
-      payload.name = name;
-      payload.email = email;
-      payload.active = active;
+      // لازم email موجود (على الأقل لتسهيل العرض)
+      if(!payload.email){
+        toast('اكتب بريد المستخدم (email)');
+        return;
+      }
 
-      // tabs
-      document.querySelectorAll('[data-ua-tab]').forEach(ch=>{
-        const k = ch.getAttribute('data-ua-tab');
-        if(k) payload.tabs[k] = !!ch.checked;
-      });
-
-      // detailed perms
-      document.querySelectorAll('[data-ua-perm]').forEach(ch=>{
-        const p = ch.getAttribute('data-ua-perm');
-        if(p) uaSetDeep(payload.permissions, p, !!ch.checked);
-      });
-
-      // enforce: if user is inactive -> hide all tabs except dashboard/users_admin? (keep as is, only save active)
       try{
         await db.collection('users').doc(uaSelected.id).set({
-          uid: uaSelected.uid || uaSelected.id,
-          name: payload.name,
-          email: payload.email,
+          name: payload.name || '',
+          email: payload.email || '',
           active: payload.active,
+          role: payload.role || 'user',
           tabs: payload.tabs,
           permissions: payload.permissions,
           updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
           updatedBy: auth.currentUser?.email || ''
-        }, { merge: true });
-        toast('تم حفظ المستخدم');
+        }, {merge:true});
+        toast('تم حفظ الصلاحيات');
       }catch(e){
-        toast(e?.message || 'فشل حفظ المستخدم');
-      }
-    }
-
-    async function uaCreateRecord(){
-      const name = (document.getElementById('ua_new_name')?.value || '').trim();
-      const email = (document.getElementById('ua_new_email')?.value || '').trim();
-      const uid = (document.getElementById('ua_new_uid')?.value || '').trim();
-      if(!email){ toast('اكتب البريد الإلكتروني'); return; }
-      const docId = uid || email; // لو مفيش UID نخزن بالميل
-      const tpl = uaCloneTemplate();
-      tpl.name = name || 'اسم المستخدم';
-      tpl.email = email;
-
-      try{
-        await db.collection('users').doc(docId).set({
-          uid: uid || docId,
-          name: tpl.name,
-          email: tpl.email,
-          active: true,
-          tabs: tpl.tabs,
-          permissions: tpl.permissions,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-          createdBy: auth.currentUser?.email || '',
-          updatedBy: auth.currentUser?.email || ''
-        }, { merge: true });
-        toast('تم إنشاء سجل المستخدم');
-        document.getElementById('ua_new_name').value = '';
-        document.getElementById('ua_new_email').value = '';
-        document.getElementById('ua_new_uid').value = '';
-      }catch(e){
-        toast(e?.message || 'فشل إنشاء سجل المستخدم');
+        toast(e?.message || 'فشل حفظ الصلاحيات');
       }
     }
 
     function uaStartLive(){
-      if(usersUnsub) return;
-      // try orderBy email if field exists
-      let q = db.collection('users');
-      try{ q = q.orderBy('email'); }catch(_){ /* ignore */ }
-
-      usersUnsub = q.onSnapshot((snap)=>{
+      if(uaUnsub) return;
+      uaUnsub = db.collection('users').onSnapshot((snap)=>{
         const arr = [];
         snap.forEach(doc=>{
           const d = doc.data() || {};
-          arr.push(uaNormalizeUser(doc.id, d));
+          arr.push({
+            id: doc.id,
+            email: d.email || '',
+            active: (typeof d.active === 'boolean') ? d.active : true,
+            createdAt: d.createdAt || null,
+            updatedAt: d.updatedAt || null,
+            raw: d
+          });
+        });
+        // Sort: updated desc, then email
+        arr.sort((a,b)=>{
+          const ta = a.updatedAt?.toMillis ? a.updatedAt.toMillis() : 0;
+          const tb = b.updatedAt?.toMillis ? b.updatedAt.toMillis() : 0;
+          if(tb!=ta) return tb-ta;
+          return (a.email||'').localeCompare(b.email||'');
         });
         uaCache = arr;
         uaRenderList();
@@ -4704,14 +4676,12 @@ if(type==='photo'){ $('req_photo_date').value=''; }
     }
 
     function uaStopLive(){
-      if(usersUnsub){ usersUnsub(); usersUnsub = null; }
+      if(uaUnsub){ uaUnsub(); uaUnsub=null; }
     }
 
     // Bind UI
     document.getElementById('ua_refresh')?.addEventListener('click', ()=>uaRenderList());
     document.getElementById('ua_search')?.addEventListener('input', ()=>uaRenderList());
-    document.getElementById('ua_active_filter')?.addEventListener('change', ()=>uaRenderList());
-    document.getElementById('ua_create')?.addEventListener('click', uaCreateRecord);
     document.getElementById('ua_save')?.addEventListener('click', uaSave);
     document.getElementById('ua_close')?.addEventListener('click', ()=>{
       const ed = document.getElementById('ua_editor');
@@ -4720,16 +4690,15 @@ if(type==='photo'){ $('req_photo_date').value=''; }
     });
 
     // Hook into openView to start/stop live
-    const __openView_users_admin = openView;
+    const __openView_usersAdmin = openView;
     openView = function(viewId){
-      __openView_users_admin(viewId);
+      __openView_usersAdmin(viewId);
       if(viewId === 'view-users'){
         uaStartLive();
       }else{
         uaStopLive();
       }
     };
-
 </script>
 </body>
 </html>
