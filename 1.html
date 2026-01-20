@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -1148,88 +1149,116 @@
           </div>
         </div>
 
-        <!-- إدارة المستخدمين والصلاحيات -->
+                <!-- إدارة المستخدمين -->
         <div class="view" id="view-users" role="tabpanel">
-          <div class="grid" style="grid-template-columns: 1fr;">
+          <div class="grid">
             <div class="card">
-              <h3>إدارة المستخدمين والصلاحيات</h3>
-              <div class="small muted">إضافة مستخدم جديد + عرض المستخدمين + تعديل الصلاحيات من داخل النظام.</div>
-              <div class="hr"></div>
-
-              <div class="row" style="gap:10px;flex-wrap:wrap">
-                <div style="min-width:240px;flex:1">
-                  <label class="small">البريد الإلكتروني</label>
-                  <input id="um_email" class="input" placeholder="name@email.com" autocomplete="off">
+              <h3>إدارة المستخدمين</h3>
+              <div class="body">
+                <div class="toolbar">
+                  <div class="field" style="flex:1;min-width:240px">
+                    <label>بحث</label>
+                    <input id="ua_search" placeholder="ابحث بالبريد أو الاسم أو UID" autocomplete="off" />
+                  </div>
+                  <div class="field" style="min-width:220px">
+                    <label>فلتر الحالة</label>
+                    <select id="ua_active_filter">
+                      <option value="all">الكل</option>
+                      <option value="active">نشط فقط</option>
+                      <option value="inactive">غير نشط فقط</option>
+                    </select>
+                  </div>
+                  <button id="ua_refresh" class="btn secondary">تحديث</button>
                 </div>
-                <div style="min-width:200px;flex:1">
-                  <label class="small">كلمة المرور</label>
-                  <input id="um_pass" class="input" type="password" placeholder="••••••••" autocomplete="new-password">
+
+                <div class="row" style="margin-top:8px">
+                  <div>
+                    <label>اسم المستخدم (لإنشاء سجل جديد)</label>
+                    <input id="ua_new_name" placeholder="اسم المستخدم" autocomplete="off" />
+                  </div>
+                  <div>
+                    <label>البريد الإلكتروني</label>
+                    <input id="ua_new_email" placeholder="email@example.com" autocomplete="off" />
+                  </div>
+                  <div>
+                    <label>UID (اختياري)</label>
+                    <input id="ua_new_uid" placeholder="UID" autocomplete="off" />
+                  </div>
+                  <div style="display:flex;align-items:flex-end;gap:8px">
+                    <button id="ua_create" class="btn primary">إنشاء سجل مستخدم</button>
+                  </div>
                 </div>
-                <div style="display:flex;align-items:flex-end">
-                  <button id="um_add" class="btn primary">إضافة مستخدم</button>
+                <div class="small" style="margin-top:8px;color:var(--muted)">
+                  ملاحظة: هذا التاب لإدارة صلاحيات المستخدمين في Firestore فقط (collection: <b>users</b>) حسب قالب الصلاحيات الذي اعتمدته.
                 </div>
-              </div>
 
-              <div class="small" id="um_add_hint" style="margin-top:8px;color:var(--muted)"></div>
+                <div class="hr" style="margin:12px 0"></div>
 
-              <div class="hr"></div>
-
-              <div class="row" style="justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
-                <div class="small muted">المستخدمون الموجودون في قاعدة البيانات (collection: <b>users</b>)</div>
-                <button id="um_refresh" class="btn">تحديث</button>
-              </div>
-
-              <div class="tableWrap" style="margin-top:10px;max-height:420px">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>البريد</th>
-                      <th>الدور</th>
-                      <th>آخر تحديث</th>
-                      <th>الإجراء</th>
-                    </tr>
-                  </thead>
-                  <tbody id="um_tbody">
-                    <tr><td colspan="4" class="small muted">—</td></tr>
-                  </tbody>
-                </table>
+                <div class="tableWrap" style="max-height:520px">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>الاسم</th>
+                        <th>البريد</th>
+                        <th>UID</th>
+                        <th>الحالة</th>
+                        <th>آخر تحديث</th>
+                        <th>إجراء</th>
+                      </tr>
+                    </thead>
+                    <tbody id="ua_tbody">
+                      <tr><td colspan="6" class="small muted">—</td></tr>
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
 
-            <div class="card" id="um_editor" style="display:none">
+            <div class="card" id="ua_editor" style="display:none">
               <h3>صلاحيات المستخدم</h3>
-              <div class="small muted" id="um_editor_user">—</div>
-              <div class="hr"></div>
+              <div class="body">
+                <div class="small muted" id="ua_editor_user">—</div>
+                <div class="hr" style="margin:12px 0"></div>
 
-              <div class="row" style="gap:10px;flex-wrap:wrap">
-                <div style="min-width:220px;flex:1">
-                  <label class="small">الدور</label>
-                  <select id="um_role" class="select">
-                    <option value="user">user</option>
-                    <option value="admin">admin</option>
-                  </select>
+                <div class="row">
+                  <div>
+                    <label>الاسم</label>
+                    <input id="ua_name" />
+                  </div>
+                  <div>
+                    <label>البريد</label>
+                    <input id="ua_email" />
+                  </div>
+                  <div>
+                    <label>الحالة</label>
+                    <select id="ua_active">
+                      <option value="true">نشط</option>
+                      <option value="false">غير نشط</option>
+                    </select>
+                  </div>
+                  <div style="display:flex;align-items:flex-end;gap:8px">
+                    <button id="ua_save" class="btn primary">حفظ</button>
+                    <button id="ua_close" class="btn secondary">إغلاق</button>
+                  </div>
                 </div>
-                <div style="display:flex;align-items:flex-end;gap:8px">
-                  <button id="um_save" class="btn primary">حفظ الصلاحيات</button>
-                  <button id="um_close" class="btn">إغلاق</button>
+
+                <div class="hr" style="margin:12px 0"></div>
+
+                <div class="small" style="margin-bottom:8px"><b>التابات</b></div>
+                <div id="ua_tabs_box" class="checks"></div>
+
+                <div class="hr" style="margin:12px 0"></div>
+
+                <div class="small" style="margin-bottom:8px"><b>الصلاحيات التفصيلية</b></div>
+                <div id="ua_perms_box"></div>
+
+                <div class="hr" style="margin:12px 0"></div>
+                <div class="small muted">تُحفظ الصلاحيات بنفس شكل القالب: tabs + permissions (buttons/fields/sections...)
                 </div>
               </div>
-
-              <div class="hr"></div>
-
-              <div class="small" style="margin-bottom:8px"><b>التابات</b></div>
-              <div id="um_tabs_box" class="grid" style="grid-template-columns: repeat(3,minmax(0,1fr)); gap:10px"></div>
-
-              <div class="hr"></div>
-
-              <div class="small" style="margin-bottom:8px"><b>إجراءات الطلبات</b></div>
-              <div id="um_actions_box" class="grid" style="grid-template-columns: repeat(3,minmax(0,1fr)); gap:10px"></div>
-
-              <div class="small muted" style="margin-top:10px">ملاحظة: تفعيل الصلاحيات على كل الأزرار سيتم في مرحلة لاحقة.</div>
             </div>
           </div>
         </div>
-
 <script>
     // Helper: short selector by id
     const $ = (id)=>document.getElementById(id);
@@ -4315,46 +4344,71 @@ if(type==='photo'){ $('req_photo_date').value=''; }
     uiLogsFilterChanged();
 
 
-    // ===== Users & Permissions (basic) =====
+    // ===== Users Admin (Firestore users collection) =====
     let usersUnsub = null;
-    let usersCache = [];
-    let umSelected = null;
+    let uaCache = [];
+    let uaSelected = null;
 
-    const UM_TABS = [
-      {id:'view-dashboard', name:'الداش بورد'},
-      {id:'view-admin', name:'الإدارة'},
-      {id:'view-inventory', name:'المخزون'},
-      {id:'view-transfer', name:'نقل السيارات'},
-      {id:'view-requests', name:'الطلبات'},
-      {id:'view-allcars', name:'كل السيارات'},
-      {id:'view-logs', name:'سجل الحركات'},
-      {id:'view-tracking', name:'التراكينج'},
-      {id:'view-archive', name:'الأرشيف'},
-      {id:'view-users', name:'إدارة المستخدمين'}
+    const UA_TABS = [
+      { key: 'dashboard', label: 'الداش بورد' },
+      { key: 'admin', label: 'الإدارة' },
+      { key: 'inventory', label: 'المخزون' },
+      { key: 'car_transfer', label: 'نقل السيارات' },
+      { key: 'requests', label: 'الطلبات' },
+      { key: 'all_cars', label: 'كل السيارات' },
+      { key: 'movement_log', label: 'سجل الحركات' },
+      { key: 'tracking', label: 'التراكينج' },
+      { key: 'archive', label: 'الأرشيف' },
+      { key: 'users_admin', label: 'إدارة المستخدمين' },
     ];
 
-    const UM_ACTIONS = [
-      {key:'requests.create', label:'إنشاء طلب'},
-      {key:'requests.step1', label:'تم استلام الطلب'},
-      {key:'requests.step2', label:'تم ارسال السيارة'},
-      {key:'requests.step3', label:'تم استلام السيارة'},
-      {key:'requests.step4', label:'تم الانتهاء'}
-    ];
+    // قالب الصلاحيات المعتمد (بنفس هيكل الرسالة)
+    const UA_TEMPLATE = {
+      name: '',
+      email: '',
+      active: true,
+      tabs: {
+        dashboard: true,
+        admin: false,
+        inventory: false,
+        car_transfer: false,
+        requests: false,
+        all_cars: false,
+        movement_log: false,
+        tracking: false,
+        archive: false,
+        users_admin: false
+      },
+      permissions: {
+        dashboard: { buttons: { save: false, clear: false } },
+        inventory: { buttons: { add_car: false, clear_list: false, delete: false, execute_transfer_request: false } },
+        car_transfer: {
+          fields: { vin_input: false, target_location_select: false, status_select: false },
+          buttons: { send_transfer: false, clear_list: false, delete: false }
+        },
+        requests: {
+          dropdowns: { choose_section: false },
+          sections: { create_request: false, follow_requests: false, completed_requests: false },
+          fields: { request_type_select: false, vin_input: false, transfer_location_select: false },
+          buttons: { add_vin: false, clear_list: false, delete: false, send_request: false },
+          workflow_actions: { receive_order: false, send_car: false, receive_car: false, finish_order: false }
+        },
+        all_cars: { view: true },
+        movement_log: { view: true },
+        tracking: { view: true },
+        archive: { view: true },
+        users_admin: { view_users: false, edit_permissions: false, create_user_record: false, disable_user: false }
+      }
+    };
 
-    function umDefaultPerms(){
-      const tabs = {};
-      UM_TABS.forEach(t=>tabs[t.id]=false);
-      // default user sees requests only
-      tabs['view-requests']=true;
+    // JS doesn't have true/false literals in object above when written as string.
 
-      const actions = {};
-      UM_ACTIONS.forEach(a=>actions[a.key]=false);
-      actions['requests.create']=true;
-
-      return {tabs, actions};
+    function uaCloneTemplate(){
+      // deep clone
+      return JSON.parse(JSON.stringify(UA_TEMPLATE));
     }
 
-    function umTs(v){
+    function uaTs(v){
       try{
         if(!v) return '';
         if(typeof v.toDate === 'function') return v.toDate().toLocaleString('ar-SA');
@@ -4363,194 +4417,316 @@ if(type==='photo'){ $('req_photo_date').value=''; }
       }catch(e){ return ''; }
     }
 
-    function umRenderList(){
-      const tb = document.getElementById('um_tbody');
+    function uaNormalizeUser(docId, d){
+      const base = uaCloneTemplate();
+      // merge shallow
+      base.name = (d && d.name) ? d.name : '';
+      base.email = (d && d.email) ? d.email : '';
+      base.active = (d && typeof d.active === 'boolean') ? d.active : true;
+      base.tabs = Object.assign({}, base.tabs, (d && d.tabs) ? d.tabs : {});
+      base.permissions = Object.assign({}, base.permissions, (d && d.permissions) ? d.permissions : {});
+      return {
+        id: docId,
+        uid: d && (d.uid || d.UID) ? (d.uid || d.UID) : docId,
+        createdAt: d && d.createdAt ? d.createdAt : null,
+        updatedAt: d && d.updatedAt ? d.updatedAt : null,
+        updatedBy: d && d.updatedBy ? d.updatedBy : '',
+        data: base
+      };
+    }
+
+    function uaMatch(u, q){
+      if(!q) return true;
+      const bag = [u.data?.name, u.data?.email, u.uid, u.id].map(v=>String(v||'').toLowerCase()).join(' | ');
+      return bag.includes(q);
+    }
+
+    function uaFilterList(){
+      const q = (document.getElementById('ua_search')?.value || '').trim().toLowerCase();
+      const af = document.getElementById('ua_active_filter')?.value || 'all';
+      return uaCache.filter(u=>{
+        if(af==='active' && !u.data.active) return false;
+        if(af==='inactive' && u.data.active) return false;
+        return uaMatch(u, q);
+      });
+    }
+
+    function uaRenderList(){
+      const tb = document.getElementById('ua_tbody');
       if(!tb) return;
-      if(!usersCache.length){
-        tb.innerHTML = '<tr><td colspan="4" class="small muted">لا يوجد مستخدمون</td></tr>';
+      const list = uaFilterList();
+      if(!list.length){
+        tb.innerHTML = '<tr><td colspan="6" class="small muted">لا يوجد مستخدمون</td></tr>';
         return;
       }
-      tb.innerHTML = usersCache.map(u=>{
-        const email = escapeHtml(u.email||'');
-        const role = escapeHtml(u.role||'user');
-        const upd  = escapeHtml(umTs(u.updatedAt||u.createdAt));
+      tb.innerHTML = list.map(u=>{
+        const name = escapeHtml(u.data.name||'—');
+        const email = escapeHtml(u.data.email||'—');
+        const uid = escapeHtml(u.uid||u.id||'—');
+        const st = u.data.active ? '<span class="tag ok">نشط</span>' : '<span class="tag no">غير نشط</span>';
+        const upd = escapeHtml(uaTs(u.updatedAt||u.createdAt));
         return `<tr>
+          <td>${name}</td>
           <td>${email}</td>
-          <td>${role}</td>
+          <td dir="ltr">${uid}</td>
+          <td>${st}</td>
           <td>${upd}</td>
-          <td>
-            <button class="btn" data-um-edit="${escapeHtml(u.id)}">تعديل</button>
-          </td>
+          <td><button class="btn secondary" data-ua-edit="${escapeHtml(u.id)}">تعديل</button></td>
         </tr>`;
       }).join('');
 
-      tb.querySelectorAll('[data-um-edit]').forEach(btn=>{
+      tb.querySelectorAll('[data-ua-edit]').forEach(btn=>{
         btn.addEventListener('click', ()=>{
-          const id = btn.getAttribute('data-um-edit');
-          const u = usersCache.find(x=>x.id===id);
-          if(!u) return;
-          umOpenEditor(u);
+          const id = btn.getAttribute('data-ua-edit');
+          const u = uaCache.find(x=>x.id===id);
+          if(u) uaOpenEditor(u);
         });
       });
     }
 
-    function umBoxItem(id, label, checked){
-      return `<label class="row" style="gap:8px;align-items:center">
-        <input type="checkbox" data-um-id="${escapeHtml(id)}" ${checked?'checked':''} />
-        <span class="small">${escapeHtml(label)}</span>
+    function uaTabItem(key, label, checked){
+      return `<label class="checkItem">
+        <span>${escapeHtml(label)}</span>
+        <input type="checkbox" data-ua-tab="${escapeHtml(key)}" ${checked?'checked':''} />
       </label>`;
     }
 
-    function umOpenEditor(u){
-      umSelected = u;
-      const ed = document.getElementById('um_editor');
+    function uaPermBlock(title, html){
+      return `<div class="card" style="box-shadow:none;border:1px solid var(--line);margin-bottom:10px">
+        <h3 style="border:none;padding:12px 12px 0 12px;font-size:14px">${escapeHtml(title)}</h3>
+        <div class="body" style="padding:12px">${html}</div>
+      </div>`;
+    }
+
+    function uaRenderPerms(perms){
+      // perms is UA_TEMPLATE.permissions-like
+      const blocks = [];
+
+      // dashboard buttons
+      blocks.push(uaPermBlock('Dashboard', [
+        uaBoolField('dashboard.buttons.save','حفظ (save)', !!perms.dashboard?.buttons?.save),
+        uaBoolField('dashboard.buttons.clear','مسح (clear)', !!perms.dashboard?.buttons?.clear)
+      ].join('')));
+
+      // inventory buttons
+      blocks.push(uaPermBlock('Inventory', [
+        uaBoolField('inventory.buttons.add_car','إضافة سيارة', !!perms.inventory?.buttons?.add_car),
+        uaBoolField('inventory.buttons.clear_list','مسح القائمة', !!perms.inventory?.buttons?.clear_list),
+        uaBoolField('inventory.buttons.delete','حذف', !!perms.inventory?.buttons?.delete),
+        uaBoolField('inventory.buttons.execute_transfer_request','تنفيذ طلب نقل', !!perms.inventory?.buttons?.execute_transfer_request)
+      ].join('')));
+
+      // car_transfer fields + buttons
+      blocks.push(uaPermBlock('Car Transfer', [
+        '<div class="small" style="margin-bottom:6px"><b>الحقول</b></div>',
+        uaBoolField('car_transfer.fields.vin_input','إدخال رقم الهيكل', !!perms.car_transfer?.fields?.vin_input),
+        uaBoolField('car_transfer.fields.target_location_select','اختيار المكان المستهدف', !!perms.car_transfer?.fields?.target_location_select),
+        uaBoolField('car_transfer.fields.status_select','اختيار الحالة', !!perms.car_transfer?.fields?.status_select),
+        '<div class="hr" style="margin:10px 0"></div>',
+        '<div class="small" style="margin-bottom:6px"><b>الأزرار</b></div>',
+        uaBoolField('car_transfer.buttons.send_transfer','إرسال النقل', !!perms.car_transfer?.buttons?.send_transfer),
+        uaBoolField('car_transfer.buttons.clear_list','مسح القائمة', !!perms.car_transfer?.buttons?.clear_list),
+        uaBoolField('car_transfer.buttons.delete','حذف', !!perms.car_transfer?.buttons?.delete)
+      ].join('')));
+
+      // requests (dropdowns, sections, fields, buttons, workflow_actions)
+      blocks.push(uaPermBlock('Requests', [
+        '<div class="small" style="margin-bottom:6px"><b>Dropdowns</b></div>',
+        uaBoolField('requests.dropdowns.choose_section','اختر القسم', !!perms.requests?.dropdowns?.choose_section),
+        '<div class="hr" style="margin:10px 0"></div>',
+        '<div class="small" style="margin-bottom:6px"><b>Sections</b></div>',
+        uaBoolField('requests.sections.create_request','إنشاء طلب', !!perms.requests?.sections?.create_request),
+        uaBoolField('requests.sections.follow_requests','متابعة الطلبات', !!perms.requests?.sections?.follow_requests),
+        uaBoolField('requests.sections.completed_requests','الطلبات المكتملة', !!perms.requests?.sections?.completed_requests),
+        '<div class="hr" style="margin:10px 0"></div>',
+        '<div class="small" style="margin-bottom:6px"><b>Fields</b></div>',
+        uaBoolField('requests.fields.request_type_select','تحديد نوع الطلب', !!perms.requests?.fields?.request_type_select),
+        uaBoolField('requests.fields.vin_input','كتابة رقم الهيكل', !!perms.requests?.fields?.vin_input),
+        uaBoolField('requests.fields.transfer_location_select','اختيار مكان النقل', !!perms.requests?.fields?.transfer_location_select),
+        '<div class="hr" style="margin:10px 0"></div>',
+        '<div class="small" style="margin-bottom:6px"><b>Buttons</b></div>',
+        uaBoolField('requests.buttons.add_vin','إضافة هيكل', !!perms.requests?.buttons?.add_vin),
+        uaBoolField('requests.buttons.clear_list','مسح القائمة', !!perms.requests?.buttons?.clear_list),
+        uaBoolField('requests.buttons.delete','حذف', !!perms.requests?.buttons?.delete),
+        uaBoolField('requests.buttons.send_request','إرسال الطلب', !!perms.requests?.buttons?.send_request),
+        '<div class="hr" style="margin:10px 0"></div>',
+        '<div class="small" style="margin-bottom:6px"><b>Workflow Actions</b></div>',
+        uaBoolField('requests.workflow_actions.receive_order','تم استلام الطلب', !!perms.requests?.workflow_actions?.receive_order),
+        uaBoolField('requests.workflow_actions.send_car','تم ارسال السيارة', !!perms.requests?.workflow_actions?.send_car),
+        uaBoolField('requests.workflow_actions.receive_car','تم استلام السيارة', !!perms.requests?.workflow_actions?.receive_car),
+        uaBoolField('requests.workflow_actions.finish_order','تم الانتهاء', !!perms.requests?.workflow_actions?.finish_order)
+      ].join('')));
+
+      // view permissions
+      blocks.push(uaPermBlock('Views', [
+        uaBoolField('all_cars.view','عرض كل السيارات', !!perms.all_cars?.view),
+        uaBoolField('movement_log.view','عرض سجل الحركات', !!perms.movement_log?.view),
+        uaBoolField('tracking.view','عرض التراكينج', !!perms.tracking?.view),
+        uaBoolField('archive.view','عرض الأرشيف', !!perms.archive?.view)
+      ].join('')));
+
+      // users_admin
+      blocks.push(uaPermBlock('Users Admin', [
+        uaBoolField('users_admin.view_users','عرض المستخدمين', !!perms.users_admin?.view_users),
+        uaBoolField('users_admin.edit_permissions','تعديل الصلاحيات', !!perms.users_admin?.edit_permissions),
+        uaBoolField('users_admin.create_user_record','إنشاء سجل مستخدم', !!perms.users_admin?.create_user_record),
+        uaBoolField('users_admin.disable_user','تعطيل مستخدم', !!perms.users_admin?.disable_user)
+      ].join('')));
+
+      return blocks.join('');
+    }
+
+    function uaBoolField(pathKey, label, checked){
+      return `<label class="checkItem" style="background:#fff">
+        <span>${escapeHtml(label)}</span>
+        <input type="checkbox" data-ua-perm="${escapeHtml(pathKey)}" ${checked?'checked':''} />
+      </label>`;
+    }
+
+    function uaOpenEditor(u){
+      uaSelected = u;
+      const ed = document.getElementById('ua_editor');
       if(!ed) return;
       ed.style.display = 'block';
-      document.getElementById('um_editor_user').innerHTML = `المستخدم: <b>${escapeHtml(u.email||'')}</b>`;
-      document.getElementById('um_role').value = u.role || 'user';
+      document.getElementById('ua_editor_user').innerHTML = `المستخدم: <b>${escapeHtml(u.data.email||'')}</b> <span class="small muted">(uid: ${escapeHtml(u.uid||u.id||'')})</span>`;
+      document.getElementById('ua_name').value = u.data.name || '';
+      document.getElementById('ua_email').value = u.data.email || '';
+      document.getElementById('ua_active').value = (u.data.active ? 'true' : 'false');
+
+      const tabsBox = document.getElementById('ua_tabs_box');
+      tabsBox.innerHTML = UA_TABS.map(t=>uaTabItem(t.key, t.label, !!u.data.tabs?.[t.key])).join('');
+
+      const permsBox = document.getElementById('ua_perms_box');
+      permsBox.innerHTML = uaRenderPerms(u.data.permissions || uaCloneTemplate().permissions);
+    }
+
+    function uaSetDeep(obj, pathKey, val){
+      const parts = pathKey.split('.');
+      let cur = obj;
+      for(let i=0;i<parts.length-1;i++){
+        const k = parts[i];
+        if(!cur[k] || typeof cur[k] !== 'object') cur[k] = {};
+        cur = cur[k];
+      }
+      cur[parts[parts.length-1]] = val;
+    }
+
+    async function uaSave(){
+      if(!uaSelected) return;
+      const name = (document.getElementById('ua_name')?.value || '').trim();
+      const email = (document.getElementById('ua_email')?.value || '').trim();
+      const active = (document.getElementById('ua_active')?.value || 'true') === 'true';
+
+      const payload = uaCloneTemplate();
+      payload.name = name;
+      payload.email = email;
+      payload.active = active;
 
       // tabs
-      const tabsBox = document.getElementById('um_tabs_box');
-      const permsTabs = (u.permissions && u.permissions.tabs) ? u.permissions.tabs : {};
-      tabsBox.innerHTML = UM_TABS.map(t=>umBoxItem('tab:'+t.id, t.name, !!permsTabs[t.id])).join('');
-
-      // actions
-      const actBox = document.getElementById('um_actions_box');
-      const permsAct = (u.permissions && u.permissions.actions) ? u.permissions.actions : {};
-      actBox.innerHTML = UM_ACTIONS.map(a=>umBoxItem('act:'+a.key, a.label, !!permsAct[a.key])).join('');
-    }
-
-    async function umSave(){
-      if(!umSelected) return;
-      const role = document.getElementById('um_role').value || 'user';
-      const tabs = {};
-      const actions = {};
-
-      document.querySelectorAll('#um_tabs_box input[type="checkbox"][data-um-id]').forEach(ch=>{
-        const id = ch.getAttribute('data-um-id')||'';
-        if(id.startsWith('tab:')) tabs[id.replace('tab:','')] = !!ch.checked;
-      });
-      document.querySelectorAll('#um_actions_box input[type="checkbox"][data-um-id]').forEach(ch=>{
-        const id = ch.getAttribute('data-um-id')||'';
-        if(id.startsWith('act:')) actions[id.replace('act:','')] = !!ch.checked;
+      document.querySelectorAll('[data-ua-tab]').forEach(ch=>{
+        const k = ch.getAttribute('data-ua-tab');
+        if(k) payload.tabs[k] = !!ch.checked;
       });
 
-      // ensure admin always sees all tabs
-      if(role==='admin'){
-        UM_TABS.forEach(t=>tabs[t.id]=true);
-        UM_ACTIONS.forEach(a=>actions[a.key]=true);
-      }
+      // detailed perms
+      document.querySelectorAll('[data-ua-perm]').forEach(ch=>{
+        const p = ch.getAttribute('data-ua-perm');
+        if(p) uaSetDeep(payload.permissions, p, !!ch.checked);
+      });
 
+      // enforce: if user is inactive -> hide all tabs except dashboard/users_admin? (keep as is, only save active)
       try{
-        await db.collection('users').doc(umSelected.id).set({
-          role,
-          permissions: {tabs, actions},
+        await db.collection('users').doc(uaSelected.id).set({
+          uid: uaSelected.uid || uaSelected.id,
+          name: payload.name,
+          email: payload.email,
+          active: payload.active,
+          tabs: payload.tabs,
+          permissions: payload.permissions,
           updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
           updatedBy: auth.currentUser?.email || ''
-        }, {merge:true});
-        toast('تم حفظ الصلاحيات');
+        }, { merge: true });
+        toast('تم حفظ المستخدم');
       }catch(e){
-        toast(e.message || 'فشل حفظ الصلاحيات');
+        toast(e?.message || 'فشل حفظ المستخدم');
       }
     }
 
-    function startUsersLive(){
+    async function uaCreateRecord(){
+      const name = (document.getElementById('ua_new_name')?.value || '').trim();
+      const email = (document.getElementById('ua_new_email')?.value || '').trim();
+      const uid = (document.getElementById('ua_new_uid')?.value || '').trim();
+      if(!email){ toast('اكتب البريد الإلكتروني'); return; }
+      const docId = uid || email; // لو مفيش UID نخزن بالميل
+      const tpl = uaCloneTemplate();
+      tpl.name = name || 'اسم المستخدم';
+      tpl.email = email;
+
+      try{
+        await db.collection('users').doc(docId).set({
+          uid: uid || docId,
+          name: tpl.name,
+          email: tpl.email,
+          active: true,
+          tabs: tpl.tabs,
+          permissions: tpl.permissions,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          createdBy: auth.currentUser?.email || '',
+          updatedBy: auth.currentUser?.email || ''
+        }, { merge: true });
+        toast('تم إنشاء سجل المستخدم');
+        document.getElementById('ua_new_name').value = '';
+        document.getElementById('ua_new_email').value = '';
+        document.getElementById('ua_new_uid').value = '';
+      }catch(e){
+        toast(e?.message || 'فشل إنشاء سجل المستخدم');
+      }
+    }
+
+    function uaStartLive(){
       if(usersUnsub) return;
-      usersUnsub = db.collection('users').orderBy('updatedAt','desc').onSnapshot((snap)=>{
+      // try orderBy email if field exists
+      let q = db.collection('users');
+      try{ q = q.orderBy('email'); }catch(_){ /* ignore */ }
+
+      usersUnsub = q.onSnapshot((snap)=>{
         const arr = [];
         snap.forEach(doc=>{
-          const d = doc.data()||{};
-          arr.push({
-            id: doc.id,
-            email: d.email || doc.id,
-            role: d.role || 'user',
-            permissions: d.permissions || umDefaultPerms(),
-            createdAt: d.createdAt || null,
-            updatedAt: d.updatedAt || null
-          });
+          const d = doc.data() || {};
+          arr.push(uaNormalizeUser(doc.id, d));
         });
-        usersCache = arr;
-        umRenderList();
+        uaCache = arr;
+        uaRenderList();
       }, (err)=>{
         console.warn('users live error', err);
       });
     }
 
-    function stopUsersLive(){
-      if(usersUnsub){ usersUnsub(); usersUnsub=null; }
+    function uaStopLive(){
+      if(usersUnsub){ usersUnsub(); usersUnsub = null; }
     }
 
-    // Create user without logging out current admin (Secondary App)
-    let secAuth = null;
-    function ensureSecondaryAuth(){
-      if(secAuth) return secAuth;
-      try{
-        const secApp = firebase.apps.find(a=>a.name==='Secondary') || firebase.initializeApp(firebaseConfig, 'Secondary');
-        secAuth = firebase.auth(secApp);
-        return secAuth;
-      }catch(e){
-        console.warn('secondary auth init error', e);
-        return null;
-      }
-    }
-
-    async function umAddUser(){
-      const email = (document.getElementById('um_email').value||'').trim();
-      const pass  = (document.getElementById('um_pass').value||'').trim();
-      const hint  = document.getElementById('um_add_hint');
-      if(hint) hint.textContent = '';
-      if(!email || !pass){
-        toast('اكتب البريد وكلمة المرور');
-        return;
-      }
-      const s = ensureSecondaryAuth();
-      if(!s){
-        toast('فشل تهيئة إنشاء المستخدم');
-        return;
-      }
-      try{
-        const cred = await s.createUserWithEmailAndPassword(email, pass);
-        const uid = cred.user.uid;
-        const perms = umDefaultPerms();
-        await db.collection('users').doc(uid).set({
-          email,
-          role: 'user',
-          permissions: perms,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-          createdBy: auth.currentUser?.email || '',
-          updatedBy: auth.currentUser?.email || ''
-        }, {merge:true});
-
-        if(hint) hint.textContent = 'تم إضافة المستخدم بنجاح';
-        toast('تم إضافة المستخدم');
-      }catch(e){
-        const msg = e?.message || 'فشل إضافة المستخدم';
-        if(hint) hint.textContent = msg;
-        toast(msg);
-      }finally{
-        try{ await s.signOut(); }catch(_){}
-      }
-    }
-
-    // Bind users tab UI
-    document.getElementById('um_add')?.addEventListener('click', umAddUser);
-    document.getElementById('um_save')?.addEventListener('click', umSave);
-    document.getElementById('um_close')?.addEventListener('click', ()=>{
-      const ed = document.getElementById('um_editor');
+    // Bind UI
+    document.getElementById('ua_refresh')?.addEventListener('click', ()=>uaRenderList());
+    document.getElementById('ua_search')?.addEventListener('input', ()=>uaRenderList());
+    document.getElementById('ua_active_filter')?.addEventListener('change', ()=>uaRenderList());
+    document.getElementById('ua_create')?.addEventListener('click', uaCreateRecord);
+    document.getElementById('ua_save')?.addEventListener('click', uaSave);
+    document.getElementById('ua_close')?.addEventListener('click', ()=>{
+      const ed = document.getElementById('ua_editor');
       if(ed) ed.style.display = 'none';
-      umSelected = null;
+      uaSelected = null;
     });
-    document.getElementById('um_refresh')?.addEventListener('click', ()=>{ umRenderList(); });
 
     // Hook into openView to start/stop live
-    const __openView_users = openView;
+    const __openView_users_admin = openView;
     openView = function(viewId){
-      __openView_users(viewId);
+      __openView_users_admin(viewId);
       if(viewId === 'view-users'){
-        startUsersLive();
+        uaStartLive();
       }else{
-        stopUsersLive();
+        uaStopLive();
       }
     };
 
