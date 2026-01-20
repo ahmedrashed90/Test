@@ -1,1 +1,4559 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>mzj-workflow | الإدارة + المخزون</title>
 
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+  <style>
+    :root{--brown:#3e2420;--beige:#bc8f74;--cream:#fff8ef;--bg:#f6f2ed;--card:#fff;--text:#1f1f1f;--muted:#6b6b6b;--line:#e9dfd5;--shadow:0 10px 24px rgba(0,0,0,.08);--r:12px}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:"Tajawal",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
+    .wrap{max-width:1400px;margin:0 auto;padding:16px}
+    .topbar{background:#fff;border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:14px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    .brand{display:flex;align-items:center;gap:10px}
+    .dot{width:12px;height:12px;border-radius:50%;background:var(--beige);box-shadow:0 0 0 6px rgba(188,143,116,.18)}
+    .title{font-weight:800;color:var(--brown);font-size:18px}
+    .subtitle{color:var(--muted);font-size:13px;margin-top:2px}
+    .right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .pill{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--cream);padding:8px 10px;border-radius:999px;font-size:13px;color:var(--brown)}
+    .btn{appearance:none;border:none;cursor:pointer;border-radius:10px;padding:10px 12px;font-weight:800;font-family:inherit;display:inline-flex;align-items:center;gap:8px}
+    .btn.primary{background:var(--brown);color:#fff}
+    .btn.secondary{background:#fff;border:1px solid var(--line);color:var(--brown)}
+    .btn.danger{background:#b42318;color:#fff}
+    .btn:disabled{opacity:.55;cursor:not-allowed}
+
+    .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+    .card h3{margin:0;padding:14px;border-bottom:1px solid var(--line);color:var(--brown);font-size:16px}
+    .card .body{padding:14px}
+
+    .tabs{margin-top:14px}
+    .tabbar{display:flex;gap:8px;flex-wrap:wrap;background:#fff;border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:8px}
+    .tab{padding:10px 12px;border-radius:10px;border:1px solid transparent;font-weight:900;color:var(--brown);cursor:pointer}
+    .tab.active{background:var(--cream);border-color:var(--line)}
+    .view{display:none;margin-top:14px}
+    .view.active{display:block}
+
+    .grid{display:grid;grid-template-columns:1.05fr .95fr;gap:14px}
+    @media(max-width:980px){.grid{grid-template-columns:1fr}}
+
+    label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
+    input,select,textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;font-family:inherit;background:#fff;outline:none}
+    textarea{min-height:90px;resize:vertical}
+
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+    @media(max-width:680px){.row{grid-template-columns:1fr}}
+    .span2{grid-column:1 / -1}
+
+    .checks{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+    @media(max-width:980px){.checks{grid-template-columns:repeat(3,1fr)}}
+    @media(max-width:520px){.checks{grid-template-columns:repeat(2,1fr)}}
+    .checkItem{border:1px solid var(--line);border-radius:10px;padding:10px;display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--cream)}
+    .checkItem span{font-weight:900;color:var(--brown);font-size:13px}
+
+    .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;align-items:flex-end}
+    .toolbar .field{min-width:220px}
+
+    .tableWrap{max-height:560px;overflow:auto;border:1px solid var(--line);border-radius:12px;background:#fff}
+    table{width:100%;border-collapse:collapse}
+    thead th{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--line);color:var(--brown);font-size:12px;text-align:right;padding:6px 8px;white-space:nowrap}
+    tbody td{border-bottom:1px solid var(--line);padding:6px 8px;font-size:12.5px;vertical-align:top}
+
+    .linkBtn{display:inline-flex;align-items:center;justify-content:center;padding:7px 10px;border-radius:10px;border:1px solid var(--line);background:var(--cream);color:var(--brown);font-weight:900;cursor:pointer;white-space:nowrap}
+    .linkBtn:hover{filter:brightness(.98)}
+
+    .tag{display:inline-flex;align-items:center;border-radius:999px;padding:5px 10px;font-weight:900;font-size:12px;white-space:nowrap}
+    .tag.ok{background:#e7f7ed;color:#087443;border:1px solid #bfe7cc}
+    .tag.no{background:#feeceb;color:#a1130b;border:1px solid #f5c2be}
+
+    .authBox{max-width:520px;margin:22px auto}
+    .hidden{display:none !important}
+
+    .toast{position:fixed;left:16px;bottom:16px;background:#111;color:#fff;padding:12px 14px;border-radius:12px;box-shadow:0 10px 24px rgba(0,0,0,.25);opacity:0;transform:translateY(10px);transition:.25s;max-width:92vw;z-index:9999}
+    .toast.show{opacity:1;transform:translateY(0)}
+
+    .modalBackdrop{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;padding:14px;z-index:9998}
+    .modalBackdrop.show{display:flex}
+    .modal{width:min(720px,96vw);background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 20px 40px rgba(0,0,0,.2);overflow:hidden}
+    .modalHead{display:flex;align-items:center;justify-content:space-between;padding:14px;border-bottom:1px solid var(--line);background:var(--cream)}
+    .modalHead h4{margin:0;color:var(--brown)}
+    .modalBody{padding:14px}
+    .modalFoot{padding:14px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-start;flex-wrap:wrap}
+
+    .small{font-size:12px;color:var(--muted);line-height:1.7}
+  
+/* توسيع جدول المخزون فقط */
+#view-inventory .body{
+  padding: 0;
+}
+
+
+/* سطر واحد لكل خلايا جدول المخزون */
+#inv_table th,
+#inv_table td{
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+
+/* جعل جدول المخزون بعرض الصفحة بالكامل */
+#view-inventory{
+  margin-left: calc(-50vw + 50%);
+  margin-right: calc(-50vw + 50%);
+}
+
+#view-inventory .card{
+  border-radius: 0;
+}
+
+#view-inventory .tableWrap{
+  width: 100vw;
+}
+
+
+/* جدول النقل في تاب نقل السيارات بعرض الصفحة */
+#view-transfer .tableWrap{
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  margin-right: calc(-50vw + 50%);
+  border-radius: 0;
+}
+#view-transfer .tableWrap table{
+  width: 100%;
+}
+
+
+
+/* نقل السيارات: خليه نفس شكل تاب الطلبات (كارت بعرض الصفحة + جدول داخل الكارت) */
+#view-transfer .grid{
+  grid-template-columns: 1fr !important;
+}
+
+#view-transfer .card{
+  width: 100%;
+}
+
+#tr_tableWrap{
+  width: 100%;
+  margin: 0;
+}
+
+#tr_tableWrap table{
+  width: 100%;
+}
+
+
+/* FIX FINAL: خلي تاب نقل السيارات نفس Layout تاب الطلبات */
+#view-transfer{
+  max-width: 100%;
+}
+#view-transfer > .card{
+  max-width: 100%;
+  margin: 0 auto;
+}
+#view-transfer .body{
+  padding: 16px;
+}
+#view-transfer .tableWrap{
+  width: 100%;
+  margin: 0;
+}
+#view-transfer table{
+  width: 100%;
+}
+
+
+    /* ===== Dashboard ===== */
+    .dashGrid{display:grid;grid-template-columns:repeat(3, minmax(0,1fr));gap:14px;margin-top:14px}
+    .dashCard .body{display:grid;gap:10px}
+    .dashKpis{display:grid;grid-template-columns:repeat(2, minmax(0,1fr));gap:10px}
+    .dashKpi{background:#fff;border:1px solid #f0e6dc;border-radius:12px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .dashKpi span{color:var(--muted);font-size:13px;font-weight:700}
+    .dashKpi b{font-size:18px;color:var(--brown)}
+    .dashBtns{display:flex;gap:8px;flex-wrap:wrap}
+    .dashFilters{display:grid;grid-template-columns:220px 1fr 220px;gap:12px;align-items:end}
+    .dashStatusBox{border:1px solid #f0e6dc;border-radius:12px;background:#fff;padding:10px 12px}
+    .dashChecks{display:flex;gap:10px;flex-wrap:wrap}
+    .dashChk{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--brown);font-weight:700}
+    .dashFilterActions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+
+    @media (max-width:1100px){
+      .dashGrid{grid-template-columns:repeat(2, minmax(0,1fr))}
+      .dashFilters{grid-template-columns:1fr}
+      .dashFilterActions{justify-content:flex-start}
+    }
+    @media (max-width:720px){
+      .dashGrid{grid-template-columns:1fr}
+    }
+
+
+/* داش بورد: تمييز الإجمالي الفعلي وإجمالي المفاتيح */
+#stk_totalActual, #stk_keysTotal,
+#ag_totalActual,  #ag_keysTotal,
+#b1_totalActual,  #b1_keysTotal,
+#b2_totalActual,  #b2_keysTotal,
+#b3_totalActual,  #b3_keysTotal{
+  color: #d97706; /* برتقالي مناسب */
+}
+
+
+/* داش بورد: إبراز الإجمالي الفعلي وإجمالي المفاتيح */
+#view-dashboard .dashKpi:has(#stk_totalActual),
+#view-dashboard .dashKpi:has(#stk_keysTotal),
+#view-dashboard .dashKpi:has(#ag_totalActual),
+#view-dashboard .dashKpi:has(#ag_keysTotal),
+#view-dashboard .dashKpi:has(#b1_totalActual),
+#view-dashboard .dashKpi:has(#b1_keysTotal),
+#view-dashboard .dashKpi:has(#b2_totalActual),
+#view-dashboard .dashKpi:has(#b2_keysTotal),
+#view-dashboard .dashKpi:has(#b3_totalActual),
+#view-dashboard .dashKpi:has(#b3_keysTotal){
+  border: 2px solid #d97706;
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+#view-dashboard #stk_totalActual, #view-dashboard #stk_keysTotal,
+#view-dashboard #ag_totalActual,  #view-dashboard #ag_keysTotal,
+#view-dashboard #b1_totalActual,  #view-dashboard #b1_keysTotal,
+#view-dashboard #b2_totalActual,  #view-dashboard #b2_keysTotal,
+#view-dashboard #b3_totalActual,  #view-dashboard #b3_keysTotal{
+  color:#d97706;
+}
+
+
+/* Dashboard: saved cards container should flow inside grid */
+#dash_saved_cards{display:contents}
+
+/* Dashboard: highlight totals (اجمالي فعلي/مفاتيح) */
+#view-dashboard .kpiHighlight{
+  border:2px solid #d97706;
+  border-radius:12px;
+  padding:10px 12px;
+}
+#view-dashboard .kpiHighlight b{
+  color:#d97706;
+}
+
+
+/* Dashboard enhancements */
+.dashKpi.clickable{cursor:pointer;}
+#dashDataModal .modalBox, #reqModal .modalBox, #detailsModal .modalBox{width:min(96vw, 1400px);}
+#dashDataModal .tableWrap, #reqModal .tableWrap, #detailsModal .tableWrap{max-height:60vh;}
+
+
+/* DASH MODAL TWEAK */
+#dashDataModal .modal{max-width: 96vw; width: 96vw; max-height: 86vh; height: auto;}
+#dashDataModal .modalBody{max-height: 70vh; overflow:auto;}
+#dashDataModal table{min-width: 1100px;}
+
+
+/* DASH DATA MODAL */
+#dashDataModal .modal-card{max-width:95vw;width:95vw;max-height:85vh;height:85vh;display:flex;flex-direction:column;}
+#dashDataModal .modal-body{flex:1;overflow:auto;}
+#dashDataModal table{min-width:1100px;}
+
+/* SHEET IMPORT MODAL */
+#sheetImportModal .modal-card{max-width:900px;width:95vw;}
+</style>
+
+  <style>
+    /* Dashboard modals wider */
+    #dashDataModal .modal, #detailsModal .modal{width:96vw;max-width:96vw}
+    #dashDataModal table.table{min-width:1200px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <div class="topbar">
+      <div class="brand">
+        <div class="dot"></div>
+        <div>
+          <div class="title">mzj-workflow — الإدارة + المخزون</div>
+          <div class="subtitle">المسار الموحد لبيانات السيارة: <b>cars/{VIN}</b></div>
+        </div>
+      </div>
+      <div class="right">
+        <span class="pill" id="authPill">غير مسجل</span>
+        <button class="btn secondary hidden" id="btnLogout">تسجيل خروج</button>
+      </div>
+    </div>
+
+    <!-- LOGIN -->
+    <div class="authBox" id="authBox">
+      <div class="card">
+        <h3>تسجيل الدخول</h3>
+        <div class="body">
+          <div class="row">
+            <div>
+              <label>البريد الإلكتروني</label>
+              <input id="loginEmail" type="email" placeholder="example@company.com" />
+            </div>
+            <div>
+              <label>كلمة المرور</label>
+              <input id="loginPass" type="password" placeholder="••••••••" />
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn primary" id="btnLogin">تسجيل الدخول</button>
+            <button class="btn secondary" id="btnReset">نسيت كلمة المرور</button>
+          </div>
+          <div class="small" style="margin-top:10px">يجب أن تكون مسجل داخل مشروع <b>mzj-workflow</b>.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- APP -->
+    <div id="app" class="hidden">
+      <div class="tabs">
+        <div class="tabbar" role="tablist" aria-label="Tabs">
+          <div class="tab" role="tab" data-view="view-dashboard">الداش بورد</div>
+          <div class="tab active" role="tab" data-view="view-admin">الإدارة</div>
+          <div class="tab" role="tab" data-view="view-inventory">المخزون</div>
+          <div class="tab" role="tab" data-view="view-transfer">نقل السيارات</div>
+          <div class="tab" role="tab" data-view="view-requests">الطلبات</div>
+                  <div class="tab" role="tab" data-view="view-allcars">كل السيارات</div>
+          <div class="tab" role="tab" data-view="view-logs">سجل الحركات</div>
+          <div class="tab" role="tab" data-view="view-tracking">التراكينج</div>
+          <div class="tab" role="tab" data-view="view-archive">الأرشيف</div>
+          <div class="tab" role="tab" data-view="view-users">إدارة المستخدمين</div>
+</div>
+
+        <!-- الداش بورد -->
+        <div class="view" id="view-dashboard" role="tabpanel">
+
+          <!-- Saved View Filters -->
+          <div class="card">
+            <h3>الداش بورد</h3>
+            <div class="body">
+              <div class="dashFilters">
+                <div>
+                  <label>المكان</label>
+                  <select id="dash_filter_location" class="selWithAdd">
+                    <option value="">— اختر —</option>
+                  </select>
+                </div>
+                <div class="dashStatusBox">
+                  <div class="small" style="margin-bottom:6px">الحالات (يمكن اختيار أكثر من حالة)</div>
+                  <div class="dashChecks" id="dash_filter_statuses">
+                    <label class="dashChk"><input type="checkbox" value="متاح للبيع"> متاح للبيع</label>
+                    <label class="dashChk"><input type="checkbox" value="حجز"> حجز</label>
+                    <label class="dashChk"><input type="checkbox" value="بها ملاحظات"> بها ملاحظات</label>
+                    <label class="dashChk"><input type="checkbox" value="مباع تحت التسليم"> مباع تحت التسليم</label>
+                    <label class="dashChk"><input type="checkbox" value="مباع تم التسليم"> مباع تم التسليم</label>
+                  </div>
+                </div>
+                <div class="dashFilterActions">
+                  <button class="btn secondary" id="dash_filter_show">عرض</button>
+                  <button class="btn primary" id="dash_filter_save">حفظ</button>
+                  <button class="btn danger" id="dash_filter_clear">تفريغ</button>
+                </div>
+              </div>
+              <div class="small" id="dash_filter_meta" style="margin-top:10px">—</div>
+            </div>
+          </div>
+
+          <!-- Cards -->
+          <div class="dashGrid">
+      <div id="dash_saved_cards"></div>
+
+            <div class="card dashCard">
+              <h3>كارت النواقص</h3>
+              <div class="body">
+                <div class="dashKpis">
+                  <div class="dashKpi"><span>إجمالي النواقص (كل الفروع)</span><b id="miss_total">—</b></div>
+                </div>
+                <div class="dashBtns">
+<button type="button" class="btn secondary" data-miss-branch="الصالة">فرع 1: الصالة</button>
+                  <button type="button" class="btn secondary" data-miss-branch="الملتقى">فرع 2: الملتقى</button>
+                  <button type="button" class="btn secondary" data-miss-branch="القادسية">فرع 3: القادسية</button>
+                </div>
+                <div class="small" id="miss_meta" style="margin-top:10px">يُحسب من الإجمالي الفعلي (متاح للبيع + محجوز + بها ملاحظات) بالاعتماد على catalog.</div>
+              </div>
+            </div>
+
+            <div class="card dashCard">
+              <h3>كارت المخزون (عام)</h3>
+              <div class="body">
+                <div class="dashKpis">
+                  <div class="dashKpi"><span>الإجمالي الفعلي</span><b id="stk_totalActual">—</b></div>
+                  <div class="dashKpi"><span>إجمالي المفاتيح</span><b id="stk_keysTotal">—</b></div>
+                </div>
+                <div class="dashKpis">
+                  <div class="dashKpi"><span>متاح</span><b id="stk_avail">—</b></div>
+                  <div class="dashKpi"><span>محجوز</span><b id="stk_reserved">—</b></div>
+                  <div class="dashKpi"><span>بها ملاحظات</span><b id="stk_notes">—</b></div>
+                  <div class="dashKpi"><span>مباع تحت التسليم</span><b id="stk_under">—</b></div>
+                  <div class="dashKpi"><span>مباع تم التسليم</span><b id="stk_delivered">—</b></div>
+                </div>
+                <div class="dashBtns">
+                  <button type="button" class="btn secondary" id="btn_go_agency">الوكالة</button>
+                  <button type="button" class="btn secondary" data-go-status="متاح للبيع">المتاح للبيع</button>
+                  <button type="button" class="btn secondary" data-go-status="بها ملاحظات">سيارات بها ملاحظات</button>
+                  <button type="button" class="btn secondary" data-go-status="مباع تحت التسليم">مباع تحت التسليم</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="card dashCard">
+              <h3>كارت الوكالة</h3>
+              <div class="body">
+                <div class="dashKpis">
+                  <div class="dashKpi"><span>الإجمالي الفعلي</span><b id="ag_totalActual">—</b></div>
+                  <div class="dashKpi"><span>إجمالي المفاتيح</span><b id="ag_keysTotal">—</b></div>
+                </div>
+                <div class="dashKpis">
+                  <div class="dashKpi"><span>متاح</span><b id="ag_avail">—</b></div>
+                  <div class="dashKpi"><span>محجوز</span><b id="ag_reserved">—</b></div>
+                  <div class="dashKpi"><span>بها ملاحظات</span><b id="ag_notes">—</b></div>
+                  <div class="dashKpi"><span>مباع تحت التسليم</span><b id="ag_under">—</b></div>
+                  <div class="dashKpi"><span>مباع تم التسليم</span><b id="ag_delivered">—</b></div>
+                </div>
+                <div class="dashBtns">
+          <button type="button" class="btn btn-sm kpiBtn show-branch-btn" data-go-location="الوكالة">عرض سيارات الوكالة</button>
+        </div>
+              </div>
+            </div>
+
+            <div class="card dashCard">
+              <h3>كارت فرع 1 : الصالة</h3>
+              <div class="body">
+                <div class="dashKpis">
+                  <div class="dashKpi"><span>الإجمالي الفعلي</span><b id="b1_totalActual">—</b></div>
+                  <div class="dashKpi"><span>إجمالي المفاتيح</span><b id="b1_keysTotal">—</b></div>
+                </div>
+                <div class="dashKpis">
+                  <div class="dashKpi"><span>متاح</span><b id="b1_avail">—</b></div>
+                  <div class="dashKpi"><span>محجوز</span><b id="b1_reserved">—</b></div>
+                  <div class="dashKpi"><span>بها ملاحظات</span><b id="b1_notes">—</b></div>
+                  <div class="dashKpi"><span>مباع تحت التسليم</span><b id="b1_under">—</b></div>
+                  <div class="dashKpi"><span>مباع تم التسليم</span><b id="b1_delivered">—</b></div>
+                </div>
+                <div class="dashBtns"><button type="button" class="btn secondary" data-go-location="الصالة">عرض سيارات الصالة</button></div>
+              </div>
+            </div>
+
+            <div class="card dashCard">
+              <h3>كارت فرع 2 : الملتقى</h3>
+              <div class="body">
+                <div class="dashKpis">
+                  <div class="dashKpi"><span>الإجمالي الفعلي</span><b id="b2_totalActual">—</b></div>
+                  <div class="dashKpi"><span>إجمالي المفاتيح</span><b id="b2_keysTotal">—</b></div>
+                </div>
+                <div class="dashKpis">
+                  <div class="dashKpi"><span>متاح</span><b id="b2_avail">—</b></div>
+                  <div class="dashKpi"><span>محجوز</span><b id="b2_reserved">—</b></div>
+                  <div class="dashKpi"><span>بها ملاحظات</span><b id="b2_notes">—</b></div>
+                  <div class="dashKpi"><span>مباع تحت التسليم</span><b id="b2_under">—</b></div>
+                  <div class="dashKpi"><span>مباع تم التسليم</span><b id="b2_delivered">—</b></div>
+                </div>
+                <div class="dashBtns"><button type="button" class="btn secondary" data-go-location="الملتقى">عرض سيارات الملتقى</button></div>
+              </div>
+            </div>
+
+            <div class="card dashCard">
+              <h3>كارت فرع 3 : القادسية</h3>
+              <div class="body">
+                <div class="dashKpis">
+                  <div class="dashKpi"><span>الإجمالي الفعلي</span><b id="b3_totalActual">—</b></div>
+                  <div class="dashKpi"><span>إجمالي المفاتيح</span><b id="b3_keysTotal">—</b></div>
+                </div>
+                <div class="dashKpis">
+                  <div class="dashKpi"><span>متاح</span><b id="b3_avail">—</b></div>
+                  <div class="dashKpi"><span>محجوز</span><b id="b3_reserved">—</b></div>
+                  <div class="dashKpi"><span>بها ملاحظات</span><b id="b3_notes">—</b></div>
+                  <div class="dashKpi"><span>مباع تحت التسليم</span><b id="b3_under">—</b></div>
+                  <div class="dashKpi"><span>مباع تم التسليم</span><b id="b3_delivered">—</b></div>
+                </div>
+                <div class="dashBtns"><button type="button" class="btn secondary" data-go-location="القادسية">عرض سيارات القادسية</button></div>
+              </div>
+            </div>
+
+            <div class="card dashCard">
+              <h3>كارت الموافقة المالية والإدارية</h3>
+              <div class="body">
+                <div class="dashKpis">
+                  <div class="dashKpi"><span>ناقص موافقة مالية</span><b id="ap_need_fin">—</b></div>
+                  <div class="dashKpi"><span>ناقص موافقة إدارية</span><b id="ap_need_adm">—</b></div>
+                  <div class="dashKpi"><span>جاهزة للأرشيف</span><b id="ap_ready">—</b></div>
+                </div>
+                <div class="dashBtns">
+                  <button class="btn secondary" id="ap_show_fin">عرض الناقص المالي</button>
+                  <button class="btn secondary" id="ap_show_adm">عرض الناقص الإداري</button>
+                  <button class="btn secondary" id="ap_show_ready">عرض الجاهز للأرشيف</button>
+                </div>
+                <div class="small" style="margin-top:10px">مربوط بالحالة: مباع تحت التسليم</div>
+              </div>
+            </div>
+
+            <div class="card dashCard">
+              <h3>كارت الطلبات</h3>
+              <div class="body">
+                <div class="dashKpis">
+                  <div class="dashKpi"><span>تم استلام الطلب</span><b id="rq_s1">—</b></div>
+                  <div class="dashKpi"><span>تم ارسال السيارة</span><b id="rq_s2">—</b></div>
+                  <div class="dashKpi"><span>تم استلام السيارة</span><b id="rq_s3">—</b></div>
+                  <div class="dashKpi"><span>تم الانتهاء</span><b id="rq_s4">—</b></div>
+                </div>
+<div class="small" style="margin-top:10px">الأرشفة تتم من تاب المخزون بعد اكتمال الطلب.</div>
+              </div>
+            </div>
+
+            <div class="card dashCard">
+              <h3>كارت تتبع طلبات البيع (Tracking)</h3>
+              <div class="body">
+                <div class="small">—</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+
+        <!-- الإدارة -->
+        <div class="view active" id="view-admin" role="tabpanel">
+          <div class="card">
+              <h3>إضافة / تعديل سيارة</h3>
+              <div class="body">
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+                  <button class="btn primary" id="btnSave">حفظ</button>
+                  <button class="btn secondary" id="btnClear">تفريغ</button>
+                  <button class="btn secondary" id="btnFind">بحث بالهيكل</button>
+                </div>
+
+                <div class="row">
+                  <div><label>الهيكل (VIN)</label><input id="f_vin" placeholder="VIN" /></div>
+                  <div><label>السيارة</label><input id="f_car" placeholder="مثال: سوناتا" /></div>
+                </div>
+
+                <div class="row">
+                  <div><label>البيان</label><input id="f_statement" /></div>
+                  <div><label>الوكيل</label><input id="f_agent" /></div>
+                </div>
+
+                <div class="row">
+                  <div><label>اللون الداخلي</label><input id="f_int" /></div>
+                  <div><label>اللون الخارجي</label><input id="f_ext" /></div>
+                </div>
+
+                <div class="row">
+                  <div><label>موديل</label><input id="f_model" placeholder="2025 / 2026" /></div>
+                  <div><label>اللوحة</label><input id="f_plate" /></div>
+                </div>
+
+                <div class="row">
+                  <div><label>اسم الدفعة بالتاريخ</label><input id="f_batch" /></div>
+                  <div>
+                    <label>المكان (الفرع)</label>
+                    <select id="f_location" class="selWithAdd">
+                      <option value="">— اختر —</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div>
+                    <label>الحالة</label>
+                    <select id="f_status" class="selWithAdd">
+                      <option value="">— اختر —</option>
+                    </select>
+                  </div>
+                  <div><label>ملاحظات (تحديد المكان)</label><input id="f_notesLoc" /></div>
+                </div>
+
+                <div class="row">
+                  <div><label>ملاحظات (تخص النواقص)</label><input id="f_notesMissing" /></div>
+                  <div id="f_carNotes_box" class="hidden"><label>ملاحظات السيارات</label><input id="f_carNotes" placeholder="تُفتح عند الحالة: بها ملاحظات" /></div>
+                </div>
+                <div class="row">
+                  <div class="span2">
+                    <div style="margin:10px 0 8px;color:var(--brown);font-weight:900">التشيك</div>
+                    <div class="checks">
+                      <div class="checkItem"><span>فرشات</span><input id="c_farshat" type="checkbox"></div>
+                      <div class="checkItem"><span>طفاية</span><input id="c_tafaia" type="checkbox"></div>
+                      <div class="checkItem"><span>شنطة</span><input id="c_shanta" type="checkbox"></div>
+                      <div class="checkItem"><span>اسبير</span><input id="c_spare" type="checkbox"></div>
+                      <div class="checkItem"><span>ريموت</span><input id="c_remote" type="checkbox"></div>
+                      <div class="checkItem"><span>شاشة</span><input id="c_screen" type="checkbox"></div>
+                      <div class="checkItem"><span>مسجل</span><input id="c_recorder" type="checkbox"></div>
+                      <div class="checkItem"><span>مكيف</span><input id="c_ac" type="checkbox"></div>
+                      <div class="checkItem"><span>كاميرا</span><input id="c_camera" type="checkbox"></div>
+                      <div class="checkItem"><span>حساس</span><input id="c_sensors" type="checkbox"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div>
+                    <label>الموافقة المالية</label>
+                    <select id="a_financial">
+                      <option value="">—</option>
+                      <option value="true">نعم</option>
+                      <option value="false">لا</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label>الموافقة الإدارية</label>
+                    <select id="a_admin">
+                      <option value="">—</option>
+                      <option value="true">نعم</option>
+                      <option value="false">لا</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="span2">
+                    <label>Tracking (اختياري)</label>
+                    <input id="f_tracking" placeholder="رابط/كود تتبع (اختياري)" />
+                  </div>
+                </div>
+
+                <div class="small">المسار الموحد: <b>cars</b> فقط. تابات النقل والطلبات لاحقًا هتشتغل Reference على VIN.</div>
+              </div>
+            </div>
+
+            <div class="card">
+              <h3>استيراد / تصدير</h3>
+              <div class="body">
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+                  <button class="btn secondary" id="btnTemplate">تصدير قالب فاضي</button>
+                  <button class="btn secondary" id="btnExportAll">تصدير البيانات</button>
+                  <button class="btn primary" id="btnImport">استيراد من شيت</button>
+                </div>
+                <div class="small">
+                  الاستيراد يدعم 3 اختيارات: <b>استبدال كامل</b> / <b>إضافة فوق الحالي</b> / <b>تحديث من الشيت</b>.
+                  <br>الهيكل (VIN) هو المفتاح.
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- المخزون -->
+        <div class="view" id="view-inventory" role="tabpanel">
+          <div class="card">
+            <h3>المخزون (قراءة فقط)</h3>
+            <div class="body">
+              <div class="toolbar">
+                <div class="field" style="flex:1">
+                  <label>بحث عام</label>
+                  <input id="inv_search" placeholder="ابحث بالهيكل/السيارة/الوكيل/اللوحة/المكان..." />
+                </div>
+                <div class="field">
+                  <label>الفرع (المكان)</label>
+                  <select id="inv_location">
+                    <option value="">الكل</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>الحالة</label>
+                  <select id="inv_status">
+                    <option value="">الكل</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>الموديل</label>
+                  <select id="inv_model">
+                    <option value="">الكل</option>
+                  </select>
+                </div>
+                <div>
+                  <button class="btn secondary" id="inv_export">تصدير النتائج</button>
+                </div>
+              </div>
+
+              <div class="small" style="margin-bottom:10px">
+                يعرض: VIN, السيارة, البيان, الوكيل, الألوان, الموديل, اللوحة, الدفعة, المكان, الملاحظات, الحالة, ملاحظات السيارات, Tracking + زر عرض المزيد.
+              </div>
+
+              <div class="tableWrap">
+                <table id="inv_table">
+                  <thead>
+                    <tr>
+                      <th>الهيكل (VIN)</th>
+                      <th>السيارة</th>
+                      <th>البيان</th>
+                      <th>الوكيل</th>
+                      <th>اللون الداخلي</th>
+                      <th>اللون الخارجي</th>
+                      <th>موديل</th>
+                      <th>اللوحة</th>
+                      <th>اسم الدفعة بالتاريخ</th>
+                      <th>المكان</th>
+                      <th>ملاحظات (تحديد المكان)</th>
+                      <th>ملاحظات (تخص النواقص)</th>
+                      <th>الحالة</th>
+                      <th>Tracking</th>
+                      <th>الموافقات</th>
+                      <th>التشيك</th>
+                      <th>طلبات النقل</th>
+                      <th>الأرشيف</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+
+              <div class="small" id="inv_meta" style="margin-top:10px">—</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- نقل السيارات -->
+        <div class="view" id="view-transfer" role="tabpanel">
+          <div class="grid">
+
+            <div class="card">
+              <h3>إنشاء طلب نقل (أكثر من سيارة إلى مكان واحد)</h3>
+              <div class="body">
+
+                <div class="toolbar" style="margin-bottom:8px">
+                  <div class="field" style="min-width:unset">
+                    <button class="btn secondary" id="tr_addRow">➕ إضافة سيارة</button>
+                    <button class="btn danger" id="tr_clearRows">تفريغ القائمة</button>
+                  </div>
+                </div>
+
+                <div class="tableWrap" id="tr_tableWrap" style="max-height:260px;margin-bottom:10px">
+                  <table id="tr_vinTable">
+                    <thead>
+                      <tr>
+                        <th style="min-width:220px">الهيكل (VIN)</th>
+                        <th>السيارة</th>
+                        <th>المكان الحالي</th>
+                        <th>الحالة</th>
+                        <th>الموافقات</th>
+                        <th>حذف</th>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+
+                <div class="row">
+                  <div>
+                    <label>المكان المستهدف</label>
+                    <select id="tr_to" class="selWithAdd">
+                      <option value="">— اختر —</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label>الحالة</label>
+                    <select id="tr_status" class="selWithAdd">
+                      <option value="">— اختر —</option>
+                    </select>
+                  </div>
+
+                  <div id="tr_note_box" class="hidden">
+                    <label>ملاحظة (مطلوبة عند اختيار: سيارات بها ملاحظات)</label>
+                    <input id="tr_note" placeholder="اكتب الملاحظة هنا..." />
+                  </div>
+                </div>
+
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
+<button class="btn primary" id="tr_submit">تنفيذ طلب النقل</button>
+                </div>
+
+                <div class="small" id="tr_hint" style="margin-top:10px">
+                  المسموح بالنقل: <b>الادارة / اداري</b>. سيتم تسجيل آخر الحركات مع البريد المنفذ.
+                
+            <div class="card" style="margin-top:14px">
+              <h3>سجل آخر الحركات</h3>
+              <div class="body">
+                <div class="tableWrap" style="max-height:360px">
+                  <table id="log_table">
+                    <thead>
+                      <tr>
+                        <th>نوع الطلب</th>
+                        <th>رقم الهيكل</th>
+                        <th>من</th>
+                        <th>إلى</th>
+                        <th>ملاحظات</th>
+                        <th>المستخدم</th>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+                <div class="small" id="log_meta" style="margin-top:8px">آخر الحركات: 0</div>
+              </div>
+            </div>
+</div>
+
+              </div>
+            </div>
+<div class="small" id="tr_meta" style="margin-top:10px">—</div>
+              </div>
+            </div>
+
+          </div>
+</div>
+        </div>
+
+</div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+        <!-- الطلبات -->
+        <div class="view" id="view-requests" role="tabpanel">
+          <div class="card">
+            <h3>الطلبات</h3>
+            <div class="body">
+              <div class="row">
+                <div>
+                  <label>اختر القسم</label>
+                  <select id="req_mode">
+                    <option value="create">إنشاء طلب</option>
+                    <option value="track">متابعة الطلبات</option>
+                    <option value="done">الطلبات المكتملة</option>
+                  </select>
+                </div>
+                <div>
+                  <label>—</label>
+                  <div class="small">اختر من القائمة لإنشاء طلب جديد أو متابعة الطلبات.</div>
+                </div>
+              </div>
+
+              <!-- إنشاء طلب -->
+              <div id="req_create_box">
+                <div class="row">
+                  <div>
+                    <label>نوع الطلب</label>
+                    <select id="req_type">
+                      <option value="transfer">نقل</option>
+                      <option value="photo">تصوير</option>
+                    </select>
+                  </div>
+                  <div id="req_photo_date_box" class="hidden">
+                    <label>تاريخ التصوير</label>
+                    <input id="req_photo_date" type="date" />
+                  </div>
+                </div>
+
+                <div class="toolbar" style="margin-bottom:8px">
+                  <div class="field" style="min-width:unset">
+                    <button class="btn secondary" id="req_addRow">➕ إضافة رقم هيكل</button>
+                    <button class="btn danger" id="req_clearRows">تفريغ القائمة</button>
+                  </div>
+                </div>
+
+                <div class="tableWrap" style="max-height:320px;margin-bottom:10px">
+                  <table id="req_vinTable">
+                    <thead>
+                      <tr>
+                        <th style="min-width:220px">رقم الهيكل (VIN)</th>
+                        <th>السيارة</th>
+                        <th>الفئة</th>
+                        <th>الخارجي</th>
+                        <th>الداخلي</th>
+                        <th>الموديل</th>
+                        <th>المكان الحالي</th>
+                        <th style="min-width:220px">ملاحظة</th>
+                        <th>حذف</th>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+
+                <div class="row">
+                  <div>
+                    <label id="req_loc_label">مكان النقل</label>
+                    <select id="req_to" class="selWithAdd">
+                      <option value="">— اختر —</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label>الحالة</label>
+                    <select id="req_status" class="selWithAdd">
+                      <option value="">— اختر —</option>
+                    </select>
+                  </div>
+</div>
+
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
+                  <button class="btn primary" id="req_submit">إرسال الطلب</button>
+                </div>
+
+                <div class="small" id="req_create_hint" style="margin-top:10px">—</div>
+              </div>
+
+              <!-- متابعة الطلبات -->
+              <div id="req_track_box" class="hidden">
+                <div class="small" style="margin-bottom:10px">يعرض الطلبات غير المكتملة فقط.</div>
+                <div class="tableWrap" style="max-height:520px">
+                  <table id="req_table_open">
+                    <thead>
+                      <tr>
+                        <th>التاريخ</th>
+                        <th>النوع</th>
+                        <th>عدد الهياكل</th>
+                        <th>المكان المستهدف</th>
+                        <th>الحالة</th>
+                        <th>فتح</th>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+                <div class="small" id="req_open_meta" style="margin-top:10px">—</div>
+              </div>
+
+              <!-- الطلبات المكتملة -->
+              <div id="req_done_box" class="hidden">
+                <div class="small" style="margin-bottom:10px">يعرض الطلبات المكتملة فقط.</div>
+                <div class="tableWrap" style="max-height:520px">
+                  <table id="req_table_done">
+                    <thead>
+                      <tr>
+                        <th>التاريخ</th>
+                        <th>النوع</th>
+                        <th>عدد الهياكل</th>
+                        <th>المكان المستهدف</th>
+                        <th>اكتمل</th>
+                        <th>فتح</th>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+                <div class="small" id="req_done_meta" style="margin-top:10px">—</div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+  
+        <!-- كل السيارات -->
+        <div class="view" id="view-allcars" role="tabpanel">
+          <div class="card">
+            <h3>كل السيارات</h3>
+            <div class="body">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+                <div class="small">التجميع حسب (السيارة + البيان + الموديل) مع إجمالي العدد.</div>
+                <button class="btn secondary" id="btnExportAllCars">تصدير Excel</button>
+              </div>
+
+              <div class="tableWrap" style="padding:0">
+                <table id="allCarsTable">
+                  <thead>
+                    <tr>
+                      <th style="width:60px">#</th>
+                      <th>السيارة</th>
+                      <th>البيان</th>
+                      <th>الموديل</th>
+                      <th style="width:140px">إجمالي العدد</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+
+              <div class="small" id="allCarsMeta" style="margin-top:8px">—</div>
+            </div>
+          </div>
+        </div>
+
+
+        <!-- سجل الحركات -->
+        <div class="view" id="view-logs" role="tabpanel">
+          <div class="card">
+            <h3>سجل الحركات</h3>
+            <div class="body">
+              <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end">
+                <div style="min-width:160px">
+                  <div class="small">من تاريخ</div>
+                  <input id="lg_from" type="date" class="input" />
+                </div>
+                <div style="min-width:160px">
+                  <div class="small">إلى تاريخ</div>
+                  <input id="lg_to" type="date" class="input" />
+                </div>
+                <div style="min-width:160px">
+                  <div class="small">فلترة</div>
+                  <select id="lg_filter" class="input">
+                    <option value="all">الكل</option>
+                    <option value="vin">رقم الهيكل</option>
+                    <option value="car">السيارة</option>
+                    <option value="from">من</option>
+                  </select>
+                </div>
+                <div id="lg_search_box" style="min-width:220px">
+                  <div class="small">بحث</div>
+                  <input id="lg_search" class="input" placeholder="اكتب رقم الهيكل أو اسم السيارة" />
+                </div>
+                <div id="lg_from_box" class="hidden" style="min-width:260px">
+                  <div class="small">اختار المكان (من)</div>
+                  <select id="lg_from_loc" class="input"></select>
+                </div>
+                <button class="btn primary" id="lg_apply">عرض</button>
+                <button class="btn secondary" id="lg_export">تصدير Excel</button>
+              </div>
+
+              <div style="margin-top:12px;overflow:auto">
+                <table class="table" id="lg_table">
+                  <thead>
+                    <tr>
+                      <th>التاريخ</th>
+                      <th>رقم الهيكل</th>
+                      <th>السيارة</th>
+                      <th>من</th>
+                      <th>إلى</th>
+                      <th>المكان الحالي (المخزون)</th>
+                      <th>اللون الداخلي</th>
+                      <th>حساس</th>
+                      <th>كاميرا</th>
+                      <th>مكيف</th>
+                      <th>مسجل</th>
+                      <th>شاشة</th>
+                      <th>ريموت</th>
+                      <th>فرشات</th>
+                      <th>طفاية</th>
+                      <th>شنطة سلامة</th>
+                      <th>اسبير</th>
+                      <th>الموافقة المالية</th>
+                      <th>الموافقة الادارية</th>
+                      <th>منفذ الحركة</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+
+              <div class="small" id="lg_meta" style="margin-top:10px">—</div>
+            </div>
+          </div>
+        </div>
+
+<!-- Import Modal -->
+  <div class="modalBackdrop" id="importModal">
+    <div class="modal" role="dialog" aria-modal="true">
+      <div class="modalHead">
+        <h4>استيراد من شيت</h4>
+        <button class="btn secondary" id="closeImport">إغلاق</button>
+      </div>
+      <div class="modalBody">
+        <label>اختر ملف Excel</label>
+        <input id="importFile" type="file" accept=".xlsx,.xls" />
+
+        <div style="margin-top:10px">
+          <label>نوع الاستيراد</label>
+          <select id="importMode">
+            <option value="replace">استبدال كامل (مسح القديم + إضافة الجديد)</option>
+            <option value="append">إضافة فوق الحالي (بدون مسح)</option>
+            <option value="update">تحديث من الشيت (تعديل الموجود فقط)</option>
+          </select>
+        </div>
+
+        <div class="small" id="importPreview" style="margin-top:10px">—</div>
+      </div>
+      <div class="modalFoot">
+        <button class="btn primary" id="runImport" disabled>تنفيذ الاستيراد</button>
+        <button class="btn danger" id="clearImport">تفريغ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DETAILS MODAL (Checklist + Approvals) -->
+  <div class="modalBackdrop" id="detailsModal">
+    <div class="modal" role="dialog" aria-modal="true">
+      <div class="modalHead">
+        <h4>عرض المزيد</h4>
+        <button class="btn secondary" id="detailsClose">إغلاق</button>
+      </div>
+      <div class="modalBody" id="detailsBody"></div>
+    </div>
+  </div>
+
+
+  <!-- REQUEST DETAILS MODAL -->
+  <div class="modalBackdrop" id="reqModal">
+    <div class="modal" role="dialog" aria-modal="true">
+      <div class="modalHead">
+        <h4 id="reqModalTitle">تفاصيل الطلب</h4>
+        <button class="btn secondary" id="reqClose">إغلاق</button>
+      </div>
+      <div class="modalBody" id="reqModalBody"></div>
+      <div class="modalFoot" id="reqModalFoot"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  
+        
+  <!-- Dashboard Data Modal -->
+  <div class="modalBackdrop" id="dashDataModal">
+    <div class="modal" role="dialog" aria-modal="true">
+      <div class="modalHead">
+        <h4 id="dashDataTitle">عرض البيانات</h4>
+        <button class="btn secondary" id="dashDataClose">إغلاق</button>
+      </div>
+      <div class="modalBody">
+        <div id="dashDataMeta" class="muted" style="margin-bottom:10px"></div>
+        <div style="overflow:auto;max-height:70vh;border:1px solid var(--line);border-radius:12px;background:#fff">
+          <table class="table" style="min-width:980px">
+            <thead>
+              <tr>
+                <th>(VIN) الهيكل</th>
+                <th>السيارة</th>
+                <th>البيان</th>
+                <th>موديل</th>
+                <th>الوكيل</th>
+                <th>الداخلي</th>
+                <th>الخارجي</th>
+                <th>المكان</th>
+                <th>الحالة</th>
+              </tr>
+            </thead>
+            <tbody id="dashDataBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+        <!-- التراكينج (فارغ مؤقتًا) -->
+        <div class="view" id="view-tracking" role="tabpanel">
+          <div class="card">
+            <h3>التراكينج</h3>
+            <div class="small muted">التاب جاهز (فارغ مؤقتًا).</div>
+          </div>
+        </div>
+
+        <!-- الأرشيف (فارغ مؤقتًا) -->
+        <div class="view" id="view-archive" role="tabpanel">
+          <div class="card">
+            <h3>الأرشيف</h3>
+            <div class="small muted">التاب جاهز (فارغ مؤقتًا).</div>
+          </div>
+        </div>
+
+        <!-- إدارة المستخدمين والصلاحيات -->
+        <div class="view" id="view-users" role="tabpanel">
+          <div class="grid" style="grid-template-columns: 1fr;">
+            <div class="card">
+              <h3>إدارة المستخدمين والصلاحيات</h3>
+              <div class="small muted">إضافة مستخدم جديد + عرض المستخدمين + تعديل الصلاحيات من داخل النظام.</div>
+              <div class="hr"></div>
+
+              <div class="row" style="gap:10px;flex-wrap:wrap">
+                <div style="min-width:240px;flex:1">
+                  <label class="small">البريد الإلكتروني</label>
+                  <input id="um_email" class="input" placeholder="name@email.com" autocomplete="off">
+                </div>
+                <div style="min-width:200px;flex:1">
+                  <label class="small">كلمة المرور</label>
+                  <input id="um_pass" class="input" type="password" placeholder="••••••••" autocomplete="new-password">
+                </div>
+                <div style="display:flex;align-items:flex-end">
+                  <button id="um_add" class="btn primary">إضافة مستخدم</button>
+                </div>
+              </div>
+
+              <div class="small" id="um_add_hint" style="margin-top:8px;color:var(--muted)"></div>
+
+              <div class="hr"></div>
+
+              <div class="row" style="justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+                <div class="small muted">المستخدمون الموجودون في قاعدة البيانات (collection: <b>users</b>)</div>
+                <button id="um_refresh" class="btn">تحديث</button>
+              </div>
+
+              <div class="tableWrap" style="margin-top:10px;max-height:420px">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>البريد</th>
+                      <th>الدور</th>
+                      <th>آخر تحديث</th>
+                      <th>الإجراء</th>
+                    </tr>
+                  </thead>
+                  <tbody id="um_tbody">
+                    <tr><td colspan="4" class="small muted">—</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="card" id="um_editor" style="display:none">
+              <h3>صلاحيات المستخدم</h3>
+              <div class="small muted" id="um_editor_user">—</div>
+              <div class="hr"></div>
+
+              <div class="row" style="gap:10px;flex-wrap:wrap">
+                <div style="min-width:220px;flex:1">
+                  <label class="small">الدور</label>
+                  <select id="um_role" class="select">
+                    <option value="user">user</option>
+                    <option value="admin">admin</option>
+                  </select>
+                </div>
+                <div style="display:flex;align-items:flex-end;gap:8px">
+                  <button id="um_save" class="btn primary">حفظ الصلاحيات</button>
+                  <button id="um_close" class="btn">إغلاق</button>
+                </div>
+              </div>
+
+              <div class="hr"></div>
+
+              <div class="small" style="margin-bottom:8px"><b>التابات</b></div>
+              <div id="um_tabs_box" class="grid" style="grid-template-columns: repeat(3,minmax(0,1fr)); gap:10px"></div>
+
+              <div class="hr"></div>
+
+              <div class="small" style="margin-bottom:8px"><b>إجراءات الطلبات</b></div>
+              <div id="um_actions_box" class="grid" style="grid-template-columns: repeat(3,minmax(0,1fr)); gap:10px"></div>
+
+              <div class="small muted" style="margin-top:10px">ملاحظة: تفعيل الصلاحيات على كل الأزرار سيتم في مرحلة لاحقة.</div>
+            </div>
+          </div>
+        </div>
+
+<script>
+    // Helper: short selector by id
+    const $ = (id)=>document.getElementById(id);
+
+    // ===== Firebase Config (mzj-workflow) =====
+    const firebaseConfig = {
+      apiKey: "AIzaSyBaor-9gU1XYmTD-3YCP14Kstf7HvMEC_M",
+      authDomain: "mzj-workflow.firebaseapp.com",
+      projectId: "mzj-workflow",
+      storageBucket: "mzj-workflow.firebasestorage.app",
+      messagingSenderId: "71098850303",
+      appId: "1:71098850303:web:ac5d165282c197f8fa65ca",
+      measurementId: "G-N5Q63YGLWF"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // ===== Inventory Live (Fix: startInventoryLive/stopInventoryLive) =====
+    let invUnsub = null;
+    let invAll = [];
+
+    function norm(v){ return (v ?? '').toString().trim(); }
+    function toKey(v){ return norm(v).toLowerCase(); }
+
+    function getInvFilters(){
+      const q = toKey($('inv_search')?.value || '');
+      const branch = norm($('inv_location')?.value || '').trim();
+      const status = norm($('inv_status')?.value || '').trim();
+      const model  = norm($('inv_model')?.value || '').trim();
+      return { q, branch, status, model };
+    }
+
+    function matchesSearch(car, q){
+      if(!q) return true;
+      const bag = [
+        car.vin, car.carName, car.statement, car.agent,
+        car.interiorColor, car.exteriorColor, car.model,
+        car.plate, car.batchName, car.location, car.status,
+        car.noteLocation, car.noteMissing, car.trackingLink
+      ].map(toKey).join(' | ');
+      return bag.includes(q);
+    }
+
+    function renderInventory(){
+      const table = $('inv_table');
+      if(!table) return;
+      let tbody = table.querySelector('tbody');
+      if(!tbody){ tbody = document.createElement('tbody'); table.appendChild(tbody); }
+
+      const { q, branch, status, model } = getInvFilters();
+      const filtered = invAll.filter(car=>{
+        if(branch && branch!=='الكل' && norm(car.location)!==branch) return false;
+        if(status && status!=='الكل' && norm(car.status)!==status) return false;
+        if(model  && model!=='الكل'  && norm(car.model)!==model) return false;
+        return matchesSearch(car, q);
+      });
+
+      tbody.innerHTML = '';
+      if(filtered.length===0){
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 18;
+        td.style.textAlign = 'center';
+        td.style.padding = '14px';
+        td.textContent = 'لا توجد بيانات مطابقة.';
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+        $('inv_meta').textContent = 'إجمالي: 0';
+        return;
+      }
+
+      filtered.forEach(car=>{
+        const tr = document.createElement('tr');
+
+        function tdText(v){
+          const td=document.createElement('td');
+          td.textContent = norm(v);
+          return td;
+        }
+
+        tr.appendChild(tdText(car.vin));
+        tr.appendChild(tdText(car.carName));
+        tr.appendChild(tdText(car.statement));
+        tr.appendChild(tdText(car.agent));
+        tr.appendChild(tdText(car.interiorColor));
+        tr.appendChild(tdText(car.exteriorColor));
+        tr.appendChild(tdText(car.model));
+        tr.appendChild(tdText(car.plate));
+        tr.appendChild(tdText(car.batchName));
+        tr.appendChild(tdText(car.location));
+        tr.appendChild(tdText(car.noteLocation));
+        tr.appendChild(tdText(car.noteMissing));
+        tr.appendChild(tdText(car.status));
+
+        // Tracking
+        {
+          const td=document.createElement('td');
+          if(car.trackingLink){
+            const a=document.createElement('a');
+            a.href = car.trackingLink;
+            a.target = '_blank';
+            a.rel='noopener';
+            a.textContent = 'فتح';
+            a.style.textDecoration='underline';
+            td.appendChild(a);
+          }else{
+            td.textContent='—';
+          }
+          tr.appendChild(td);
+        }
+
+        // Approvals
+        {
+          const td=document.createElement('td');
+          const b=document.createElement('button');
+          b.className='btn btn-sm';
+          b.textContent='عرض';
+          b.addEventListener('click', ()=>{
+            const fin = !!(car.approvals && car.approvals.financial);
+            const adm = !!(car.approvals && car.approvals.admin);
+            openDetailsModal(`
+              <div style="display:grid;gap:10px">
+                <div class="pill" style="display:flex;justify-content:space-between;align-items:center">
+                  <span>الموافقة المالية</span><strong>${fin?'✅':'❌'}</strong>
+                </div>
+                <div class="pill" style="display:flex;justify-content:space-between;align-items:center">
+                  <span>الموافقة الادارية</span><strong>${adm?'✅':'❌'}</strong>
+                </div>
+              </div>
+            `, 'الموافقات');
+          });
+          td.appendChild(b);
+          tr.appendChild(td);
+        }
+
+        // Checklist
+        {
+          const td=document.createElement('td');
+          const b=document.createElement('button');
+          b.className='btn btn-sm';
+          b.textContent='عرض';
+          b.addEventListener('click', ()=>{
+            const c = car.checklist || {};
+            const rows = [
+              ['حساس', c.sensor],
+              ['كاميرا', c.camera],
+              ['مكيف', c.ac],
+              ['مسجل', c.musajjal ?? c.recorder],
+              ['شاشة', c.screen],
+              ['ريموت', c.remote],
+              ['فرشات', c.farshat],
+              ['طفاية', c.tafaya],
+              ['شنطة سلامة', c.shanta],
+              ['اسبير', c.aspir],
+            ].map(([k,v])=>`
+              <div class="pill" style="display:flex;justify-content:space-between;align-items:center">
+                <span>${k}</span><strong>${v ? '✅' : '❌'}</strong>
+              </div>
+            `).join('');
+            openDetailsModal(`<div style="display:grid;gap:10px">${rows}</div>`, 'التشيك');
+          });
+          td.appendChild(b);
+          tr.appendChild(td);
+        }
+
+        // Transfers logs
+        {
+          const td=document.createElement('td');
+          const b=document.createElement('button');
+          b.className='btn btn-sm';
+          b.textContent='عرض';
+          b.addEventListener('click', async ()=>{
+            b.disabled = true;
+            b.textContent = '...';
+            try{
+              const snap = await db.collection('logs')
+                .where('vin','==',car.vin)
+                .orderBy('at','desc')
+                .limit(50)
+                .get();
+              if(snap.empty){
+                openDetailsModal('<div class="small">لا توجد حركات مسجلة لهذه السيارة.</div>', 'طلبات النقل');
+              }else{
+                const items = [];
+                snap.forEach(doc=>{
+                  const d = doc.data()||{};
+                  if(!(d.action||'').toString().includes('transfer')) return;
+                  const at = d.at && d.at.toDate ? d.at.toDate().toLocaleString('ar-SA') : (d.at||'');
+                  items.push(`
+                    <div class="pill" style="display:grid;gap:6px">
+                      <div style="display:flex;justify-content:space-between;gap:10px">
+                        <strong>${escapeHtml(at)}</strong>
+                        <span class="small">${escapeHtml(d.by||'')}</span>
+                      </div>
+                      <div class="small">من: ${escapeHtml(d.from||'—')} → إلى: ${escapeHtml(d.to||'—')}</div>
+                    </div>
+                  `);
+                });
+                openDetailsModal(`<div style="display:grid;gap:10px">${items.join('') || '<div class="small">لا توجد حركات نقل.</div>'}</div>`, 'طلبات النقل');
+              }
+            }catch(e){
+              console.error(e);
+              openDetailsModal('<div class="small">تعذر تحميل سجل النقل.</div>', 'طلبات النقل');
+            }finally{
+              b.disabled = false;
+              b.textContent = 'عرض';
+            }
+          });
+          td.appendChild(b);
+          tr.appendChild(td);
+        }
+
+        // Archive
+        {
+          const td=document.createElement('td');
+          const b=document.createElement('button');
+          b.className='btn btn-sm';
+          b.textContent='أرشيف';
+          const canShow = norm(car.status)==='مباع تم التسليم';
+          if(!canShow){
+            b.style.display='none';
+          }else{
+            const fin = !!(car.approvals && car.approvals.financial);
+            const adm = !!(car.approvals && car.approvals.admin);
+            const hasTrack = !!car.trackingLink;
+            // We require at least one transfer log (best-effort check: will be verified on click)
+            b.disabled = !(fin && adm && hasTrack);
+            b.title = b.disabled ? 'يجب اكتمال الموافقات + Tracking' : '';
+            b.addEventListener('click', async ()=>{
+              b.disabled = true;
+              b.textContent='...';
+              try{
+                // verify transfer exists
+                const trSnap = await db.collection('logs').where('vin','==',car.vin).limit(1).get();
+                if(trSnap.empty) { toast('لا يمكن الأرشفة بدون طلبات نقل'); b.disabled=false; b.textContent='أرشيف'; return; }
+
+                await db.collection('archives').doc(car.vin).set({
+                  ...car._raw,
+                  archivedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                  archivedBy: (auth.currentUser && auth.currentUser.email) || ''
+                }, { merge:true });
+
+                await db.collection('cars').doc(car.vin).delete();
+                toast('تم أرشفة السيارة');
+              }catch(e){
+                console.error(e);
+                toast('تعذر أرشفة السيارة');
+              }finally{
+                b.textContent='أرشيف';
+              }
+            });
+          }
+          td.appendChild(b);
+          tr.appendChild(td);
+        }
+
+        tbody.appendChild(tr);
+      });
+
+      $('inv_meta').textContent = `إجمالي: ${filtered.length}`;
+    }
+
+    function startInventoryLive(){
+      if(invUnsub) return;
+      const metaEl = $('inv_meta');
+      if(metaEl) metaEl.textContent = 'جاري التحميل...';
+      invUnsub = db.collection('cars').onSnapshot((snap)=>{
+        invAll = [];
+        snap.forEach(doc=>{
+          const d = doc.data() || {};
+          const car = {
+            vin: doc.id,
+            carName: d.carName || d.car || d.name || d.vehicle || '',
+            statement: d.statement || d.trim || d.desc || d.variant || '',
+            agent: (d.agent || d.dealer || d.vendor || d.agency || d['الوكيل'] || ''),
+            interiorColor: d.interiorColor || '',
+            exteriorColor: d.exteriorColor || '',
+            model: d.model || '',
+            plate: d.plate || '',
+            batchName: d.batchName || '',
+            location: d.location || '',
+            noteLocation: d.noteLocation || '',
+            noteMissing: d.noteMissing || '',
+            status: (d.status || d.state || d.statuses || d['الحالة'] || ''),
+            trackingLink: d.trackingLink || '',
+            approvals: d.approvals || {financial:false, admin:false},
+            checklist: d.checklist || {},
+            _raw: d
+          };
+          invAll.push(car);
+        });
+        renderInventory();
+      }, (err)=>{
+        console.error(err);
+        if($('inv_meta')) $('inv_meta').textContent = 'تعذر تحميل المخزون';
+        toast(err?.message || 'تعذر تحميل المخزون');
+      });
+    }
+
+    function stopInventoryLive(){
+      if(invUnsub){ invUnsub(); invUnsub=null; }
+    }
+
+
+    /****************************************************
+     * Dashboard
+     ****************************************************/
+    let dashCarsUnsub = null;
+    let dashCatalogUnsub = null;
+    let dashCars = [];
+    let dashCatalog = [];
+
+    function normStatus(s){
+      s = (s||'').toString().trim();
+      // توحيد مسميات تحت/تم التسليم
+      if(s === 'تحت التسليم') return 'مباع تحت التسليم';
+      if(s === 'تم التسليم') return 'مباع تم التسليم';
+      if(s === 'مباع تحت التسلم') return 'مباع تحت التسليم';
+      if(s === 'مباع تحت التسليم') return 'مباع تحت التسليم';
+      if(s === 'مباع تم التسليم') return 'مباع تم التسليم';
+      if(s === 'محجوز') return 'حجز';
+      return s;
+    }
+
+    function isActualStatus(st){
+      const s = normStatus(st);
+      return (s==='متاح للبيع' || s==='محجوز' || s==='حجز' || s==='بها ملاحظات');
+    }
+
+    function statusBucket(st){
+      const s = normStatus(st);
+      if(s==='متاح للبيع') return 'avail';
+      if(s==='محجوز' || s==='حجز') return 'reserved';
+      if(s==='بها ملاحظات') return 'notes';
+      if(s==='مباع تحت التسليم') return 'under';
+      if(s==='مباع تم التسليم') return 'delivered';
+      return 'other';
+    }
+
+    function countAgg(cars){
+      const out = {avail:0,reserved:0,notes:0,under:0,delivered:0,other:0};
+      cars.forEach(c=>{ out[statusBucket(c.status)] += 1; });
+      out.totalActual = out.avail + out.reserved + out.notes;
+      out.keysTotal = out.totalActual + out.under;
+      return out;
+    }
+
+    function setText(id, val){
+      const el = document.getElementById(id);
+      if(el) el.textContent = (val===null||val===undefined) ? '—' : String(val);
+    }
+
+    function applyAgg(prefix, agg){
+      setText(prefix+'_totalActual', agg.totalActual);
+      setText(prefix+'_keysTotal', agg.keysTotal);
+      setText(prefix+'_avail', agg.avail);
+      setText(prefix+'_reserved', agg.reserved);
+      setText(prefix+'_notes', agg.notes);
+      setText(prefix+'_under', agg.under);
+      setText(prefix+'_delivered', agg.delivered);
+    }
+
+    
+    
+    async function loadDashLocationsIntoSelect(){
+      const sel = document.getElementById('dash_filter_location');
+      const statusesWrap = document.getElementById('dash_filter_statuses');
+      if(!sel) return;
+
+      const curLoc = (sel.value||'').toString();
+      const checkedStatuses = new Set((statusesWrap ? Array.from(statusesWrap.querySelectorAll('input[type="checkbox"]:checked')).map(i=>i.value) : []));
+
+      let branches = [];
+      let statuses = [];
+
+      // Read from meta/lists (fields: branches, statuses)
+      try{
+        const mDoc = await db.collection('meta').doc('lists').get();
+        if(mDoc.exists){
+          const d = mDoc.data() || {};
+          branches = Array.isArray(d.branches) ? d.branches : [];
+          statuses = Array.isArray(d.statuses) ? d.statuses : [];
+        }
+      }catch(e){
+        console.warn('meta/lists read failed', e);
+      }
+
+      // Fallback branches from cars snapshot
+      if(!branches.length){
+        branches = Array.from(new Set(dashCars.map(c=>(c.location||'').toString().trim()).filter(Boolean)))
+          .sort((a,b)=>a.localeCompare(b,'ar'));
+      }
+
+      // Final fallback safe
+      if(!branches.length){
+        branches = ['الملتقى','القادسية','الصالة','الوكالة','المستودع'];
+      }
+
+      sel.innerHTML = '<option value="">— اختر —</option>' + branches.map(b=>`<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`).join('');
+      if(curLoc && branches.includes(curLoc)) sel.value = curLoc;
+
+      // Rebuild statuses checkboxes from meta (if container exists)
+      if(statusesWrap){
+        if(!statuses.length){
+          statuses = ['متاح للبيع','محجوز','بها ملاحظات','مباع تحت التسليم','مباع تم التسليم'];
+        }
+        statusesWrap.innerHTML = statuses.map((st)=>{
+          const checked = checkedStatuses.has(st) ? 'checked' : '';
+          return `<label class="dashChk"><input type="checkbox" value="${escapeHtml(st)}" ${checked}> ${escapeHtml(st)}</label>`;
+        }).join('');
+      }
+    }
+
+    function readSavedDashFilter(){
+      try{
+        const raw = localStorage.getItem('mzj_dash_filter');
+        return raw ? JSON.parse(raw) : null;
+      }catch(e){ return null; }
+    }
+
+    function writeSavedDashFilter(obj){
+      try{ localStorage.setItem('mzj_dash_filter', JSON.stringify(obj||{})); }catch(e){}
+    }
+
+    function getDashFilterFromUI(){
+      const loc = (document.getElementById('dash_filter_location')?.value || '').trim();
+      const checks = Array.from(document.querySelectorAll('#dash_filter_statuses input[type="checkbox"]'));
+      const statuses = checks.filter(c=>c.checked).map(c=>c.value);
+      return {location: loc, statuses};
+    }
+
+    function applyDashFilterToUI(obj){
+      obj = obj || {};
+      const sel = document.getElementById('dash_filter_location');
+      if(sel) sel.value = obj.location || '';
+      const checks = Array.from(document.querySelectorAll('#dash_filter_statuses input[type="checkbox"]'));
+      const set = new Set(obj.statuses || []);
+      checks.forEach(c=> c.checked = set.has(c.value));
+    }
+
+    
+    function markDashboardTotalsHighlight(){
+      const ids = ['stk_totalActual','stk_keysTotal','ag_totalActual','ag_keysTotal','b1_totalActual','b1_keysTotal','b2_totalActual','b2_keysTotal','b3_totalActual','b3_keysTotal'];
+      ids.forEach(id=>{
+        const el = document.getElementById(id);
+        if(!el) return;
+        const kpi = el.closest('.dashKpi');
+        if(kpi) kpi.classList.add('kpiHighlight');
+      });
+    }
+
+    function renderDashboard(){
+
+      // global
+      const allAgg = countAgg(dashCars);
+      applyAgg('stk', allAgg);
+
+      // agency + branches
+      const byLoc = (loc)=> dashCars.filter(c=>(c.location||'').toString().trim()===loc);
+      applyAgg('ag', countAgg(byLoc('الوكالة')));
+      applyAgg('b1', countAgg(byLoc('الصالة')));
+      applyAgg('b2', countAgg(byLoc('الملتقى')));
+      applyAgg('b3', countAgg(byLoc('القادسية')));
+
+      // approvals (status under delivery)
+      const under = dashCars.filter(c=>normStatus(c.status)==='مباع تحت التسليم');
+      const needFin = under.filter(c=>!(c.approvals && c.approvals.financial===true));
+      const needAdm = under.filter(c=>!(c.approvals && c.approvals.admin===true));
+      const ready   = under.filter(c=>(c.approvals && c.approvals.financial===true && c.approvals.admin===true));
+      setText('ap_need_fin', needFin.length);
+      setText('ap_need_adm', needAdm.length);
+      setText('ap_ready', ready.length);
+      // Missing (catalog)
+      const missMeta = document.getElementById('miss_meta');
+      if(!dashCatalog.length){
+        setText('miss_total', '—');
+        if(missMeta) missMeta.textContent = 'لم يتم العثور على catalog. أنشئ catalog لتفعيل كارت النواقص.';
+      }else{
+        if(missMeta) missMeta.textContent = 'يُحسب من الإجمالي الفعلي (متاح للبيع + محجوز + بها ملاحظات) بالاعتماد على catalog.';
+        let total=0;
+        ['الوكالة','الصالة','الملتقى','القادسية'].forEach(loc=>{
+          total += computeMissingForBranch(loc).length;
+        });
+        setText('miss_total', total);
+      }
+
+      // Render saved cards + highlight totals
+      if(typeof renderSavedDashCards==='function') renderSavedDashCards();
+      if(typeof markDashboardTotalsHighlight==='function') markDashboardTotalsHighlight();
+
+      // Saved filter meta
+      const fmeta = document.getElementById('dash_filter_meta');
+      const saved = readSavedDashFilter();
+      if(fmeta){
+        if(saved && (saved.location || (saved.statuses||[]).length)){
+          fmeta.textContent = `محفوظ: ${saved.location||'—'} | حالات: ${(saved.statuses||[]).join('، ')||'—'}`;
+        }else{
+          fmeta.textContent = '—';
+        }
+      }
+    }
+
+
+    function catKey(obj){
+      const carName = (obj.carName||obj['السيارة']||'').toString().trim();
+      const statement = (obj.statement||obj['البيان']||'').toString().trim();
+      const interiorColor = (obj.interiorColor||obj.colorInside||obj['اللون الداخلي']||'').toString().trim();
+      const exteriorColor = (obj.exteriorColor||obj.colorOutside||obj['اللون الخارجي']||'').toString().trim();
+      const model = (obj.model||obj['موديل']||'').toString().trim();
+      return '|' + [carName, statement, interiorColor, exteriorColor, model].join('|') + '|';
+    }
+
+    function carToCatKey(c){
+      return '|' + [
+        (c.carName||'').toString().trim(),
+        (c.statement||'').toString().trim(),
+        (c.interiorColor||'').toString().trim(),
+        (c.exteriorColor||'').toString().trim(),
+        (c.model||'').toString().trim()
+      ].join('|') + '|';
+    }
+
+    function computeMissingForBranch(branch){
+      if(!dashCatalog.length) return [];
+      const actualCars = dashCars.filter(c=>(c.location||'').toString().trim()===branch && isActualStatus(c.status));
+      const set = new Set(actualCars.map(carToCatKey));
+      const missing = [];
+      dashCatalog.forEach(item=>{
+        const key = catKey(item);
+        if(!set.has(key)) missing.push(item);
+      });
+      return missing;
+    }
+
+    function openMissingModal(branch){
+      const arr = computeMissingForBranch(branch);
+      const rows = arr.map((it)=>{
+        const d = it._raw || it;
+        const carName = (d.carName||d['السيارة']||'—');
+        const statement = (d.statement||d['البيان']||'—');
+        const interiorColor = (d.interiorColor||d.colorInside||d['اللون الداخلي']||'—');
+        const exteriorColor = (d.exteriorColor||d.colorOutside||d['اللون الخارجي']||'—');
+        const model = (d.model||d['موديل']||'—');
+        return `<tr><td>${escapeHtml(carName)}</td><td>${escapeHtml(statement)}</td><td>${escapeHtml(interiorColor)}</td><td>${escapeHtml(exteriorColor)}</td><td>${escapeHtml(model)}</td></tr>`;
+      }).join('');
+
+      const html = `
+        <div class="tableWrap" style="max-height:520px">
+          <table>
+            <thead><tr><th>السيارة</th><th>البيان</th><th>اللون الداخلي</th><th>اللون الخارجي</th><th>موديل</th></tr></thead>
+            <tbody>${rows || '<tr><td colspan="5" class="small">لا توجد نواقص</td></tr>'}</tbody>
+          </table>
+        </div>`;
+      openDetailsModal(html, `نواقص: ${branch}`);
+    }
+
+    function goInventoryFilter(location, status){
+      openView('view-inventory');
+      const locSel = document.getElementById('inv_location');
+      const stSel  = document.getElementById('inv_status');
+      if(locSel && location){ locSel.value = location; }
+      if(stSel && status){ stSel.value = status; }
+      renderInventory();
+    }
+
+    function openApprovalsModal(mode){
+      const under = dashCars.filter(c=>normStatus(c.status)==='مباع تحت التسليم');
+      let arr = under;
+      let title = 'الموافقات';
+      if(mode==='fin') { arr = under.filter(c=>!(c.approvals && c.approvals.financial===true)); title='ناقص موافقة مالية'; }
+      if(mode==='adm') { arr = under.filter(c=>!(c.approvals && c.approvals.admin===true)); title='ناقص موافقة إدارية'; }
+      if(mode==='ready'){ arr = under.filter(c=>(c.approvals && c.approvals.financial===true && c.approvals.admin===true)); title='جاهزة للأرشيف'; }
+
+      const rows = arr.map(c=>`
+        <tr>
+          <td>${escapeHtml(c.vin)}</td>
+          <td>${escapeHtml(c.carName||'')}</td>
+          <td>${escapeHtml(c.statement||'')}</td>
+          <td>${escapeHtml(c.location||'')}</td>
+          <td>${escapeHtml(normStatus(c.status)||'')}</td>
+          <td>${(c.approvals && c.approvals.admin===true) ? '<span class="tag ok">✓</span>' : '<span class="tag no">✗</span>'}</td>
+          <td>${(c.approvals && c.approvals.financial===true) ? '<span class="tag ok">✓</span>' : '<span class="tag no">✗</span>'}</td>
+        </tr>`).join('');
+
+      const html = `
+        <div class="tableWrap" style="max-height:520px">
+          <table>
+            <thead><tr><th>VIN</th><th>السيارة</th><th>البيان</th><th>المكان</th><th>الحالة</th><th>إداري</th><th>مالي</th></tr></thead>
+            <tbody>${rows || '<tr><td colspan="7" class="small">لا توجد بيانات</td></tr>'}</tbody>
+          </table>
+        </div>`;
+      openDetailsModal(html, title);
+    }
+
+    // Requests (light summary)
+    let dashReqUnsub = null;
+    let dashReq = [];
+
+    function reqStage(r){
+      const s1 = !!r.step1At;
+      const s2 = !!r.step2At;
+      const s3 = !!r.step3At;
+      const s4 = !!r.step4At;
+      if(s4) return 4;
+      if(s3) return 3;
+      if(s2) return 2;
+      if(s1) return 1;
+      return 0;
+    }
+
+    function renderRequestsCounts(){
+      const s1 = dashReq.filter(r=>reqStage(r)==1).length;
+      const s2 = dashReq.filter(r=>reqStage(r)==2).length;
+      const s3 = dashReq.filter(r=>reqStage(r)==3).length;
+      const s4 = dashReq.filter(r=>reqStage(r)==4).length;
+      setText('rq_s1', s1);
+      setText('rq_s2', s2);
+      setText('rq_s3', s3);
+      setText('rq_s4', s4);
+    }
+
+    
+    function openRequestDetails(id){
+      const r = dashReq.find(x=>(x.id||x._id||'')===id) || null;
+      if(!r){ toast('الطلب غير موجود'); return; }
+      const type = (r.type==='transfer') ? 'نقل' : (r.type==='photo' ? 'تصوير' : (r.type||''));
+      const target = (r.targetLocation||r.toLocation||r.to||'');
+      const status = (reqStage(r)===1?'تم استلام الطلب':reqStage(r)===2?'تم ارسال السيارة':reqStage(r)===3?'تم استلام السيارة':reqStage(r)===4?'تم الانتهاء':'-');
+      const createdAt = fmtDate(r.createdAt)||'';
+      const createdBy = (r.createdBy||r.userEmail||r.user||'')||'';
+
+      const items = Array.isArray(r.items)? r.items : [];
+      const rows = items.map(it=>{
+        const vin = escapeHtml(it.vin||it.VIN||'');
+        const car = escapeHtml(it.car||it.name||'');
+        const trim = escapeHtml(it.trim||it.desc||'');
+        return `<tr><td>${vin}</td><td>${car}</td><td>${trim}</td></tr>`;
+      }).join('');
+
+      const html = `
+        <div class="muted" style="margin-bottom:10px">
+          <b>نوع الطلب:</b> ${escapeHtml(type)} &nbsp; | &nbsp;
+          <b>المكان المستهدف:</b> ${escapeHtml(target)} &nbsp; | &nbsp;
+          <b>الحالة:</b> ${escapeHtml(status)} <br/>
+          <b>تاريخ الطلب:</b> ${escapeHtml(createdAt)} &nbsp; | &nbsp;
+          <b>المنشئ:</b> ${escapeHtml(createdBy)}
+        </div>
+
+        <div class="tableWrap" style="max-height:520px">
+          <table>
+            <thead><tr><th>رقم الهيكل</th><th>السيارة</th><th>البيان</th></tr></thead>
+            <tbody>${rows || '<tr><td colspan="3" class="small">لا توجد سيارات داخل الطلب</td></tr>'}</tbody>
+          </table>
+        </div>
+      `;
+      openDetailsModal(html, 'تفاصيل الطلب');
+    }
+
+
+    function openReqStageModal(stage){
+      const arr = dashReq.filter(r=>reqStage(r)==stage);
+      const rows = arr.map(r=>{
+        const type = (r.type==='transfer') ? 'نقل' : (r.type==='photo' ? 'تصوير' : (r.type||''));
+        const itemsCount = (r.items||[]).length;
+                return `<tr><td>${escapeHtml(type)}</td><td>${escapeHtml(r.targetLocation||r.toLocation||r.to||'')}</td><td>${escapeHtml(itemsCount.toString())}</td><td>${escapeHtml((r.createdBy||r.userEmail||r.user||'')||'')}</td><td>${escapeHtml(fmtDate(r.createdAt)||'')}</td><td><button class="btn secondary" data-req-details="${escapeHtml(r.id||r._id||'')}">تفاصيل</button></td></tr>`;
+      }).join('');
+      const html = `
+        <div class="tableWrap" style="max-height:520px">
+          <table>
+            <thead><tr><th>نوع الطلب</th><th>المكان المستهدف</th><th>عدد السيارات</th><th>المنشئ</th><th>تاريخ الطلب</th><th>الإجراء</th></tr></thead>
+            <tbody>${rows || '<tr><td colspan="6" class="small">لا توجد طلبات</td></tr>'}</tbody>
+          </table>
+        </div>`;
+      const titles = {1:'تم استلام الطلب',2:'تم ارسال السيارة',3:'تم استلام السيارة',4:'تم الانتهاء'};
+      openDetailsModal(html, (titles[stage] || 'طلبات'));
+      // bind request details
+      document.querySelectorAll('[data-req-details]').forEach(b=>{
+        b.addEventListener('click', ()=>{ const id=b.getAttribute('data-req-details'); if(id) openRequestDetails(id); });
+      });
+    }
+
+    
+    // ===== Dashboard Cards: Saved cards + Data modal =====
+    const DASH_SAVED_CARDS_KEY = 'mzj_dash_cards';
+
+    function readSavedDashCards(){
+      try{
+        const raw = localStorage.getItem(DASH_SAVED_CARDS_KEY);
+        return raw ? (JSON.parse(raw) || []) : [];
+      }catch(e){ return []; }
+    }
+    function writeSavedDashCards(arr){
+      try{ localStorage.setItem(DASH_SAVED_CARDS_KEY, JSON.stringify(arr||[])); }catch(e){}
+    }
+        function makeCardTitle(loc){
+      return (loc && loc.trim()) ? loc.trim() : 'كل الأماكن';
+    }
+    function normalizeStatuses(arr){
+      return Array.from(new Set((arr||[]).map(s=>(s||'').toString().trim()).filter(Boolean)));
+    }
+
+    function showModal(id){
+      const b = document.getElementById(id);
+      if(b) b.classList.add('show');
+    }
+    function hideModal(id){
+      const b = document.getElementById(id);
+      if(b) b.classList.remove('show');
+    }
+
+    function openDashDataModal(title, cars){
+      const t = document.getElementById('dashDataTitle');
+      const meta = document.getElementById('dashDataMeta');
+      const body = document.getElementById('dashDataBody');
+      if(t) t.textContent = title || 'عرض البيانات';
+      if(meta) meta.textContent = `عدد النتائج: ${cars.length}`;
+      if(body){
+        body.innerHTML = cars.map(c=>{
+          const vin = escapeHtml(c.vin||c.VIN||'');
+          const car = escapeHtml(c.carName||c.car||c.makeModel||c.name||'');
+          const trim = escapeHtml(c.statement||c.trim||c.variant||c.desc||'');
+          const year = escapeHtml((c.model||c.year||'').toString());
+          const agent = escapeHtml(c.agent||c.dealer||c.agency||c.agentName||c.vendor||c.salesAgent||c['الوكيل']||c['وكيل']||'');
+          const inC = escapeHtml(c.interiorColor||c.interior||'');
+          const outC = escapeHtml(c.exteriorColor||c.exterior||'');
+          const loc = escapeHtml(c.location||'');
+          const st = escapeHtml(c.status||'');
+          return `<tr>
+            <td>${vin}</td>
+            <td>${car}</td>
+            <td>${trim}</td>
+            <td>${year}</td>
+            <td>${agent}</td>
+            <td>${inC}</td>
+            <td>${outC}</td>
+            <td>${loc}</td>
+            <td>${st}</td>
+          </tr>`;
+        }).join('');
+      }
+      showModal('dashDataModal');
+    }
+
+    
+    function filterCars(location, statuses){
+      const locWanted = norm(location||'');
+      const setWanted = new Set((statuses||[]).map(s=>normStatus(s)));
+      return dashCars.filter(c=>{
+        const locOk = !locWanted || norm(c.location||'')===locWanted;
+        if(!locOk) return false;
+        if(!setWanted.size) return true;
+        const st = normStatus(c.status||'');
+        return setWanted.has(st);
+      });
+    }
+
+
+    function openCarsModalByFilter(location, statuses){
+      const cars = filterCars(location, statuses);
+      openDashDataModal(makeCardTitle(location, normalizeStatuses(statuses)), cars);
+    }
+
+    function renderSavedDashCards(){
+      const host = document.getElementById('dash_saved_cards');
+      if(!host) return;
+      const cards = (typeof getDashCardsFromCache === 'function') ? getDashCardsFromCache() : (readSavedDashCards ? readSavedDashCards() : []);
+
+      host.innerHTML = (cards||[]).map(card=>{
+        const loc = (card.location||'').toString().trim();
+        const title = escapeHtml(makeCardTitle(loc)); // اسم المكان فقط
+        const statuses = (card.statuses||[]);
+        const all = filterCars(loc, statuses);
+        const countBy = (st)=> filterCars(loc, [st]).length;
+
+        const totalActual = all.filter(x=>['متاح للبيع','حجز','بها ملاحظات'].includes(normStatus((x.status||'').toString().trim()))).length;
+        const keysTotal = all.filter(x=>['متاح للبيع','حجز','بها ملاحظات','مباع تحت التسليم'].includes(normStatus((x.status||'').toString().trim()))).length;
+
+        const list = statuses.length ? statuses : ['متاح للبيع','محجوز','بها ملاحظات','مباع تحت التسليم','مباع تم التسليم'];
+
+        const kpis = [];
+        kpis.push(`<div class="dashKpi kpiHighlight" data-card="${escapeHtml(card.id)}" data-kpi="totalActual"><div>الإجمالي الفعلي</div><b>${totalActual}</b></div>`);
+        kpis.push(`<div class="dashKpi kpiHighlight" data-card="${escapeHtml(card.id)}" data-kpi="keysTotal"><div>إجمالي المفاتيح</div><b>${keysTotal}</b></div>`);
+        list.forEach(st=>{
+          kpis.push(`<div class="dashKpi" data-card="${escapeHtml(card.id)}" data-status="${escapeHtml(st)}"><div>${escapeHtml(st)}</div><b>${countBy(st)}</b></div>`);
+        });
+
+        return `
+          <div class="card dashCard">
+            <h3>${title}</h3>
+            <div class="body">
+              <div class="dashKpis">${kpis.join('')}</div>
+              <div class="dashBtns">
+                <button class="btn secondary" data-saved-open="${escapeHtml(card.id)}">عرض</button>
+                <button class="btn danger" data-saved-del="${escapeHtml(card.id)}">حذف</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // bind open
+      host.querySelectorAll('[data-saved-open]').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const id = btn.getAttribute('data-saved-open');
+          const cards2 = (typeof getDashCardsFromCache === 'function') ? getDashCardsFromCache() : (readSavedDashCards ? readSavedDashCards() : []);
+          const c = (cards2||[]).find(x=>x.id===id);
+          if(!c) return;
+          openCarsModalByFilter((c.location||''), (c.statuses||[]));
+        });
+      });
+
+      // bind delete
+      host.querySelectorAll('[data-saved-del]').forEach(btn=>{
+        btn.addEventListener('click', async ()=>{
+          const id = btn.getAttribute('data-saved-del');
+          if(!id) return;
+          if(!confirm('حذف هذا الكارت؟')) return;
+          if(typeof deleteDashCard === 'function'){
+            await deleteDashCard(id);
+          }else{
+            const cards3 = (readSavedDashCards ? readSavedDashCards() : []).filter(c=>c.id!==id);
+            if(typeof writeSavedDashCards === 'function') writeSavedDashCards(cards3);
+          }
+          renderSavedDashCards();
+          toast('تم الحذف');
+        });
+      });
+
+      // KPI clicks
+      host.querySelectorAll('.dashKpi[data-status]').forEach(k=>{
+        k.style.cursor='pointer';
+        k.addEventListener('click', ()=>{
+          const id = k.getAttribute('data-card');
+          const st = k.getAttribute('data-status');
+          const cards4 = (typeof getDashCardsFromCache === 'function') ? getDashCardsFromCache() : (readSavedDashCards ? readSavedDashCards() : []);
+          const c = (cards4||[]).find(x=>x.id===id);
+          if(!c) return;
+          openCarsModalByFilter((c.location||''), [st]);
+        });
+      });
+    }
+
+
+    function bindDashboardActions(){
+      // Dashboard data modal close (no refresh needed)
+      const dashDataModal = document.getElementById('dashDataModal');
+      const dashDataClose = document.getElementById('dashDataClose');
+      if(dashDataClose) dashDataClose.addEventListener('click', ()=>{ if(dashDataModal) dashDataModal.classList.remove('show'); });
+      if(dashDataModal) dashDataModal.addEventListener('click', (e)=>{ if(e.target===dashDataModal) dashDataModal.classList.remove('show'); });
+
+      // Missing (نواقص) buttons
+      document.querySelectorAll('[data-miss-branch]').forEach(btn=>{
+        btn.addEventListener('click', ()=> openMissingModal(btn.getAttribute('data-miss-branch')));
+      });
+
+      // Inventory quick buttons -> OPEN MODAL (not navigate)
+      const openBy = (loc, statuses)=> openCarsModalByFilter((loc||'').toString(), Array.isArray(statuses)? statuses: []);
+      const btnAgency = document.getElementById('btn_go_agency');
+      if(btnAgency) btnAgency.addEventListener('click', ()=> openBy('الوكالة', []));
+      document.querySelectorAll('[data-go-status]').forEach(btn=>{
+        btn.addEventListener('click', ()=> openBy('', [btn.getAttribute('data-go-status')]));
+      });
+      document.querySelectorAll('[data-go-location]').forEach(btn=>{
+        btn.addEventListener('click', ()=> openBy(btn.getAttribute('data-go-location')||'', []));
+      });
+
+      // Requests stages buttons
+      document.querySelectorAll('[data-req-stage]').forEach(btn=>{
+        btn.addEventListener('click', ()=> openReqStageModal(parseInt(btn.getAttribute('data-req-stage')||'0',10)));
+      });
+
+      // KPI clicks (totals + statuses) -> OPEN MODAL
+      const kpiMap = {
+        // Stock (all)
+        'stk_totalActual': {loc:'', statuses:['متاح للبيع','محجوز','بها ملاحظات']},
+        'stk_keysTotal' : {loc:'', statuses:['متاح للبيع','محجوز','بها ملاحظات','مباع تحت التسليم']},
+        'stk_avail'     : {loc:'', statuses:['متاح للبيع']},
+        'stk_reserved'  : {loc:'', statuses:['حجز']},
+        'stk_notes'     : {loc:'', statuses:['بها ملاحظات']},
+        'stk_under'     : {loc:'', statuses:['مباع تحت التسليم']},
+        'stk_delivered' : {loc:'', statuses:['مباع تم التسليم']},
+
+        // Agency
+        'ag_totalActual': {loc:'الوكالة', statuses:['متاح للبيع','محجوز','بها ملاحظات']},
+        'ag_keysTotal' : {loc:'الوكالة', statuses:['متاح للبيع','محجوز','بها ملاحظات','مباع تحت التسليم']},
+        'ag_avail'     : {loc:'الوكالة', statuses:['متاح للبيع']},
+        'ag_reserved'  : {loc:'الوكالة', statuses:['حجز']},
+        'ag_notes'     : {loc:'الوكالة', statuses:['بها ملاحظات']},
+        'ag_under'     : {loc:'الوكالة', statuses:['مباع تحت التسليم']},
+        'ag_delivered' : {loc:'الوكالة', statuses:['مباع تم التسليم']},
+
+        // Branch 1: الصالة
+        'b1_totalActual': {loc:'الصالة', statuses:['متاح للبيع','محجوز','بها ملاحظات']},
+        'b1_keysTotal' : {loc:'الصالة', statuses:['متاح للبيع','محجوز','بها ملاحظات','مباع تحت التسليم']},
+        'b1_avail'     : {loc:'الصالة', statuses:['متاح للبيع']},
+        'b1_reserved'  : {loc:'الصالة', statuses:['حجز']},
+        'b1_notes'     : {loc:'الصالة', statuses:['بها ملاحظات']},
+        'b1_under'     : {loc:'الصالة', statuses:['مباع تحت التسليم']},
+        'b1_delivered' : {loc:'الصالة', statuses:['مباع تم التسليم']},
+
+        // Branch 2: الملتقى
+        'b2_totalActual': {loc:'الملتقى', statuses:['متاح للبيع','محجوز','بها ملاحظات']},
+        'b2_keysTotal' : {loc:'الملتقى', statuses:['متاح للبيع','محجوز','بها ملاحظات','مباع تحت التسليم']},
+        'b2_avail'     : {loc:'الملتقى', statuses:['متاح للبيع']},
+        'b2_reserved'  : {loc:'الملتقى', statuses:['حجز']},
+        'b2_notes'     : {loc:'الملتقى', statuses:['بها ملاحظات']},
+        'b2_under'     : {loc:'الملتقى', statuses:['مباع تحت التسليم']},
+        'b2_delivered' : {loc:'الملتقى', statuses:['مباع تم التسليم']},
+
+        // Branch 3: القادسية
+        'b3_totalActual': {loc:'القادسية', statuses:['متاح للبيع','محجوز','بها ملاحظات']},
+        'b3_keysTotal' : {loc:'القادسية', statuses:['متاح للبيع','محجوز','بها ملاحظات','مباع تحت التسليم']},
+        'b3_avail'     : {loc:'القادسية', statuses:['متاح للبيع']},
+        'b3_reserved'  : {loc:'القادسية', statuses:['حجز']},
+        'b3_notes'     : {loc:'القادسية', statuses:['بها ملاحظات']},
+        'b3_under'     : {loc:'القادسية', statuses:['مباع تحت التسليم']},
+        'b3_delivered' : {loc:'القادسية', statuses:['مباع تم التسليم']},
+      };
+
+      Object.keys(kpiMap).forEach(id=>{
+        const el = document.getElementById(id);
+        if(!el) return;
+        const kpi = el.closest('.dashKpi') || el;
+        kpi.style.cursor = 'pointer';
+        kpi.addEventListener('click', ()=>{
+          const cfg = kpiMap[id];
+          openBy(cfg.loc, cfg.statuses);
+        });
+      });
+
+      // Requests KPI numbers clickable too
+      const rqIds = { 'rq_s1':1, 'rq_s2':2, 'rq_s3':3, 'rq_s4':4 };
+      Object.keys(rqIds).forEach(id=>{
+        const el = document.getElementById(id);
+        if(!el) return;
+        const kpi = el.closest('.dashKpi') || el;
+        kpi.style.cursor = 'pointer';
+        kpi.addEventListener('click', ()=> openReqStageModal(rqIds[id]));
+      });
+
+      // go inventory by status/location
+      document.querySelectorAll('[data-go-status]').forEach(btn=>{
+        btn.addEventListener('click', ()=> openCarsModalByFilter('', [btn.getAttribute('data-go-status')]));
+      });
+      document.querySelectorAll('[data-go-location]').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const loc = btn.getAttribute('data-go-location')||'';
+          openCarsModalByFilter(loc, []);
+        });
+      });
+      const goAgency = document.getElementById('btn_go_agency');
+      if(goAgency) goAgency.addEventListener('click', ()=> openCarsModalByFilter('الوكالة', []));
+
+      // approvals
+      document.getElementById('ap_show_fin')?.addEventListener('click', ()=>openApprovalsModal('fin'));
+      document.getElementById('ap_show_adm')?.addEventListener('click', ()=>openApprovalsModal('adm'));
+      document.getElementById('ap_show_ready')?.addEventListener('click', ()=>openApprovalsModal('ready'));
+
+      // requests stages
+      document.querySelectorAll('[data-req-stage]').forEach(btn=>{
+        btn.addEventListener('click', ()=> openReqStageModal(parseInt(btn.getAttribute('data-req-stage')||'0',10)));
+      });
+
+      // saved filter buttons
+      document.getElementById('dash_filter_save')?.addEventListener('click', ()=>{
+        const obj = getDashFilterFromUI();
+        // keep old behavior (remember last filter)
+        writeSavedDashFilter(obj);
+
+        // create a new saved card
+        const cards = readSavedDashCards();
+        const location = (obj.location||'').trim();
+        const statuses = normalizeStatuses(obj.statuses||[]);
+        const title = makeCardTitle(location);
+
+        // avoid duplicates by same location+statuses
+        const key = JSON.stringify({location, statuses});
+        const exists = cards.some(c=> (c.key===key));
+        if(!exists){
+          cards.unshift({id: 'c_'+Date.now().toString(36), key, title, location, statuses, createdAt: Date.now()});
+          writeSavedDashCards(cards);
+        }
+
+        renderDashboard();
+        renderSavedDashCards();
+      markDashboardTotalsHighlight();
+        toast(exists ? 'الكارت موجود بالفعل' : 'تم إنشاء كارت جديد');
+      });
+      document.getElementById('dash_filter_show')?.addEventListener('click', ()=>{
+        const obj = getDashFilterFromUI();
+        const cars = dashCars.filter(c=>{
+          if(obj.location && (c.location||'').toString().trim() != obj.location) return false;
+          if(obj.statuses && obj.statuses.length){
+            return obj.statuses.map(normStatus).includes(normStatus(c.status));
+          }
+          return true;
+        });
+        const agg = countAgg(cars);
+        const rows = `
+          <div class="dashKpis" style="margin-bottom:10px">
+            <div class="dashKpi"><span>الإجمالي الفعلي</span><b>${agg.totalActual}</b></div>
+            <div class="dashKpi"><span>إجمالي المفاتيح</span><b>${agg.keysTotal}</b></div>
+          </div>
+          <div class="dashKpis">
+            <div class="dashKpi"><span>متاح</span><b>${agg.avail}</b></div>
+            <div class="dashKpi"><span>محجوز</span><b>${agg.reserved}</b></div>
+            <div class="dashKpi"><span>بها ملاحظات</span><b>${agg.notes}</b></div>
+            <div class="dashKpi"><span>مباع تحت التسليم</span><b>${agg.under}</b></div>
+            <div class="dashKpi"><span>مباع تم التسليم</span><b>${agg.delivered}</b></div>
+          </div>`;
+        openDetailsModal(rows, 'عرض مخصص');
+      });
+      document.getElementById('dash_filter_clear')?.addEventListener('click', ()=>{
+        applyDashFilterToUI({location:'', statuses:[]});
+        writeSavedDashFilter({});
+        renderDashboard();
+        toast('تم التفريغ');
+      });
+
+      // KPI clicks (الكروت نفسها)
+      document.querySelectorAll('#view-dashboard .dashKpi').forEach(kpi=>{
+        kpi.style.cursor = 'pointer';
+        kpi.addEventListener('click', ()=>{
+          const b = kpi.querySelector('b[id]');
+          if(!b) return;
+          const id = b.id || '';
+
+          // Stock / branches KPIs
+          const map = {
+            'stk_avail': {location:'', status:'متاح للبيع'},
+            'stk_reserved': {location:'', status:'محجوز'},
+            'stk_notes': {location:'', status:'بها ملاحظات'},
+            'stk_under': {location:'', status:'مباع تحت التسليم'},
+            'stk_delivered': {location:'', status:'مباع تم التسليم'},
+
+            'ag_avail': {location:'الوكالة', status:'متاح للبيع'},
+            'ag_reserved': {location:'الوكالة', status:'محجوز'},
+            'ag_notes': {location:'الوكالة', status:'بها ملاحظات'},
+            'ag_under': {location:'الوكالة', status:'مباع تحت التسليم'},
+            'ag_delivered': {location:'الوكالة', status:'مباع تم التسليم'},
+
+            'b1_avail': {location:'الصالة', status:'متاح للبيع'},
+            'b1_reserved': {location:'الصالة', status:'محجوز'},
+            'b1_notes': {location:'الصالة', status:'بها ملاحظات'},
+            'b1_under': {location:'الصالة', status:'مباع تحت التسليم'},
+            'b1_delivered': {location:'الصالة', status:'مباع تم التسليم'},
+
+            'b2_avail': {location:'الملتقى', status:'متاح للبيع'},
+            'b2_reserved': {location:'الملتقى', status:'محجوز'},
+            'b2_notes': {location:'الملتقى', status:'بها ملاحظات'},
+            'b2_under': {location:'الملتقى', status:'مباع تحت التسليم'},
+            'b2_delivered': {location:'الملتقى', status:'مباع تم التسليم'},
+
+            'b3_avail': {location:'القادسية', status:'متاح للبيع'},
+            'b3_reserved': {location:'القادسية', status:'محجوز'},
+            'b3_notes': {location:'القادسية', status:'بها ملاحظات'},
+            'b3_under': {location:'القادسية', status:'مباع تحت التسليم'},
+            'b3_delivered': {location:'القادسية', status:'مباع تم التسليم'},
+          };
+
+          if(map[id]){
+            openCarsModalByFilter(map[id].location, [map[id].status]);
+            return;
+          }
+
+          // Approvals KPIs
+          if(id === 'ap_need_fin') return openApprovalsModal('fin');
+          if(id === 'ap_need_adm') return openApprovalsModal('adm');
+          if(id === 'ap_ready') return openApprovalsModal('ready');
+
+          // Requests KPIs
+          if(id === 'rq_s1') return openReqStageModal(1);
+          if(id === 'rq_s2') return openReqStageModal(2);
+          if(id === 'rq_s3') return openReqStageModal(3);
+          if(id === 'rq_s4') return openReqStageModal(4);
+        });
+
+      // Requests stage buttons
+      document.querySelectorAll('[data-req-stage]').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const st = parseInt(btn.getAttribute('data-req-stage')||'0',10);
+          if(st>=1 && st<=4) openReqStageModal(st);
+        });
+      });
+
+      });
+
+    }
+
+    function startDashboardLive(){
+      if(dashCarsUnsub) return;
+      bindDashboardActions();
+
+      // load saved filter into UI
+      const saved = readSavedDashFilter();
+      if(saved) applyDashFilterToUI(saved);
+      loadDashLocationsIntoSelect();
+
+      dashCarsUnsub = db.collection('cars').onSnapshot((snap)=>{
+        dashCars = [];
+        snap.forEach(doc=>{
+          const d = doc.data() || {};
+          dashCars.push({
+            vin: doc.id,
+            carName: d.carName || d.car || d.name || d.vehicle || '',
+            statement: d.statement || d.trim || d.desc || d.variant || '',
+            interiorColor: d.interiorColor || '',
+            exteriorColor: d.exteriorColor || '',
+            model: d.model || '',
+            agent: (d.agent || d.dealer || d.vendor || d.agency || d['الوكيل'] || ''),
+            location: d.location || '',
+            status: (d.status || d.state || d.statuses || d['الحالة'] || ''),
+            approvals: d.approvals || {financial:false, admin:false}
+          });
+        });
+        loadDashLocationsIntoSelect();
+        renderDashboard();
+      });
+
+      // catalog
+      dashCatalogUnsub = db.collection('catalog').where('active','==',true).onSnapshot((snap)=>{
+        dashCatalog = [];
+        snap.forEach(doc=>{
+          const d = doc.data() || {};
+          dashCatalog.push({...d, _raw:d, id:doc.id});
+        });
+        renderDashboard();
+      }, (err)=>{
+        console.error(err);
+      });
+
+      // requests summary
+      dashReqUnsub = db.collection('requests').limit(300).onSnapshot((snap)=>{
+        dashReq = [];
+        snap.forEach(doc=>{
+          const d = doc.data() || {};
+          dashReq.push({id:doc.id, ...d});
+        });
+        renderRequestsCounts();
+      }, (err)=>{ console.error(err); });
+    }
+
+    function stopDashboardLive(){
+      if(dashCarsUnsub){ dashCarsUnsub(); dashCarsUnsub=null; }
+      if(dashCatalogUnsub){ dashCatalogUnsub(); dashCatalogUnsub=null; }
+      if(dashReqUnsub){ dashReqUnsub(); dashReqUnsub=null; }
+    }
+
+    // Inventory filters
+    ['inv_search','inv_location','inv_status','inv_model'].forEach(id=>{
+      const el=$(id);
+      if(el){
+        el.addEventListener('input', renderInventory);
+        el.addEventListener('change', renderInventory);
+      }
+    });
+
+    // Export (CSV opens in Excel)
+    const invExport = $('inv_export');
+    if(invExport){
+      invExport.addEventListener('click', ()=>{
+        const { q, branch, status, model } = getInvFilters();
+        const rows = invAll.filter(car=>{
+          if(branch && branch!=='الكل' && norm(car.location)!==branch) return false;
+          if(status && status!=='الكل' && norm(car.status)!==status) return false;
+          if(model  && model!=='الكل'  && norm(car.model)!==model) return false;
+          return matchesSearch(car, q);
+        });
+
+        const headers = ['VIN','السيارة','البيان','الوكيل','اللون الداخلي','اللون الخارجي','الموديل','اللوحة','الدفعة','المكان','ملاحظة المكان','ملاحظة النواقص','الحالة','Tracking'];
+        const csv = [headers.join(',')].concat(rows.map(c=>[
+          c.vin, c.carName, c.statement, c.agent, c.interiorColor, c.exteriorColor, c.model, c.plate, c.batchName, c.location, c.noteLocation, c.noteMissing, c.status, c.trackingLink
+        ].map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(','))).join('\n');
+
+        const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+        const url = URL.createObjectURL(blob);
+        const a=document.createElement('a');
+        a.href=url;
+        a.download='inventory.csv';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      });
+    }
+
+    function openDetailsModal(htmlContent, title){
+      // reuse existing details modal
+      const modal = $('detailsModal');
+      const body = $('detailsBody');
+      if(!modal || !body) return;
+      const h = modal.querySelector('.modal-title');
+      if(h && title) h.textContent = title;
+      body.innerHTML = htmlContent;
+      modal.classList.add('show');
+    }
+
+
+    
+    const toastEl = $('toast');
+    function toast(msg){
+      toastEl.textContent = msg;
+      toastEl.classList.add('show');
+      setTimeout(()=>toastEl.classList.remove('show'), 2400);
+    }
+
+
+    function escapeHtml(s){
+      s = (s===null || s===undefined) ? '' : String(s);
+      return s.replace(/[&<>"']/g, (c)=>({
+        '&':'&amp;',
+        '<':'&lt;',
+        '>':'&gt;',
+        '"':'&quot;',
+        "'":'&#39;'
+      }[c]));
+    }
+
+    // ===== UI: Tabs =====
+    const tabs = Array.from(document.querySelectorAll('.tab'));
+    function openView(viewId){
+      tabs.forEach(t=>t.classList.toggle('active', t.dataset.view===viewId));
+      document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active', v.id===viewId));
+      if(viewId==='view-inventory') startInventoryLive();
+      else stopInventoryLive();
+      if(viewId==='view-dashboard'){ startDashboardLive(); startDashCardsLive(); } else stopDashboardLive();
+    }
+    tabs.forEach(t=>t.addEventListener('click', ()=>openView(t.dataset.view)));
+
+    // ===== Auth =====
+    const authBox = $('authBox');
+    const app = $('app');
+    const authPill = $('authPill');
+    const btnLogout = $('btnLogout');
+
+    $('btnLogin').addEventListener('click', async ()=>{
+      const email = $('loginEmail').value.trim();
+      const pass = $('loginPass').value;
+      if(!email || !pass) return toast('اكتب البريد وكلمة المرور');
+      try{
+        await auth.signInWithEmailAndPassword(email, pass);
+      }catch(e){
+        toast(e.message || 'فشل تسجيل الدخول');
+      }
+    });
+
+    $('btnReset').addEventListener('click', async ()=>{
+      const email = $('loginEmail').value.trim();
+      if(!email) return toast('اكتب البريد أولاً');
+      try{
+        await auth.sendPasswordResetEmail(email);
+        toast('تم إرسال رابط إعادة تعيين كلمة المرور');
+      }catch(e){
+        toast(e.message || 'فشل الإرسال');
+      }
+    });
+
+    btnLogout.addEventListener('click', ()=>auth.signOut());
+
+    auth.onAuthStateChanged((user)=>{
+      if(user){
+        authPill.textContent = user.email;
+        btnLogout.classList.remove('hidden');
+        authBox.classList.add('hidden');
+        app.classList.remove('hidden');
+        // تحميل صلاحية المستخدم للنقل
+        loadUserRole(user.email).then((role)=>{
+          canTransfer = roleAllows(role);
+          const hint = document.getElementById('tr_hint');
+          if(hint){
+            hint.innerHTML = canTransfer
+              ? 'المسموح بالنقل: <b>الادارة / اداري</b>. سيتم تسجيل آخر الحركات مع البريد المنفذ.'
+              : 'غير مصرح لك بالنقل — اطلب من الإدارة إضافتك في <b>users</b> وتحديد role.';
+          }
+        });
+        toast('تم تسجيل الدخول');
+        loadMetaLists().catch(e=>console.warn('lists',e));
+        bindListsEvents();
+        const fs=document.getElementById('f_status');
+        if(fs) fs.addEventListener('change', uiStatusNotesToggle);
+        const ts=document.getElementById('tr_status');
+        if(ts) ts.addEventListener('change', uiTransferNoteToggle);
+        uiStatusNotesToggle();
+        uiTransferNoteToggle();
+      }else{
+        authPill.textContent = 'غير مسجل';
+        btnLogout.classList.add('hidden');
+        authBox.classList.remove('hidden');
+        app.classList.add('hidden');
+        canTransfer = false;
+        stopInventoryLive();
+      }
+    });
+
+    // ===== Data Helpers =====
+    const HEADERS = [
+      'الهيكل (VIN)','السيارة','البيان','الوكيل','اللون الداخلي','اللون الخارجي','موديل','اللوحة','اسم الدفعة بالتاريخ','المكان',
+      'ملاحظات (تحديد المكان)','ملاحظات (تخص النواقص)','الحالة','ملاحظات السيارات (تُفتح عند الحالة: بها ملاحظات)',
+      'فرشات','طفاية','شنطة','اسبير','ريموت','شاشة','مسجل','مكيف','كاميرا','حساس','الموافقة المالية','الموافقة الادارية','التتبع Tracking'
+    ];
+
+    function normBool(v){
+      if(v===true) return true;
+      if(v===false) return false;
+      const s = (v??'').toString().trim().toLowerCase();
+      if(!s) return false;
+      return ['1','true','yes','y','نعم','صح','√','✅','ok','تم'].includes(s);
+    }
+
+    function carFromForm(){
+      const vin = $('f_vin').value.trim();
+      return {
+        vin,
+        carName: $('f_car').value.trim(),
+        statement: $('f_statement').value.trim(),
+        agent: $('f_agent').value.trim(),
+        interiorColor: $('f_int').value.trim(),
+        exteriorColor: $('f_ext').value.trim(),
+        model: $('f_model').value.trim(),
+        plate: $('f_plate').value.trim(),
+        batchName: $('f_batch').value.trim(),
+        location: $('f_location').value.trim(),
+        status: $('f_status').value.trim(),
+        notesLocation: $('f_notesLoc').value.trim(),
+        notesMissing: $('f_notesMissing').value.trim(),
+        carNotes: $('f_carNotes').value.trim(),
+                tracking: $('f_tracking').value.trim(),
+        checklist: {
+          farshat: $('c_farshat').checked,
+          tafaia: $('c_tafaia').checked,
+          shanta: $('c_shanta').checked,
+          spare: $('c_spare').checked,
+          remote: $('c_remote').checked,
+          screen: $('c_screen').checked,
+          recorder: $('c_recorder').checked,
+          ac: $('c_ac').checked,
+          camera: $('c_camera').checked,
+          sensors: $('c_sensors').checked,
+        },
+        approvals: {
+          financial: $('a_financial').value===''? null : $('a_financial').value==='true',
+          admin: $('a_admin').value===''? null : $('a_admin').value==='true'
+        },
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      };
+    }
+
+    function fillForm(d){
+      $('f_vin').value = d.vin || '';
+      $('f_car').value = d.carName || '';
+      $('f_statement').value = d.statement || '';
+      $('f_agent').value = d.agent || '';
+      $('f_int').value = d.interiorColor || '';
+      $('f_ext').value = d.exteriorColor || '';
+      $('f_model').value = d.model || '';
+      $('f_plate').value = d.plate || '';
+      $('f_batch').value = d.batchName || '';
+      $('f_location').value = d.location || '';
+      $('f_status').value = d.status || '';
+      $('f_notesLoc').value = d.notesLocation || '';
+      $('f_notesMissing').value = d.notesMissing || '';
+      $('f_carNotes').value = d.carNotes || '';
+            $('f_tracking').value = d.tracking || '';
+
+      const c = d.checklist || {};
+      $('c_farshat').checked = !!c.farshat;
+      $('c_tafaia').checked = !!c.tafaia;
+      $('c_shanta').checked = !!c.shanta;
+      $('c_spare').checked = !!c.spare;
+      $('c_remote').checked = !!c.remote;
+      $('c_screen').checked = !!c.screen;
+      $('c_recorder').checked = !!c.recorder;
+      $('c_ac').checked = !!c.ac;
+      $('c_camera').checked = !!c.camera;
+      $('c_sensors').checked = !!c.sensors;
+
+      const a = d.approvals || {};
+      $('a_financial').value = (a.financial===true)?'true':(a.financial===false?'false':'');
+      $('a_admin').value = (a.admin===true)?'true':(a.admin===false?'false':'');
+    }
+
+    function clearForm(){
+      ['f_vin','f_car','f_statement','f_agent','f_int','f_ext','f_model','f_plate','f_batch','f_location','f_status','f_notesLoc','f_notesMissing','f_carNotes','f_tracking'].forEach(id=>$(id).value='');
+      ['c_farshat','c_tafaia','c_shanta','c_spare','c_remote','c_screen','c_recorder','c_ac','c_camera','c_sensors'].forEach(id=>$(id).checked=false);
+      $('a_financial').value='';
+      $('a_admin').value='';
+    }
+
+    // ===== Admin actions =====
+    $('btnClear').addEventListener('click', clearForm);
+
+    $('btnSave').addEventListener('click', async ()=>{
+      const data = carFromForm();
+      if(!data.vin) return toast('رقم الهيكل (VIN) مطلوب');
+      try{
+        const ref = db.collection('cars').doc(data.vin);
+        const snap = await ref.get();
+        if(!snap.exists) data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+        await ref.set(data, {merge:true});
+        toast('تم الحفظ');
+        logAction('admin','car_save',{vin:data.vin, carName:data.carName||data.car||'', model:data.model||'', location:data.location||'', status:data.status||''});
+        }catch(e){
+        toast(e.message || 'فشل الحفظ');
+      }
+    });
+
+    $('btnFind').addEventListener('click', async ()=>{
+      const vin = $('f_vin').value.trim();
+      if(!vin) return toast('اكتب VIN');
+      try{
+        const snap = await db.collection('cars').doc(vin).get();
+        if(!snap.exists) return toast('غير موجود');
+        fillForm(snap.data());
+        toast('تم جلب البيانات');
+      }catch(e){
+        toast(e.message || 'فشل البحث');
+      }
+    });
+
+    // ===== Excel Export Helpers =====
+    function downloadWorkbook(wb, filename){
+      const out = XLSX.write(wb, {bookType:'xlsx', type:'array'});
+      const blob = new Blob([out], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      a.click();
+      setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+    }
+
+    function exportTemplate(){
+      const ws = XLSX.utils.aoa_to_sheet([HEADERS]);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'template');
+      downloadWorkbook(wb, 'cars_template.xlsx');
+    }
+
+    $('btnTemplate').addEventListener('click', exportTemplate);
+
+    async function exportAllCars(){
+      try{
+        const qs = await db.collection('cars').get();
+        const rows = [HEADERS];
+        qs.forEach(doc=>rows.push(rowFromCar(doc.data())));
+        const ws = XLSX.utils.aoa_to_sheet(rows);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'cars');
+        downloadWorkbook(wb, 'cars_export.xlsx');
+      }catch(e){
+        toast(e.message || 'فشل التصدير');
+      }
+    }
+    $('btnExportAll').addEventListener('click', exportAllCars);
+
+    // ===== Import =====
+    const importModal = $('importModal');
+    const importFile = $('importFile');
+    const importMode = $('importMode');
+    const importPreview = $('importPreview');
+    const runImportBtn = $('runImport');
+
+    $('btnImport').addEventListener('click', ()=>{importModal.classList.add('show')});
+    $('closeImport').addEventListener('click', ()=>{importModal.classList.remove('show')});
+    $('clearImport').addEventListener('click', ()=>{
+      importFile.value='';
+      importPreview.textContent='—';
+      runImportBtn.disabled=true;
+    });
+
+    let parsedRows = [];
+
+    function readExcel(file){
+      return new Promise((resolve,reject)=>{
+        const reader = new FileReader();
+        reader.onload = (e)=>{
+          try{
+            const data = new Uint8Array(e.target.result);
+            const wb = XLSX.read(data, {type:'array'});
+            const sheetName = wb.SheetNames[0];
+            const ws = wb.Sheets[sheetName];
+            const aoa = XLSX.utils.sheet_to_json(ws, {header:1, blankrows:false});
+            resolve(aoa);
+          }catch(err){reject(err)}
+        };
+        reader.onerror = reject;
+        reader.readAsArrayBuffer(file);
+      });
+    }
+
+    function mapHeaderIndexes(headerRow){
+      const map = {};
+      headerRow.forEach((h, idx)=>{
+        const key = (h||'').toString().trim();
+        if(!key) return;
+        if(map[key]===undefined) map[key]=idx;
+        else {
+          // duplicate header
+          map[key+'__dup'+idx]=idx;
+        }
+      });
+      return map;
+    }
+
+    function getCell(row, headerMap, name, fallbackDupContains=null){
+      if(headerMap[name]!==undefined) return row[headerMap[name]];
+      if(fallbackDupContains){
+        const k = Object.keys(headerMap).find(x=>x.startsWith(fallbackDupContains));
+        if(k) return row[headerMap[k]];
+      }
+      return '';
+    }
+
+    // === Excel Import: Stage3 fix (wire Execute Import) ===
+    let __importCarsBuffer = [];
+
+    function normalizeStatus(s){
+      s = (s||'').toString().trim();
+      // accept common variants
+      if(s==='مباع تحت التسلم') s='مباع تحت التسليم';
+      return s;
+    }
+
+    function excelRowToCar(row, headerMap){
+      const vin = (getCell(row, headerMap, 'الهيكل') || getCell(row, headerMap, 'الهيكل (VIN)') || getCell(row, headerMap, '(VIN)') || '').toString().trim();
+      if(!vin) return null;
+
+      const carName = (getCell(row, headerMap, 'السيارة') || getCell(row, headerMap, 'اسم السيارة') || '').toString().trim();
+      const statement = (getCell(row, headerMap, 'البيان') || '').toString().trim();
+      const agent = (getCell(row, headerMap, 'الوكيل') || getCell(row, headerMap, 'وكيل') || getCell(row, headerMap, 'Agency') || '').toString().trim();
+      const interiorColor = (getCell(row, headerMap, 'اللون الداخلي') || getCell(row, headerMap, 'داخلي') || '').toString().trim();
+      const exteriorColor = (getCell(row, headerMap, 'اللون الخارجي') || getCell(row, headerMap, 'خارجي') || '').toString().trim();
+      const model = (getCell(row, headerMap, 'الموديل') || getCell(row, headerMap, 'موديل') || '').toString().trim();
+      const plate = (getCell(row, headerMap, 'اللوحة') || '').toString().trim();
+      const location = (getCell(row, headerMap, 'المكان الحالي') || getCell(row, headerMap, 'المكان') || '').toString().trim();
+      const status = normalizeStatus(getCell(row, headerMap, 'الحالة') || getCell(row, headerMap, 'Status') || '');
+      const notesLocation = (getCell(row, headerMap, 'ملاحظات المكان') || '').toString().trim();
+      const notesMissing = (getCell(row, headerMap, 'نواقص') || getCell(row, headerMap, 'النواقص') || '').toString().trim();
+      const tracking = (getCell(row, headerMap, 'Tracking') || getCell(row, headerMap, 'التتبع') || '').toString().trim();
+
+      return {
+        vin,
+        carName,
+        statement,
+        agent,
+        interiorColor,
+        exteriorColor,
+        model,
+        plate,
+        location,
+        status,
+        notesLocation,
+        notesMissing,
+        tracking,
+        updatedAt: new Date(),
+        updatedBy: (auth?.currentUser?.email || '')
+      };
+    }
+
+    async function deleteAllCars(dbi){
+      const snap = await dbi.collection('cars').get();
+      let batch = dbi.batch();
+      let n=0;
+      for(const doc of snap.docs){
+        batch.delete(doc.ref);
+        n+=1;
+        if(n % 400 == 0){
+          await batch.commit();
+          batch = dbi.batch();
+        }
+      }
+      if(n % 400 != 0) await batch.commit();
+      return n;
+    }
+
+    async function upsertCars(dbi, cars, merge=true){
+      let batch = dbi.batch();
+      let n=0;
+      for(const c of cars){
+        const ref = dbi.collection('cars').doc(String(c.vin));
+        batch.set(ref, c, { merge });
+        n+=1;
+        if(n % 400 == 0){
+          await batch.commit();
+          batch = dbi.batch();
+        }
+      }
+      if(n % 400 != 0) await batch.commit();
+      return n;
+    }
+
+    // Wire file input + execute button
+    (function bindExcelImportUI(){
+      if(!importFile) return;
+
+      importFile.addEventListener('change', async (e)=>{
+        try{
+          const file = e.target.files?.[0];
+          __importCarsBuffer = [];
+          if(!file){
+            importPreview.textContent = '';
+            runImportBtn.disabled = true;
+            return;
+          }
+          const data = await file.arrayBuffer();
+          const wb = XLSX.read(data, { type:'array' });
+          const ws = wb.Sheets[wb.SheetNames[0]];
+          const aoa = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: '' });
+          if(!aoa || aoa.length < 2){
+            importPreview.textContent = 'ملف غير صالح أو فارغ.';
+            runImportBtn.disabled = true;
+            return;
+          }
+          const headers = aoa[0];
+          const headerMap = mapHeaderIndexes(headers);
+          for(const row of aoa.slice(1)) {
+            const c = excelRowToCar(row, headerMap);
+            if(c) __importCarsBuffer.append ? __importCarsBuffer.append(c) : __importCarsBuffer.push(c);
+          }
+          importPreview.textContent = `تم قراءة ${__importCarsBuffer.length} سيارة من الملف.`;
+          runImportBtn.disabled = (__importCarsBuffer.length===0);
+        }catch(err){
+          console.error(err);
+          importPreview.textContent = 'فشل قراءة ملف Excel.';
+          runImportBtn.disabled = true;
+        }
+      });
+
+      runImportBtn.addEventListener('click', async ()=>{
+        try{
+          if(runImportBtn.disabled) return;
+          if(!__importCarsBuffer || __importCarsBuffer.length===0){
+            alert('لا توجد بيانات للاستيراد. اختر ملف Excel أولاً.');
+            return;
+          }
+          runImportBtn.disabled = true;
+          runImportBtn.textContent = 'جاري الاستيراد...';
+
+          const dbi = firebase.firestore();
+          const mode = importMode.value;
+          if(mode === 'replace'){
+            await deleteAllCars(dbi);
+            await upsertCars(dbi, __importCarsBuffer, false);
+          } else {
+            await upsertCars(dbi, __importCarsBuffer, true);
+          }
+
+          importPreview.textContent = `تم الاستيراد بنجاح: ${__importCarsBuffer.length} سيارة.`;
+          runImportBtn.textContent = 'تم';
+          setTimeout(()=>{ runImportBtn.textContent = 'تنفيذ الاستيراد'; runImportBtn.disabled = false; }, 900);
+          // refresh inventory/dashboard counts if helpers exist
+          if(typeof loadCarsToMemory === 'function') { try{ await loadCarsToMemory(); }catch(_){} }
+          if(typeof refreshDashboardCards === 'function') { try{ refreshDashboardCards(); }catch(_){} }
+        }catch(err){
+          console.error(err);
+          alert('فشل تنفيذ الاستيراد. راجع الكونسول.');
+          runImportBtn.textContent = 'تنفيذ الاستيراد';
+          runImportBtn.disabled = false;
+        }
+      });
+    })();
+
+    // === End Excel Import fix ===
+
+
+    function carFromExcelRow(row, headerMap){
+      const vin = (getCell(row, headerMap, 'الهيكل') || getCell(row, headerMap, 'الهيكل (VIN)') || '').toString().trim();
+      const cells = [
+          d.vin||'', d.carName||'', d.statement||'', d.agent||'',
+          d.interiorColor||'', d.exteriorColor||'', d.model||'', d.plate||'',
+          d.batchName||'', d.location||'', d.notesLocation||'', d.notesMissing||'', d.status||'',
+          (d.tracking||''),
+          '__APPROVALS__',
+          '__CHECK__',
+          '__TRANSFERS__',
+          '__ARCHIVE__'
+        ];
+        cells.forEach(txt=>{
+          const td = document.createElement('td');
+          if(txt === '__APPROVALS__'){
+            const b = document.createElement('button');
+            b.className = 'linkBtn';
+            b.type = 'button';
+            b.textContent = 'الموافقات';
+            b.addEventListener('click', ()=> openInvModal('approvals', d));
+            td.appendChild(b);
+          } else if(txt === '__CHECK__'){
+            const b = document.createElement('button');
+            b.className = 'linkBtn';
+            b.type = 'button';
+            b.textContent = 'التشيك';
+            b.addEventListener('click', ()=> openInvModal('checklist', d));
+            td.appendChild(b);
+          } else if(txt === '__TRANSFERS__'){
+            const b = document.createElement('button');
+            b.className = 'linkBtn';
+            b.type = 'button';
+            b.textContent = 'طلبات النقل';
+            b.addEventListener('click', ()=> openInvModal('transfers', d));
+            td.appendChild(b);
+          } else if(txt === '__ARCHIVE__'){
+            const b = document.createElement('button');
+            b.className = 'linkBtn danger';
+            b.type = 'button';
+            b.textContent = 'أرشيف';
+            const ok = canArchiveCar(d);
+            if(!ok){
+              b.disabled = true;
+              b.title = 'لا يمكن الأرشفة إلا عند اكتمال: مباع تم التسليم + موافقات مالية/إدارية + Tracking + طلبات نقل مكتملة';
+            }
+            b.addEventListener('click', ()=> archiveCar(d));
+            td.appendChild(b);
+          } else {
+            td.textContent = txt;
+          }
+          tr.appendChild(td);
+        });
+        tb.appendChild(tr);
+      $('inv_meta').textContent = `الإجمالي: ${invFiltered.length} من ${invAll.length}`;
+    }
+
+    // ===== مخزون: (الموافقات / التشيك / طلبات النقل / الأرشيف) =====
+    const detailsModal = document.getElementById('detailsModal');
+    const detailsBody = document.getElementById('detailsBody');
+    const detailsClose = document.getElementById('detailsClose');
+
+    function closeInvModal(){
+      detailsModal.classList.remove('show');
+      detailsBody.innerHTML = '';
+    }
+    if(detailsClose){
+      detailsClose.addEventListener('click', closeInvModal);
+    }
+    if(detailsModal){
+      detailsModal.addEventListener('click', (e)=>{
+        if(e.target === detailsModal) closeInvModal();
+      });
+    }
+
+    function yn(v){ return v ? '✅' : '❌'; }
+
+    async function openInvModal(type, d){
+      detailsBody.innerHTML = '';
+      let title = '';
+      if(type === 'approvals'){
+        title = 'الموافقات';
+        const a = (d && d.approvals) ? d.approvals : {};
+        detailsBody.innerHTML = `
+          <div class="modalHead"><h3>${title}</h3></div>
+          <div class="grid2" style="gap:10px">
+            <div class="miniCard"><div class="miniTitle">الموافقة المالية</div><div class="miniVal">${yn(!!a.financial)}</div></div>
+            <div class="miniCard"><div class="miniTitle">الموافقة الإدارية</div><div class="miniVal">${yn(!!a.admin)}</div></div>
+          </div>
+        `;
+      } else if(type === 'checklist'){
+        title = 'التشيك';
+        const c = (d && d.checklist) ? d.checklist : {};
+        const items = [
+          ['حساس', !!c.sensor || !!c.sensors],
+          ['كاميرا', !!c.camera],
+          ['مكيف', !!c.ac],
+          ['مسجل', !!c.recorder || !!c.musajjal],
+          ['شاشة', !!c.screen],
+          ['ريموت', !!c.remote],
+          ['فرشات', !!c.farshat],
+          ['طفاية', !!c.tafaia],
+          ['شنطة سلامة', !!c.shanta],
+          ['اسبير', !!c.spare]
+        ];
+        detailsBody.innerHTML = `
+          <div class="modalHead"><h3>${title}</h3></div>
+          <div class="grid2" style="gap:10px">
+            ${items.map(i=>`<div class="miniCard"><div class="miniTitle">${i[0]}</div><div class="miniVal">${yn(i[1])}</div></div>`).join('')}
+          </div>
+        `;
+      } else if(type === 'transfers'){
+        title = 'حركات النقل';
+        detailsBody.innerHTML = `<div class="modalHead"><h3>${title}</h3></div><div class="small">جاري التحميل...</div>`;
+        const logs = await fetchTransferLogs(d && d.vin);
+        if(!logs.length){
+          detailsBody.innerHTML = `<div class="modalHead"><h3>${title}</h3></div><div class="small">لا توجد حركات نقل مسجلة لهذه السيارة.</div>`;
+        } else {
+          const rows = logs.map((x,idx)=>{
+            const dt = x.at ? formatTs(x.at) : '';
+            const from = x.fromLocation || x.from || '';
+            const to = x.toLocation || x.to || '';
+            const by = x.by || '';
+            const act = x.action || '';
+            return `<tr>
+              <td>${idx+1}</td>
+              <td>${escapeHtml(dt)}</td>
+              <td>${escapeHtml(from)}</td>
+              <td>${escapeHtml(to)}</td>
+              <td>${escapeHtml(by)}</td>
+              <td>${escapeHtml(act)}</td>
+            </tr>`;
+          }).join('');
+          detailsBody.innerHTML = `
+            <div class="modalHead"><h3>${title}</h3></div>
+            <div class="tableWrap" style="padding:0">
+              <table>
+                <thead><tr>
+                  <th>#</th><th>التاريخ</th><th>من</th><th>إلى</th><th>المنفذ</th><th>النوع</th>
+                </tr></thead>
+                <tbody>${rows}</tbody>
+              </table>
+            </div>
+          `;
+        }
+      }
+      detailsModal.classList.add('show');
+    }
+
+    async function fetchTransferLogs(vin){
+      try{
+        if(!vin) return [];
+        const q = query(collection(db,'logs'), where('vin','==',vin), orderBy('at','desc'), limit(50));
+        const snap = await getDocs(q);
+        return snap.docs.map(d=>d.data());
+      }catch(e){
+        console.warn('fetchTransferLogs', e);
+        return [];
+      }
+    }
+
+    function canArchiveCar(d){
+      try{
+        if(!d) return false;
+        if((d.status||'') !== 'مباع تم التسليم') return false;
+        const a = d.approvals || {};
+        if(!a.financial || !a.admin) return false;
+        if(!(d.tracking||'').toString().trim()) return false;
+        return true;
+      }catch(_){ return false; }
+    }
+
+    async function archiveCar(d){
+      try{
+        if(!d || !d.vin) return;
+        if(!canArchiveCar(d)) return;
+        const logs = await fetchTransferLogs(d.vin);
+        if(!logs.length){
+          alert('لا يمكن الأرشفة: لا توجد حركات نقل مسجلة لهذه السيارة.');
+          return;
+        }
+
+        const user = auth.currentUser;
+        if(!user){ alert('يجب تسجيل الدخول'); return; }
+
+        const vin = d.vin;
+        const carRef = doc(db,'cars',vin);
+        const archRef = doc(db,'archives',vin);
+
+        const payload = Object.assign({}, d, {
+          archivedAt: serverTimestamp(),
+          archivedBy: user.email || ''
+        });
+
+        await setDoc(archRef, payload, {merge:false});
+        await deleteDoc(carRef);
+
+        logAction('inventory','car_archive',{vin: vin, carName: d.carName||'', fromLocation: d.location||'', toLocation: 'archives'});
+        invAll = invAll.filter(x=>x.vin!==vin);
+        applyInvFilters();
+        alert('تمت الأرشفة بنجاح ✅');
+      } catch(e){
+        console.error(e);
+        alert('تعذر أرشفة السيارة.');
+      }
+    }
+
+  
+    // ===== Transfer Tab =====
+    let canTransfer = false;
+
+    async function loadUserRole(email){
+      try{
+        const doc = await db.collection('users').doc(email).get();
+        if(!doc.exists) return null;
+        const d = doc.data() || {};
+        return (d.role || d.type || d.permission || '').toString().trim();
+      }catch(e){ return null; }
+    }
+
+    function roleAllows(role){
+      if(!role) return false;
+      const r = role.toString().toLowerCase();
+      return ['admin','administrator','administration','ادارة','الإدارة','اداري','إداري'].some(x=>r.includes(x.toLowerCase()));
+    }
+
+    function parseVins(text){
+      return Array.from(new Set(
+        (text||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean)
+      ));
+    }
+
+    // ===== Transfer VIN Table (multiple cars) =====
+    function getTransferVinsFromTable(){
+      const tb = document.querySelector('#tr_vinTable tbody');
+      if(!tb) return [];
+      const vins = [];
+      tb.querySelectorAll('input[data-vin-input]').forEach(inp=>{
+        const v = (inp.value||'').trim();
+        if(v) vins.push(v);
+      });
+      // unique
+      return Array.from(new Set(vins));
+    }
+
+    function clearTransferRows(){
+      const tb = document.querySelector('#tr_vinTable tbody');
+      if(!tb) return;
+      tb.innerHTML = '';
+      // add 3 empty rows by default
+      addTransferRow();
+    }
+
+    function approvalsTextLocal(a){
+      a = a || {};
+      const f = a.financial===true ? '✓ مالية' : '✗ مالية';
+      const ad = a.admin===true ? '✓ إدارية' : '✗ إدارية';
+      return `${f} | ${ad}`;
+    }
+
+    function setRowLoading(tr, on){
+      tr.dataset.loading = on ? '1' : '0';
+      tr.style.opacity = on ? '.65' : '1';
+    }
+
+    async function fillRowFromVin(tr, vin){
+      const cells = {
+        car: tr.querySelector('[data-cell=car]'),
+        loc: tr.querySelector('[data-cell=loc]'),
+        st:  tr.querySelector('[data-cell=st]'),
+        ap:  tr.querySelector('[data-cell=ap]')
+      };
+
+      if(!vin){
+        cells.car.textContent = '';
+        cells.loc.textContent = '';
+        cells.st.textContent  = '';
+        cells.ap.textContent  = '';
+        tr.dataset.vin = '';
+        return;
+      }
+
+      setRowLoading(tr, true);
+      try{
+        const snap = await db.collection('cars').doc(vin).get();
+        if(!snap.exists){
+          cells.car.textContent = 'غير موجود';
+          cells.loc.textContent = '—';
+          cells.st.textContent  = '—';
+          cells.ap.textContent  = '—';
+          tr.dataset.vin = vin;
+          tr.dataset.missing = '1';
+        }else{
+          const d = snap.data()||{};
+          cells.car.textContent = d.carName || '';
+          cells.loc.textContent = d.location || '';
+          cells.st.textContent  = d.status || '';
+          cells.ap.textContent  = approvalsTextLocal(d.approvals);
+          tr.dataset.vin = d.vin || vin;
+          tr.dataset.missing = '0';
+        }
+      }finally{
+        setRowLoading(tr, false);
+      }
+    }
+
+    function addTransferRow(vin=''){
+      const tb = document.querySelector('#tr_vinTable tbody');
+      if(!tb) return;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><input data-vin-input placeholder="اكتب VIN" value="${(vin||'').replace(/"/g,'&quot;')}" style="min-width:210px" /></td>
+        <td data-cell="car"></td>
+        <td data-cell="loc"></td>
+        <td data-cell="st"></td>
+        <td data-cell="ap"></td>
+        <td><button class="btn danger" type="button" data-del-row style="padding:7px 10px;border-radius:10px">حذف</button></td>
+      `;
+      tb.appendChild(tr);
+
+      const inp = tr.querySelector('input[data-vin-input]');
+      let t=null;
+      inp.addEventListener('input', ()=>{
+        const v = inp.value.trim();
+        if(t) clearTimeout(t);
+        t = setTimeout(()=>fillRowFromVin(tr, v), 250);
+      });
+      inp.addEventListener('blur', ()=>fillRowFromVin(tr, inp.value.trim()));
+
+      tr.querySelector('[data-del-row]').addEventListener('click', ()=>{
+        tr.remove();
+      });
+
+      // initial fill if vin provided
+      if(vin) fillRowFromVin(tr, vin);
+    }
+
+    function isNotesLocation(loc){
+      return (loc||'').includes('سيارات بها ملاحظات');
+    }
+
+    function isUnderDelivery(loc){
+      return (loc||'').includes('مباع تحت التسليم');
+    }
+
+    function isDelivered(loc){
+      return (loc||'').includes('مباع تم التسليم');
+    }
+
+    async function fetchCarsByVins(vins){
+      const res = [];
+      for(const vin of vins){
+        const snap = await db.collection('cars').doc(vin).get();
+        if(snap.exists) res.push(snap.data());
+        else res.push({ vin, _missing:true });
+      }
+      return res;
+    }
+    async function submitTransfer(){
+      if(!canTransfer) return toast('غير مصرح لك بالنقل');
+      const user = auth.currentUser;
+      if(!user) return toast('سجّل دخول أولاً');
+
+      const toLoc = $('tr_to').value;
+      if(!toLoc) return toast('اختر المكان المستهدف');
+
+      const noteRequired = isNotesLocation(toLoc);
+      const note = $('tr_note').value.trim();
+      if(noteRequired && !note) return toast('اكتب الملاحظة (مطلوبة)');
+
+      const vins = getTransferVinsFromTable();
+      if(vins.length===0) return toast('اكتب VIN واحد على الأقل');
+
+      const cars = await fetchCarsByVins(vins);
+      const missing = cars.filter(x=>x._missing);
+      if(missing.length){
+        toast('في هياكل غير موجودة — راجع المعاينة');
+        renderTransferPreview(cars);
+        return;
+      }
+
+      // قواعد التسليم
+      const blocked = [];
+      cars.forEach(d=>{
+        if(isDelivered(toLoc)){
+          const a = d.approvals || {};
+          if(!(a.financial===true && a.admin===true)) blocked.push(d.vin);
+        }
+      });
+      if(blocked.length){
+        return toast('ممنوع نقل تم التسليم بدون موافقات: ' + blocked.slice(0,5).join(', ') + (blocked.length>5?'...':''));
+      }
+
+      // إنشاء طلب
+      const req = {
+        type: 'transfer',
+        vins,
+        toLocation: toLoc,
+        note: noteRequired ? note : '',
+        createdBy: user.email,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        status: 'created'
+      };
+
+      // لو تحت التسليم: نعلّم الطلب أنه يحتاج موافقات قبل التحويل للـ "تم التسليم"
+      if(isUnderDelivery(toLoc)){
+        req.requiresApprovals = true;
+        req.approvalsStatus = { financial:false, admin:false };
+      }
+
+      const ref = await db.collection('transfers').add(req);
+
+      // تحديث السيارات + تسجيل لوج لكل سيارة
+      const batch = db.batch();
+      cars.forEach(d=>{
+        const carRef = db.collection('cars').doc(d.vin);
+        const fromLoc = d.location || '';
+        const update = {
+          location: toLoc,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        };
+        // تحديث الحالة حسب المكان المستهدف
+        if(toLoc.includes('المخزون المتاح')) update.status = 'المخزون المتاح';
+        if(toLoc.includes('سيارات بها ملاحظات')) update.status = 'بها ملاحظات';
+        if(toLoc.includes('مباع تحت التسليم')) update.status = 'مباع تحت التسليم';
+        if(toLoc.includes('مباع تم التسليم')) update.status = 'مباع تم التسليم';
+
+        // في حالة سيارات بها ملاحظات: خزّن الملاحظة في carNotes
+        if(noteRequired) update.carNotes = note;
+
+        batch.set(carRef, update, {merge:true});
+
+        const logRef = db.collection('logs').doc();
+        batch.set(logRef, {
+          action: 'transfer',
+          vin: d.vin,
+          carName: d.carName || '',
+          fromLocation: fromLoc,
+          toLocation: toLoc,
+          note: noteRequired ? note : '',
+          by: user.email,
+          requestId: ref.id,
+          at: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      });
+
+      await batch.commit();
+
+      clearTransferRows();
+      $('tr_to').value = '';
+      $('tr_note').value = '';
+      $('tr_note_box').classList.add('hidden');
+toast('تم إنشاء طلب النقل وتحديث السيارات');
+      // تحديث السجل فوراً
+      startLogsLive();
+    }
+
+    // UI bindings transfer
+    const trAddRow = $('tr_addRow');
+    if(trAddRow) trAddRow.addEventListener('click', ()=>addTransferRow());
+
+    const trClearRows = $('tr_clearRows');
+    if(trClearRows) trClearRows.addEventListener('click', ()=>clearTransferRows());
+
+    // init rows once
+    if(document.querySelector('#tr_vinTable tbody') && document.querySelector('#tr_vinTable tbody').children.length===0){
+      clearTransferRows();
+    }
+
+    const trTo = $('tr_to');
+    if(trTo){
+      trTo.addEventListener('change', ()=>{
+        if(isNotesLocation(trTo.value)) $('tr_note_box').classList.remove('hidden');
+        else { $('tr_note_box').classList.add('hidden'); $('tr_note').value=''; }
+      });
+    }
+    const trPreviewBtn = $('tr_preview');
+    if(trPreviewBtn) trPreviewBtn.addEventListener('click', ()=>doPreview().catch(()=>toast('فشل المعاينة')));
+
+    const trSubmitBtn = $('tr_submit');
+    if(trSubmitBtn) trSubmitBtn.addEventListener('click', ()=>submitTransfer().catch(e=>toast(e.message||'فشل التنفيذ')));
+
+    // Logs live (last movements)
+    let logUnsub = null;
+    function stopLogsLive(){ if(logUnsub){logUnsub(); logUnsub=null;} }
+    function startLogsLive(tableId='log_table', metaId='log_meta'){
+      if(logUnsub) return;
+      logUnsub = db.collection('logs').orderBy('at','desc').limit(50).onSnapshot((snap)=>{
+        const tb = document.querySelector('#'+tableId+' tbody');
+        if(!tb) return;
+        tb.innerHTML = '';
+        let count = 0;
+        snap.forEach(doc=>{
+          const d = doc.data()||{};
+          const tr = document.createElement('tr');
+          const type = (d.action||'').includes('request_') ? 'طلبات' : ((d.action||'')==='transfer' ? 'نقل' : (d.action||''));
+          const cells = [type, d.vin||'', d.fromLocation||d.from||'', d.toLocation||d.to||'', d.note||'', d.by||''];
+          cells.forEach(t=>{
+            const td = document.createElement('td');
+            td.textContent = t;
+            tr.appendChild(td);
+          });
+          tb.appendChild(tr);
+          count++;
+        });
+        const meta = document.getElementById(metaId);
+        if(meta) meta.textContent = `آخر الحركات: ${count}`;
+      }, (err)=>toast(err.message||'فشل تحميل السجل'));
+    }
+
+    // تعديل openView لتفعيل السجل داخل تبويب النقل
+    const _openView = openView;
+    openView = function(viewId){
+      _openView(viewId);
+      if(viewId==='view-transfer'){
+        stopLogsLive();
+        startLogsLive('log_table','log_meta');
+      }else if(viewId==='view-requests'){
+        stopLogsLive();
+        startLogsLive('log_table_req','log_meta_req');
+      }else{
+        stopLogsLive();
+      }
+      if(viewId==='view-logs') loadLogs().catch(e=>toast(e.message||'فشل تحميل السجل'));
+    }
+
+
+    
+    // ===== Logs (Global) =====
+    async function logAction(tab, action, extra){
+      try{
+        const user = auth.currentUser;
+        if(!user) return;
+        const payload = Object.assign({}, extra||{});
+        // حاول التقاط اسم السيارة/الموديل لو موجود
+        const doc = {
+          tab: tab || '',
+          action: action || '',
+          vin: payload.vin || '',
+          carName: payload.carName || payload.car || '',
+          model: payload.model || '',
+          fromLocation: payload.fromLocation || payload.from || '',
+          toLocation: payload.toLocation || payload.to || '',
+          by: user.email || '',
+          at: firebase.firestore.FieldValue.serverTimestamp(),
+          payload
+        };
+        await db.collection('logs').add(doc);
+      }catch(e){
+        // لا نوقف العملية الأساسية بسبب اللوج
+        console.warn('logAction failed', e);
+      }
+    }
+
+    function boolTag(v){ return v===true ? '✓' : (v===false ? '✗' : ''); }
+
+    // --- قوائم النظام (الفروع + الحالات) من Firestore: meta/lists ---
+    const META_LISTS_PATH = {col:'meta', doc:'lists'};
+    const DEFAULT_BRANCHES = ['الملتقى','القادسية','الصالة','الوكالة','المستودع'];
+    const DEFAULT_STATUSES = ['مباع تحت التسليم','متاح للبيع','حجز','مباع تم التسليم','بها ملاحظات'];
+
+    let APP_LISTS = { branches:[...DEFAULT_BRANCHES], statuses:[...DEFAULT_STATUSES] };
+
+    async function ensureMetaLists(){
+      const ref = db.collection(META_LISTS_PATH.col).doc(META_LISTS_PATH.doc);
+      const snap = await ref.get();
+      if(!snap.exists){
+        await ref.set({
+          branches: DEFAULT_BRANCHES,
+          statuses: DEFAULT_STATUSES,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          updatedBy: auth.currentUser?.email || ''
+        });
+      }
+    }
+
+    async function loadMetaLists(){
+      await ensureMetaLists();
+      const ref = db.collection(META_LISTS_PATH.col).doc(META_LISTS_PATH.doc);
+      const snap = await ref.get();
+      const d = snap.data() || {};
+      const b = Array.isArray(d.branches) ? d.branches.filter(Boolean) : DEFAULT_BRANCHES;
+      const s = Array.isArray(d.statuses) ? d.statuses.filter(Boolean) : DEFAULT_STATUSES;
+      APP_LISTS = { branches: b.length?b:DEFAULT_BRANCHES, statuses: s.length?s:DEFAULT_STATUSES };
+      fillAllLists();
+    }
+
+    function makeOption(val, text){
+      const o=document.createElement('option');
+      o.value=val; o.textContent=text;
+      return o;
+    }
+
+    function fillSelect(sel, items, addLabel){
+      if(!sel) return;
+      const cur = sel.value;
+      sel.innerHTML='';
+      sel.appendChild(makeOption('', '— اختر —'));
+      items.forEach(x=> sel.appendChild(makeOption(x, x)));
+      sel.appendChild(makeOption('__add__', addLabel));
+      // restore if exists
+      if(items.includes(cur)) sel.value=cur;
+      else sel.value = '';
+    }
+
+    function fillAllLists(){
+      fillSelect(document.getElementById('f_location'), APP_LISTS.branches, '➕ إضافة مكان جديد');
+      fillSelect(document.getElementById('tr_to'), APP_LISTS.branches, '➕ إضافة مكان جديد');
+      fillSelect(document.getElementById('req_to'), APP_LISTS.branches, '➕ إضافة مكان جديد');
+
+      fillSelect(document.getElementById('f_status'), APP_LISTS.statuses, '➕ إضافة حالة جديدة');
+      fillSelect(document.getElementById('tr_status'), APP_LISTS.statuses, '➕ إضافة حالة جديدة');
+      fillSelect(document.getElementById('req_status'), APP_LISTS.statuses, '➕ إضافة حالة جديدة');
+
+      // سجل الحركات: فلتر (من)
+      fillLogsLocations();
+    }
+
+    async function addItemToList(kind, value){
+      value = (value||'').trim();
+      if(!value) return;
+      const ref = db.collection(META_LISTS_PATH.col).doc(META_LISTS_PATH.doc);
+      const snap = await ref.get();
+      const d = snap.data() || {};
+      const arr = (kind==='branches') ? (d.branches||[]) : (d.statuses||[]);
+      if(arr.includes(value)) return;
+      arr.push(value);
+      const payload = { updatedAt: firebase.firestore.FieldValue.serverTimestamp(), updatedBy: auth.currentUser?.email || '' };
+      payload[kind] = arr;
+      await ref.set(payload, {merge:true});
+      await logAction('admin','list_add',{kind, value});
+      await loadMetaLists();
+    }
+
+    async function handleSelectAdd(e){
+      const sel = e.target;
+      if(!sel || sel.value!=='__add__') return;
+      sel.value='';
+      const isBranch = (sel.id==='f_location' || sel.id==='tr_to' || sel.id==='req_to');
+      const kind = isBranch ? 'branches' : 'statuses';
+      const label = isBranch ? 'اكتب اسم المكان الجديد' : 'اكتب اسم الحالة الجديدة';
+      const v = prompt(label);
+      if(v) await addItemToList(kind, v);
+    }
+
+    function bindListsEvents(){
+      ['f_location','tr_to','req_to','f_status','tr_status','req_status'].forEach(id=>{
+        const el = document.getElementById(id);
+        if(el) el.addEventListener('change', handleSelectAdd);
+      });
+    }
+
+    function uiStatusNotesToggle(){
+      const st = document.getElementById('f_status')?.value || '';
+      const box = document.getElementById('f_carNotes_box');
+      if(!box) return;
+      if(st==='بها ملاحظات') box.classList.remove('hidden');
+      else { box.classList.add('hidden'); document.getElementById('f_carNotes').value=''; }
+    }
+
+    function uiTransferNoteToggle(){
+      const st = document.getElementById('tr_status')?.value || '';
+      const box = document.getElementById('tr_note_box');
+      if(!box) return;
+      if(st==='بها ملاحظات') box.classList.remove('hidden');
+      else { box.classList.add('hidden'); document.getElementById('tr_note').value=''; }
+    }
+
+    function uiReqTypeChanged(){
+      const t = document.getElementById('req_type')?.value || 'transfer';
+      const label = document.getElementById('req_loc_label');
+      if(label) label.textContent = (t==='photo') ? 'مكان التصوير' : 'مكان النقل';
+      const box = document.getElementById('req_photo_date_box');
+      if(box){
+        if(t==='photo') box.classList.remove('hidden');
+        else box.classList.add('hidden');
+      }
+    }
+
+    function uiReqNoteToggle(){
+      const st = document.getElementById('req_status')?.value || '';
+      // ملاحظة الطلب لكل VIN موجودة في الجدول؛ لا نضيف صندوق هنا.
+    }
+
+    // --- أماكن سجل الحركات (تعتمد على الفروع) ---
+    function fillLogsLocations(){
+      const sel = document.getElementById('lg_from_loc');
+      if(!sel) return;
+      sel.innerHTML='';
+      (APP_LISTS.branches||[]).forEach(l=> sel.appendChild(makeOption(l,l)));
+    }
+    function uiLogsFilterChanged(){
+      const mode = document.getElementById('lg_filter')?.value || 'all';
+      const searchBox = document.getElementById('lg_search_box');
+      const fromBox = document.getElementById('lg_from_box');
+      if(!searchBox || !fromBox) return;
+      if(mode==='from'){
+        fromBox.classList.remove('hidden');
+        searchBox.classList.add('hidden');
+      }else if(mode==='all'){
+        fromBox.classList.add('hidden');
+        searchBox.classList.add('hidden');
+      }else{
+        fromBox.classList.add('hidden');
+        searchBox.classList.remove('hidden');
+        document.getElementById('lg_search').placeholder = (mode==='vin') ? 'اكتب رقم الهيكل' : 'اكتب اسم السيارة';
+      }
+    }
+
+    async function loadLogs(){
+      const user = auth.currentUser;
+      if(!user) return toast('سجّل دخول أولاً');
+
+      const fromStr = document.getElementById('lg_from')?.value || '';
+      const toStr = document.getElementById('lg_to')?.value || '';
+      const mode = document.getElementById('lg_filter')?.value || 'all';
+      const qSearch = (document.getElementById('lg_search')?.value || '').trim();
+      const fromLoc = document.getElementById('lg_from_loc')?.value || '';
+
+      // افتراضي: آخر 7 أيام لو ما اختار تاريخ
+      const now = new Date();
+      const fromDate = fromStr ? new Date(fromStr+'T00:00:00') : new Date(now.getTime()-7*24*60*60*1000);
+      const toDate = toStr ? new Date(toStr+'T23:59:59') : now;
+
+      let q = db.collection('logs')
+        .where('at','>=', firebase.firestore.Timestamp.fromDate(fromDate))
+        .where('at','<=', firebase.firestore.Timestamp.fromDate(toDate))
+        .orderBy('at','desc')
+        .limit(300);
+
+      // فلترة سيرفر حسب الإمكان
+      if(mode==='vin' && qSearch){
+        q = q.where('vin','==', qSearch);
+      }
+      if(mode==='from' && fromLoc){
+        q = q.where('fromLocation','==', fromLoc);
+      }
+
+      const snap = await q.get();
+      let logs = [];
+      snap.forEach(d=>logs.push({id:d.id, ...(d.data()||{})}));
+
+      // فلترة عميل لاسم السيارة (contains)
+      if(mode==='car' && qSearch){
+        const s = qSearch.toLowerCase();
+        logs = logs.filter(l=> (l.carName||'').toLowerCase().includes(s));
+      }
+
+      // اجلب بيانات السيارات (Join) لإظهار التشيك + الموافقات + المكان الحالي + اللون الداخلي
+      const vins = Array.from(new Set(logs.map(l=>l.vin).filter(Boolean))).slice(0,300);
+      const carMap = {};
+      await Promise.all(vins.map(async (vin)=>{
+        try{
+          const cs = await db.collection('cars').doc(vin).get();
+          if(cs.exists) carMap[vin] = cs.data()||{};
+        }catch(e){}
+      }));
+
+      const tb = document.querySelector('#lg_table tbody');
+      tb.innerHTML = '';
+      let shown=0;
+
+      logs.forEach(l=>{
+        const car = carMap[l.vin] || {};
+        const c = car.checklist || {};
+        const a = car.approvals || {};
+        const dt = l.at && l.at.toDate ? l.at.toDate() : null;
+
+        const row = [
+          time,
+          l.vin||'',
+          l.carName || car.carName || '',
+          l.fromLocation||'',
+          l.toLocation||'',
+          car.location || '',
+          car.interiorColor || '',
+          boolTag( (c.sensors===true) || (c.sensor===true) ),
+          boolTag( c.camera===true ),
+          boolTag( c.ac===true ),
+          boolTag( (c.musajjal===true) || (c.recorder===true) ),
+          boolTag( c.screen===true ),
+          boolTag( c.remote===true ),
+          boolTag( c.farshat===true ),
+          boolTag( c.tafaia===true ),
+          boolTag( c.shanta===true ),
+          boolTag( c.spare===true ),
+          boolTag( a.financial===true ),
+          boolTag( a.admin===true ),
+          l.by||''
+        ];
+
+        const tr = document.createElement('tr');
+        row.forEach(val=>{
+          const td = document.createElement('td');
+          td.textContent = val;
+          tr.appendChild(td);
+        });
+        tb.appendChild(tr);
+        shown++;
+      });
+
+      const meta = document.getElementById('lg_meta');
+      if(meta) meta.textContent = `المعروض: ${shown} (الحد الأقصى 300)`;
+      window.__lastLogsExport = logs.map(l=>{
+        const car = carMap[l.vin] || {};
+        const c = car.checklist || {};
+        const a = car.approvals || {};
+        const dt = l.at && l.at.toDate ? l.at.toDate() : null;
+        return {
+          التاريخ: dt ? dt.toLocaleString('ar-SA') : '',
+          'رقم الهيكل': l.vin||'',
+          السيارة: l.carName || car.carName || '',
+          من: l.fromLocation||'',
+          إلى: l.toLocation||'',
+          'المكان الحالي (المخزون)': car.location || '',
+          'اللون الداخلي': car.interiorColor || '',
+          حساس: (c.sensors===true)||(c.sensor===true) ? '✓' : '✗',
+          كاميرا: c.camera===true ? '✓':'✗',
+          مكيف: c.ac===true ? '✓':'✗',
+          مسجل: (c.musajjal===true)||(c.recorder===true) ? '✓':'✗',
+          شاشة: c.screen===true ? '✓':'✗',
+          ريموت: c.remote===true ? '✓':'✗',
+          فرشات: c.farshat===true ? '✓':'✗',
+          طفاية: c.tafaia===true ? '✓':'✗',
+          'شنطة سلامة': c.shanta===true ? '✓':'✗',
+          اسبير: c.spare===true ? '✓':'✗',
+          'الموافقة المالية': a.financial===true ? '✓':'✗',
+          'الموافقة الادارية': a.admin===true ? '✓':'✗',
+          'منفذ الحركة': l.by||''
+        };
+      });
+    }
+
+    function exportLogsExcel(){
+      const rows = window.__lastLogsExport || [];
+      if(!rows.length) return toast('لا يوجد بيانات للتصدير');
+      const ws = XLSX.utils.json_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'logs');
+      downloadWorkbook(wb, 'logs_export.xlsx');
+    }
+
+    
+    // ===== Requests Tab =====
+    let reqUnsub = null;
+
+    function stopRequestsLive(){
+      if(reqUnsub){ reqUnsub(); reqUnsub=null; }
+    }
+
+    function fmtDate(ts){
+      try{
+        const d = ts && ts.toDate ? ts.toDate() : (ts instanceof Date ? ts : null);
+        return d ? d.toLocaleString('ar-SA') : '';
+      }catch(_){ return ''; }
+    }
+
+    function reqTypeLabel(t){
+      return t==='photo' ? 'تصوير' : 'نقل';
+    }
+
+    
+
+    function buildReqBody(r, carMap){
+      const items = r.items || [];
+      const statusTxt = reqStatusLabel(r);
+      const meta = `
+        <div class="small">
+          <div><b>نوع الطلب:</b> ${reqTypeLabel(r.type)}</div>
+          <div><b>المكان المستهدف:</b> ${r.toLocation||''}</div>
+          <div><b>الحالة:</b> ${statusTxt}</div>
+          ${r.type==='photo' ? `<div><b>تاريخ التصوير:</b> ${r.photoDate||''}</div>` : ``}
+          <div><b>تاريخ الطلب:</b> ${fmtDate(r.createdAt)}</div>
+          <div><b>المنشئ:</b> ${r.createdBy||''}</div>
+        </div>`;
+
+      const rows = items.map(it=>{
+        const c = (carMap && carMap[it.vin]) ? carMap[it.vin] : {};
+        return `
+          <tr>
+            <td>${escapeHtml(it.vin||'')}</td>
+            <td>${escapeHtml(c.carName||'')}</td>
+            <td>${escapeHtml(c.statement||'')}</td>
+            <td>${escapeHtml(c.model||'')}</td>
+            <td>${escapeHtml(c.location||'')}</td>
+            <td>${escapeHtml(it.note||'')}</td>
+          </tr>`;
+      }).join('');
+
+      const carsTable = `
+        <div style="margin-top:12px">
+          <div style="font-weight:900;color:var(--brown);margin-bottom:8px">تفاصيل الطلب</div>
+          <div class="tableWrap" style="max-height:320px">
+            <table>
+              <thead>
+                <tr>
+                  <th>رقم الهيكل</th>
+                  <th>السيارة</th>
+                  <th>الفئة</th>
+                  <th>الموديل</th>
+                  <th>المكان الحالي</th>
+                  <th>ملاحظات</th>
+                </tr>
+              </thead>
+              <tbody>${rows || ''}</tbody>
+            </table>
+          </div>
+        </div>`;
+
+      const steps = `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+          <div class="checkItem" style="background:#fff"><span>تم استلام الطلب</span><div>${r.step1At ? '<span class="tag ok">✓</span>' : '<span class="tag no">✗</span>'}</div></div>
+          <div class="checkItem" style="background:#fff"><span>تم ارسال السيارة</span><div>${r.step2At ? '<span class="tag ok">✓</span>' : '<span class="tag no">✗</span>'}</div></div>
+          <div class="checkItem" style="background:#fff"><span>تم استلام السيارة</span><div>${r.step3At ? '<span class="tag ok">✓</span>' : '<span class="tag no">✗</span>'}</div></div>
+          <div class="checkItem" style="background:#fff"><span>تم الانتهاء</span><div>${r.step4At ? '<span class="tag ok">✓</span>' : '<span class="tag no">✗</span>'}</div></div>
+        </div>`;
+
+      return meta + carsTable + steps;
+    }
+
+function reqStatusLabel(r){
+      const s1 = !!r.step1At;
+      const s2 = !!r.step2At;
+      const s3 = !!r.step3At;
+      const s4 = !!r.step4At;
+      if(s4) return 'تم الانتهاء';
+      if(s3) return 'تم استلام السيارة';
+      if(s2) return 'تم ارسال السيارة';
+      if(s1) return 'تم استلام الطلب';
+      return 'جديد';
+    }
+
+    function canDeleteReq(r){
+      // مسموح بالحذف إذا: لا توجد خطوات (أو فقط step1At)
+      return !r.step2At && !r.step3At && !r.step4At;
+    }
+
+    // ----- Create Request VIN table -----
+    function clearReqRows(){
+      const tb = document.querySelector('#req_vinTable tbody');
+      if(!tb) return;
+      tb.innerHTML = '';
+      addReqRow();
+    }
+
+    async function fillReqRowFromVin(tr, vin){
+      const c = {
+        car: tr.querySelector('[data-cell=car]'),
+        cat: tr.querySelector('[data-cell=cat]'),
+        ext: tr.querySelector('[data-cell=ext]'),
+        int: tr.querySelector('[data-cell=int]'),
+        model: tr.querySelector('[data-cell=model]'),
+        loc: tr.querySelector('[data-cell=loc]'),
+      };
+      if(!vin){
+        Object.values(c).forEach(el=>el.textContent='');
+        tr.dataset.vin='';
+        tr.dataset.missing='0';
+        return;
+      }
+      tr.style.opacity = '.65';
+      try{
+        const snap = await db.collection('cars').doc(vin).get();
+        if(!snap.exists){
+          c.car.textContent = 'غير موجود';
+          c.cat.textContent = '—';
+          c.ext.textContent = '—';
+          c.int.textContent = '—';
+          c.model.textContent = '—';
+          c.loc.textContent = '—';
+          tr.dataset.vin = vin;
+          tr.dataset.missing = '1';
+        }else{
+          const d = snap.data()||{};
+          c.car.textContent = d.carName || '';
+          c.cat.textContent = d.statement || '';
+          c.ext.textContent = d.exteriorColor || '';
+          c.int.textContent = d.interiorColor || '';
+          c.model.textContent = d.model || '';
+          c.loc.textContent = d.location || '';
+          tr.dataset.vin = d.vin || vin;
+          tr.dataset.missing = '0';
+        }
+      }finally{
+        tr.style.opacity = '1';
+      }
+    }
+
+    function addReqRow(vin=''){
+      const tb = document.querySelector('#req_vinTable tbody');
+      if(!tb) return;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><input data-req-vin placeholder="اكتب VIN" value="${(vin||'').replace(/"/g,'&quot;')}" style="min-width:210px" /></td>
+        <td data-cell="car"></td>
+        <td data-cell="cat"></td>
+        <td data-cell="ext"></td>
+        <td data-cell="int"></td>
+        <td data-cell="model"></td>
+        <td data-cell="loc"></td>
+        <td><input data-req-note placeholder="ملاحظة (اختياري)" /></td>
+        <td><button class="btn danger" type="button" data-del-req style="padding:7px 10px;border-radius:10px">حذف</button></td>
+      `;
+      tb.appendChild(tr);
+
+      const inp = tr.querySelector('input[data-req-vin]');
+      let t=null;
+      inp.addEventListener('input', ()=>{
+        const v = inp.value.trim();
+        if(t) clearTimeout(t);
+        t = setTimeout(()=>fillReqRowFromVin(tr, v), 250);
+      });
+      inp.addEventListener('blur', ()=>fillReqRowFromVin(tr, inp.value.trim()));
+
+      tr.querySelector('[data-del-req]').addEventListener('click', ()=>tr.remove());
+
+      if(vin) fillReqRowFromVin(tr, vin);
+    }
+
+    function getReqItems(){
+      const tb = document.querySelector('#req_vinTable tbody');
+      if(!tb) return [];
+      const items = [];
+      tb.querySelectorAll('tr').forEach(tr=>{
+        const vin = (tr.querySelector('input[data-req-vin]')?.value || '').trim();
+        const note = (tr.querySelector('input[data-req-note]')?.value || '').trim();
+        if(vin) items.push({ vin, note });
+      });
+      // remove duplicates by VIN (keep first)
+      const seen = new Set();
+      return items.filter(it=>{
+        if(seen.has(it.vin)) return false;
+        seen.add(it.vin);
+        return true;
+      });
+    }
+
+    function statusFromLocation(loc){
+      if(!loc) return '';
+      if(loc.includes('المخزون المتاح')) return 'المخزون المتاح';
+      if(loc.includes('سيارات بها ملاحظات')) return 'بها ملاحظات';
+      if(loc.includes('مباع تحت التسليم')) return 'مباع تحت التسليم';
+      if(loc.includes('مباع تم التسليم')) return 'مباع تم التسليم';
+      return '';
+    }
+
+    async function submitRequest(){
+      const user = auth.currentUser;
+      if(!user) return toast('سجّل دخول أولاً');
+
+      const mode = $('req_mode')?.value || 'create';
+      if(mode!=='create') return;
+
+      const type = $('req_type').value;
+      const toLocation = $('req_to').value;
+      if(!toLocation) return toast('اختر المكان');
+
+      const photoDate = $('req_photo_date').value;
+      if(type==='photo' && !photoDate) return toast('اختر تاريخ التصوير');
+
+      const items = getReqItems();
+      if(items.length===0) return toast('اكتب VIN واحد على الأقل');
+
+      // تحقق وجود السيارات
+      const missing = [];
+      for(const it of items){
+        const snap = await db.collection('cars').doc(it.vin).get();
+        if(!snap.exists) missing.push(it.vin);
+      }
+      if(missing.length){
+        return toast('في هياكل غير موجودة: ' + missing.slice(0,5).join(', ') + (missing.length>5?'...':''));
+      }
+
+      const req = {
+        type, // transfer | photo
+        items,
+        vins: items.map(x=>x.vin),
+        toLocation,
+        photoDate: type==='photo' ? photoDate : null,
+
+        createdBy: user.email,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        step1At: null, step2At: null, step3At: null, step4At: null,
+        step1By: null, step2By: null, step3By: null, step4By: null,
+      };
+
+      const ref = await db.collection('requests').add(req);
+      toast('تم إرسال الطلب');
+      logAction('requests','request_create',{requestId: ref.id, type:type, toLocation:toLocation, vins: (items||[]).map(x=>x.vin)});
+      // reset
+      clearReqRows();
+      $('req_to').value = '';
+if(type==='photo'){ $('req_photo_date').value=''; }
+      // انتقل لمتابعة الطلبات
+      $('req_mode').value='track';
+      switchReqMode();
+      // افتح مباشرة
+      openReqModal({ id: ref.id, ...req });
+    }
+
+    // ----- Requests lists -----
+    function renderReqList(rows, tableSel, metaEl, onlyDone){
+      const tb = document.querySelector(tableSel+' tbody');
+      tb.innerHTML = '';
+      let c=0;
+      rows.forEach(r=>{
+        const done = !!r.step4At;
+        if(onlyDone && !done) return;
+        if(!onlyDone && done) return;
+
+        const tr = document.createElement('tr');
+        const created = fmtDate(r.createdAt);
+        const status = reqStatusLabel(r);
+        const cells = [
+          created,
+          reqTypeLabel(r.type),
+          (r.vins||[]).length,
+          r.toLocation || '',
+          onlyDone ? fmtDate(r.step4At) : status,
+          '__OPEN__'
+        ];
+        cells.forEach((t,idx)=>{
+          const td = document.createElement('td');
+          if(t==='__OPEN__'){
+            const b = document.createElement('button');
+            b.className='linkBtn';
+            b.textContent='فتح';
+            b.type='button';
+            b.addEventListener('click', ()=>openReqModal(r));
+            td.appendChild(b);
+          }else{
+            td.textContent = t;
+          }
+          tr.appendChild(td);
+        });
+        tb.appendChild(tr);
+        c++;
+      });
+      metaEl.textContent = `الطلبات: ${c}`;
+    }
+
+    function startRequestsLive(){
+      stopRequestsLive();
+      reqUnsub = db.collection('requests').orderBy('createdAt','desc').limit(200).onSnapshot((snap)=>{
+        const all = [];
+        snap.forEach(d=>all.push({ id:d.id, ...(d.data()||{}) }));
+        renderReqList(all, '#req_table_open', $('req_open_meta'), false);
+        renderReqList(all, '#req_table_done', $('req_done_meta'), true);
+      }, (err)=>toast(err.message||'فشل تحميل الطلبات'));
+    }
+
+    // ----- Request modal actions -----
+    const reqModal = document.getElementById('reqModal');
+    const reqModalBody = document.getElementById('reqModalBody');
+    const reqModalFoot = document.getElementById('reqModalFoot');
+    const reqModalTitle = document.getElementById('reqModalTitle');
+
+    function closeReqModal(){
+      reqModal.classList.remove('show');
+      reqModalBody.innerHTML='';
+      reqModalFoot.innerHTML='';
+      reqModal.dataset.id='';
+    }
+
+    document.getElementById('reqClose')?.addEventListener('click', closeReqModal);
+    reqModal?.addEventListener('click', (e)=>{ if(e.target===reqModal) closeReqModal(); });
+
+    async function markStep(reqId, step){
+      const user = auth.currentUser;
+      if(!user) return toast('سجّل دخول أولاً');
+      const ref = db.collection('requests').doc(reqId);
+      const snap = await ref.get();
+      if(!snap.exists) return toast('الطلب غير موجود');
+      const r = snap.data()||{};
+
+      const updates = {};
+      const now = firebase.firestore.FieldValue.serverTimestamp();
+
+      if(step===1){ updates.step1At = now; updates.step1By = user.email; }
+      if(step===2){ updates.step2At = now; updates.step2By = user.email; }
+      if(step===3){ updates.step3At = now; updates.step3By = user.email; }
+      if(step===4){ updates.step4At = now; updates.step4By = user.email; }
+
+      // منع ترتيب خاطئ بسيط
+      if(step>1 && !r.step1At) return toast('لازم تم استلام الطلب أولاً');
+      if(step>2 && !r.step2At) return toast('لازم تم ارسال السيارة أولاً');
+      if(step>3 && !r.step3At) return toast('لازم تم استلام السيارة أولاً');
+
+      await ref.set(updates, {merge:true});
+      logAction('requests','request_step',{requestId:reqId, step:step, type:r.type||'', toLocation:r.toLocation||'', vins:(r.vins||[])});
+
+      // لو خطوة (تم استلام السيارة) و نوع نقل: حدّث مكان السيارات
+      if(step===3 && r.type==='transfer'){
+        const batch = db.batch();
+        const toLoc = r.toLocation || '';
+        const st = statusFromLocation(toLoc);
+        const items = r.items || [];
+        items.forEach(it=>{
+          const carRef = db.collection('cars').doc(it.vin);
+          const upd = { location: toLoc, updatedAt: firebase.firestore.FieldValue.serverTimestamp() };
+          if(st) upd.status = st;
+          batch.set(carRef, upd, {merge:true});
+
+          const logRef = db.collection('logs').doc();
+          batch.set(logRef, {
+            action: 'request_transfer_receive_car',
+            requestId: reqId,
+            vin: it.vin,
+            toLocation: toLoc,
+            by: user.email,
+            at: firebase.firestore.FieldValue.serverTimestamp()
+          });
+        });
+        await batch.commit();
+      }
+
+      toast('تم تحديث الطلب');
+      // refresh modal
+      const snap2 = await ref.get();
+      openReqModal({ id:reqId, ...(snap2.data()||{}) }, true);
+    }
+
+    async function deleteRequest(reqId){
+      const user = auth.currentUser;
+      if(!user) return toast('سجّل دخول أولاً');
+      const ref = db.collection('requests').doc(reqId);
+      const snap = await ref.get();
+      if(!snap.exists) return toast('الطلب غير موجود');
+      const r = snap.data()||{};
+      if(!canDeleteReq(r)) return toast('ممنوع حذف الطلب بعد تنفيذ إجراءات');
+      await ref.delete();
+      toast('تم حذف الطلب');
+      logAction('requests','request_delete',{requestId:reqId, type:r.type||'', toLocation:r.toLocation||'', vins:(r.vins||[])});
+      closeReqModal();
+    }
+    async function openReqModal(r, keepOpen=false){
+      if(!r || !r.id){
+        toast('لا يمكن فتح الطلب');
+        return;
+      }
+      reqModal.dataset.id = r.id;
+      reqModalTitle.textContent = `تفاصيل الطلب — ${reqTypeLabel(r.type)} (${(r.vins||[]).length})`;
+      
+      const carMap = {};
+      const its = r.items || [];
+      await Promise.all(its.map(async (it)=>{
+        try{
+          const cs = await db.collection('cars').doc(it.vin).get();
+          if(cs.exists) carMap[it.vin] = cs.data() || {};
+        }catch(e){}
+      }));
+      reqModalBody.innerHTML = buildReqBody(r, carMap);
+    
+
+      const id = r.id;
+      reqModalFoot.innerHTML = '';
+
+      const mkBtn = (label, cls, fn, disabled=false)=>{
+        const b = document.createElement('button');
+        b.className = 'btn ' + cls;
+        b.type = 'button';
+        b.textContent = label;
+        b.disabled = !!disabled;
+        b.addEventListener('click', fn);
+        return b;
+      };
+
+      // أزرار الخطوات
+      reqModalFoot.appendChild(mkBtn('تم استلام الطلب', 'secondary', ()=>markStep(id,1), !!r.step1At));
+      reqModalFoot.appendChild(mkBtn('تم ارسال السيارة', 'secondary', ()=>markStep(id,2), !r.step1At || !!r.step2At));
+      reqModalFoot.appendChild(mkBtn('تم استلام السيارة', 'secondary', ()=>markStep(id,3), !r.step2At || !!r.step3At));
+      reqModalFoot.appendChild(mkBtn('تم الانتهاء', 'primary', ()=>markStep(id,4), !r.step3At || !!r.step4At));
+
+      // حذف
+      reqModalFoot.appendChild(mkBtn('حذف الطلب', 'danger', ()=>deleteRequest(id), !canDeleteReq(r)));
+
+      reqModal.classList.add('show');
+    }
+
+    // ----- Requests UI mode switch -----
+    function switchReqMode(){
+      const v = $('req_mode').value;
+      $('req_create_box').classList.toggle('hidden', v!=='create');
+      $('req_track_box').classList.toggle('hidden', v!=='track');
+      $('req_done_box').classList.toggle('hidden', v!=='done');
+
+      if(v==='track' || v==='done') startRequestsLive();
+      else stopRequestsLive();
+    }
+
+    if($('req_mode')) $('req_mode').addEventListener('change', switchReqMode);
+
+    if($('req_type')){
+      $('req_type').addEventListener('change', ()=>{
+        const t = $('req_type').value;
+        $('req_photo_date_box').classList.toggle('hidden', t!=='photo');
+        $('req_loc_label').textContent = (t==='photo') ? 'مكان التصوير' : 'مكان النقل';
+        if(t!=='photo') $('req_photo_date').value='';
+      });
+    }
+
+    if($('req_addRow')) $('req_addRow').addEventListener('click', ()=>addReqRow());
+    if($('req_clearRows')) $('req_clearRows').addEventListener('click', clearReqRows);
+    if($('req_submit')) $('req_submit').addEventListener('click', ()=>submitRequest().catch(e=>toast(e.message||'فشل إرسال الطلب')));
+
+    // init request rows
+    if(document.querySelector('#req_vinTable tbody') && document.querySelector('#req_vinTable tbody').children.length===0){
+      clearReqRows();
+    }
+    if($('req_create_hint')){
+      $('req_create_hint').innerHTML = 'تنبيه: <b>النقل</b> يغيّر مكان السيارة في المخزون عند زر <b>تم استلام السيارة</b>.';
+    }
+
+    
+    /****************************************************
+     * كل السيارات (تجميع + تصدير)
+     ****************************************************/
+    let _allCarsUnsub = null;
+    let _allCarsRows = [];
+
+    function startAllCarsLive(){
+      stopAllCarsLive();
+      const tbody = document.querySelector('#allCarsTable tbody');
+      const meta  = document.getElementById('allCarsMeta');
+      if(!tbody) return;
+
+      meta.textContent = 'جاري التحميل...';
+      _allCarsUnsub = db.collection('cars').onSnapshot((snap)=>{
+        const map = new Map();
+        snap.forEach(doc=>{
+          const d = doc.data() || {};
+          const carName = (d.carName || d['سيارة'] || '').toString().trim();
+          const statement = (d.statement || d['البيان'] || '').toString().trim();
+          const model = (d.model || d['موديل'] || '').toString().trim();
+
+          const key = [carName, statement, model].join('||');
+          if(!map.has(key)){
+            map.set(key, {carName, statement, model, count:0});
+          }
+          map.get(key).count += 1;
+        });
+
+        _allCarsRows = Array.from(map.values())
+          .sort((a,b)=>{
+            // sort by car then model then statement
+            return (a.carName||'').localeCompare(b.carName||'') ||
+                   (a.model||'').localeCompare(b.model||'') ||
+                   (a.statement||'').localeCompare(b.statement||'');
+          });
+
+        // render
+        tbody.innerHTML = '';
+        _allCarsRows.forEach((r,i)=>{
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${i+1}</td>
+            <td>${escapeHtml(r.carName||'—')}</td>
+            <td>${escapeHtml(r.statement||'—')}</td>
+            <td>${escapeHtml(r.model||'—')}</td>
+            <td style="font-weight:700">${r.count}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+        meta.textContent = `إجمالي السجلات في المخزون: ${snap.size} | إجمالي الصفوف بعد التجميع: ${_allCarsRows.length}`;
+      }, (err)=>{
+        meta.textContent = 'تعذر تحميل البيانات. راجع الصلاحيات.';
+        console.error(err);
+      });
+    }
+
+    function stopAllCarsLive(){
+      if(_allCarsUnsub){ _allCarsUnsub(); _allCarsUnsub = null; }
+    }
+
+    function exportAllCars(){
+      const data = _allCarsRows.map((r,i)=>({
+        '#': i+1,
+        'السيارة': r.carName || '',
+        'البيان': r.statement || '',
+        'الموديل': r.model || '',
+        'إجمالي العدد': r.count || 0
+      }));
+      const ws = XLSX.utils.json_to_sheet(data);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'كل السيارات');
+      XLSX.writeFile(wb, 'كل_السيارات.xlsx');
+    }
+
+    const btnExportAllCars = document.getElementById('btnExportAllCars');
+    if(btnExportAllCars){
+      btnExportAllCars.addEventListener('click', exportAllCars);
+    }
+
+
+    // Hook into main tabs: when opening requests tab ensure mode is applied
+    const __openViewBase = openView;
+    openView = function(viewId){
+      __openViewBase(viewId);
+      if(viewId==='view-requests'){
+        switchReqMode();
+      }else{
+        stopRequestsLive();
+      }
+
+      if(viewId==='view-allcars'){
+        startAllCarsLive();
+      }else{
+        stopAllCarsLive();
+      }
+    };
+
+    // ===== Logs Tab bindings =====
+    fillLogsLocations();
+    document.getElementById('lg_filter')?.addEventListener('change', uiLogsFilterChanged);
+    document.getElementById('lg_apply')?.addEventListener('click', ()=>loadLogs().catch(e=>toast(e.message||'فشل تحميل السجل')));
+    document.getElementById('lg_export')?.addEventListener('click', exportLogsExcel);
+    uiLogsFilterChanged();
+
+
+    // ===== Users & Permissions (basic) =====
+    let usersUnsub = null;
+    let usersCache = [];
+    let umSelected = null;
+
+    const UM_TABS = [
+      {id:'view-dashboard', name:'الداش بورد'},
+      {id:'view-admin', name:'الإدارة'},
+      {id:'view-inventory', name:'المخزون'},
+      {id:'view-transfer', name:'نقل السيارات'},
+      {id:'view-requests', name:'الطلبات'},
+      {id:'view-allcars', name:'كل السيارات'},
+      {id:'view-logs', name:'سجل الحركات'},
+      {id:'view-tracking', name:'التراكينج'},
+      {id:'view-archive', name:'الأرشيف'},
+      {id:'view-users', name:'إدارة المستخدمين'}
+    ];
+
+    const UM_ACTIONS = [
+      {key:'requests.create', label:'إنشاء طلب'},
+      {key:'requests.step1', label:'تم استلام الطلب'},
+      {key:'requests.step2', label:'تم ارسال السيارة'},
+      {key:'requests.step3', label:'تم استلام السيارة'},
+      {key:'requests.step4', label:'تم الانتهاء'}
+    ];
+
+    function umDefaultPerms(){
+      const tabs = {};
+      UM_TABS.forEach(t=>tabs[t.id]=false);
+      // default user sees requests only
+      tabs['view-requests']=true;
+
+      const actions = {};
+      UM_ACTIONS.forEach(a=>actions[a.key]=false);
+      actions['requests.create']=true;
+
+      return {tabs, actions};
+    }
+
+    function umTs(v){
+      try{
+        if(!v) return '';
+        if(typeof v.toDate === 'function') return v.toDate().toLocaleString('ar-SA');
+        if(typeof v === 'number') return new Date(v).toLocaleString('ar-SA');
+        return '';
+      }catch(e){ return ''; }
+    }
+
+    function umRenderList(){
+      const tb = document.getElementById('um_tbody');
+      if(!tb) return;
+      if(!usersCache.length){
+        tb.innerHTML = '<tr><td colspan="4" class="small muted">لا يوجد مستخدمون</td></tr>';
+        return;
+      }
+      tb.innerHTML = usersCache.map(u=>{
+        const email = escapeHtml(u.email||'');
+        const role = escapeHtml(u.role||'user');
+        const upd  = escapeHtml(umTs(u.updatedAt||u.createdAt));
+        return `<tr>
+          <td>${email}</td>
+          <td>${role}</td>
+          <td>${upd}</td>
+          <td>
+            <button class="btn" data-um-edit="${escapeHtml(u.id)}">تعديل</button>
+          </td>
+        </tr>`;
+      }).join('');
+
+      tb.querySelectorAll('[data-um-edit]').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const id = btn.getAttribute('data-um-edit');
+          const u = usersCache.find(x=>x.id===id);
+          if(!u) return;
+          umOpenEditor(u);
+        });
+      });
+    }
+
+    function umBoxItem(id, label, checked){
+      return `<label class="row" style="gap:8px;align-items:center">
+        <input type="checkbox" data-um-id="${escapeHtml(id)}" ${checked?'checked':''} />
+        <span class="small">${escapeHtml(label)}</span>
+      </label>`;
+    }
+
+    function umOpenEditor(u){
+      umSelected = u;
+      const ed = document.getElementById('um_editor');
+      if(!ed) return;
+      ed.style.display = 'block';
+      document.getElementById('um_editor_user').innerHTML = `المستخدم: <b>${escapeHtml(u.email||'')}</b>`;
+      document.getElementById('um_role').value = u.role || 'user';
+
+      // tabs
+      const tabsBox = document.getElementById('um_tabs_box');
+      const permsTabs = (u.permissions && u.permissions.tabs) ? u.permissions.tabs : {};
+      tabsBox.innerHTML = UM_TABS.map(t=>umBoxItem('tab:'+t.id, t.name, !!permsTabs[t.id])).join('');
+
+      // actions
+      const actBox = document.getElementById('um_actions_box');
+      const permsAct = (u.permissions && u.permissions.actions) ? u.permissions.actions : {};
+      actBox.innerHTML = UM_ACTIONS.map(a=>umBoxItem('act:'+a.key, a.label, !!permsAct[a.key])).join('');
+    }
+
+    async function umSave(){
+      if(!umSelected) return;
+      const role = document.getElementById('um_role').value || 'user';
+      const tabs = {};
+      const actions = {};
+
+      document.querySelectorAll('#um_tabs_box input[type="checkbox"][data-um-id]').forEach(ch=>{
+        const id = ch.getAttribute('data-um-id')||'';
+        if(id.startsWith('tab:')) tabs[id.replace('tab:','')] = !!ch.checked;
+      });
+      document.querySelectorAll('#um_actions_box input[type="checkbox"][data-um-id]').forEach(ch=>{
+        const id = ch.getAttribute('data-um-id')||'';
+        if(id.startsWith('act:')) actions[id.replace('act:','')] = !!ch.checked;
+      });
+
+      // ensure admin always sees all tabs
+      if(role==='admin'){
+        UM_TABS.forEach(t=>tabs[t.id]=true);
+        UM_ACTIONS.forEach(a=>actions[a.key]=true);
+      }
+
+      try{
+        await db.collection('users').doc(umSelected.id).set({
+          role,
+          permissions: {tabs, actions},
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          updatedBy: auth.currentUser?.email || ''
+        }, {merge:true});
+        toast('تم حفظ الصلاحيات');
+      }catch(e){
+        toast(e.message || 'فشل حفظ الصلاحيات');
+      }
+    }
+
+    function startUsersLive(){
+      if(usersUnsub) return;
+      usersUnsub = db.collection('users').orderBy('updatedAt','desc').onSnapshot((snap)=>{
+        const arr = [];
+        snap.forEach(doc=>{
+          const d = doc.data()||{};
+          arr.push({
+            id: doc.id,
+            email: d.email || doc.id,
+            role: d.role || 'user',
+            permissions: d.permissions || umDefaultPerms(),
+            createdAt: d.createdAt || null,
+            updatedAt: d.updatedAt || null
+          });
+        });
+        usersCache = arr;
+        umRenderList();
+      }, (err)=>{
+        console.warn('users live error', err);
+      });
+    }
+
+    function stopUsersLive(){
+      if(usersUnsub){ usersUnsub(); usersUnsub=null; }
+    }
+
+    // Create user without logging out current admin (Secondary App)
+    let secAuth = null;
+    function ensureSecondaryAuth(){
+      if(secAuth) return secAuth;
+      try{
+        const secApp = firebase.apps.find(a=>a.name==='Secondary') || firebase.initializeApp(firebaseConfig, 'Secondary');
+        secAuth = firebase.auth(secApp);
+        return secAuth;
+      }catch(e){
+        console.warn('secondary auth init error', e);
+        return null;
+      }
+    }
+
+    async function umAddUser(){
+      const email = (document.getElementById('um_email').value||'').trim();
+      const pass  = (document.getElementById('um_pass').value||'').trim();
+      const hint  = document.getElementById('um_add_hint');
+      if(hint) hint.textContent = '';
+      if(!email || !pass){
+        toast('اكتب البريد وكلمة المرور');
+        return;
+      }
+      const s = ensureSecondaryAuth();
+      if(!s){
+        toast('فشل تهيئة إنشاء المستخدم');
+        return;
+      }
+      try{
+        const cred = await s.createUserWithEmailAndPassword(email, pass);
+        const uid = cred.user.uid;
+        const perms = umDefaultPerms();
+        await db.collection('users').doc(uid).set({
+          email,
+          role: 'user',
+          permissions: perms,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          createdBy: auth.currentUser?.email || '',
+          updatedBy: auth.currentUser?.email || ''
+        }, {merge:true});
+
+        if(hint) hint.textContent = 'تم إضافة المستخدم بنجاح';
+        toast('تم إضافة المستخدم');
+      }catch(e){
+        const msg = e?.message || 'فشل إضافة المستخدم';
+        if(hint) hint.textContent = msg;
+        toast(msg);
+      }finally{
+        try{ await s.signOut(); }catch(_){}
+      }
+    }
+
+    // Bind users tab UI
+    document.getElementById('um_add')?.addEventListener('click', umAddUser);
+    document.getElementById('um_save')?.addEventListener('click', umSave);
+    document.getElementById('um_close')?.addEventListener('click', ()=>{
+      const ed = document.getElementById('um_editor');
+      if(ed) ed.style.display = 'none';
+      umSelected = null;
+    });
+    document.getElementById('um_refresh')?.addEventListener('click', ()=>{ umRenderList(); });
+
+    // Hook into openView to start/stop live
+    const __openView_users = openView;
+    openView = function(viewId){
+      __openView_users(viewId);
+      if(viewId === 'view-users'){
+        startUsersLive();
+      }else{
+        stopUsersLive();
+      }
+    };
+
+</script>
+</body>
+</html>
