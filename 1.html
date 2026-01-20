@@ -1278,6 +1278,103 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
+    // ===== Access Control (tabs + permissions) =====
+    // UI visibility is controlled here (Firestore Rules control data access only).
+    const ADMIN_EMAILS = [
+      'mr.ahmed_rashed@outlook.sa',
+      'ceo@mzjcars.com',
+      'hossamzayan10@gmail.com'
+    ];
+
+    let CURRENT_USER_DOC = null;
+
+    function isAdminClient(user, userDocData){
+      const em = (user?.email || '').toLowerCase();
+      if(ADMIN_EMAILS.includes(em)) return true;
+      const role = (userDocData?.role || '').toString().toLowerCase();
+      return role === 'admin' || role === 'administrator' || role === 'administration' || role.includes('ادار');
+    }
+
+    function canShowTabKey(tabKey, user, userDocData){
+      if(isAdminClient(user, userDocData)) return true;
+      if(userDocData?.active === false) return false;
+
+      // Prefer tabs.* if present, otherwise fallback to permissions.*.view
+      const tabs = userDocData?.tabs;
+      if(tabs && Object.prototype.hasOwnProperty.call(tabs, tabKey)) {
+        return tabs[tabKey] === true;
+      }
+      const perms = userDocData?.permissions;
+      if(perms && perms[tabKey] && typeof perms[tabKey] === 'object' && 'view' in perms[tabKey]){
+        return perms[tabKey].view === true;
+      }
+      // default: hidden
+      return false;
+    }
+
+    const VIEW_TO_TABKEY = {
+      'view-dashboard': 'dashboard',
+      'view-admin': 'admin',
+      'view-inventory': 'inventory',
+      'view-transfer': 'car_transfer',
+      'view-requests': 'requests',
+      'view-allcars': 'all_cars',
+      'view-logs': 'movement_log',
+      'view-tracking': 'tracking',
+      'view-archive': 'archive',
+      'view-users': 'users_admin'
+    };
+
+    function applyAccessControl(user, userDocData){
+      // Tabs in top bar
+      document.querySelectorAll('.tabbar .tab').forEach(tabEl=>{
+        const viewId = tabEl.dataset.view;
+        const key = VIEW_TO_TABKEY[viewId];
+        if(!key) return;
+        const ok = canShowTabKey(key, user, userDocData);
+        tabEl.style.display = ok ? '' : 'none';
+        tabEl.setAttribute('aria-hidden', ok ? 'false' : 'true');
+      });
+
+      // If current active view is not allowed, open first allowed view
+      const activeTab = document.querySelector('.tabbar .tab.active');
+      const currentView = activeTab?.dataset?.view || 'view-admin';
+      const currentKey = VIEW_TO_TABKEY[currentView];
+      if(currentKey && !canShowTabKey(currentKey, user, userDocData)) {
+        const first = Array.from(document.querySelectorAll('.tabbar .tab'))
+          .find(t=>t.style.display !== 'none');
+        if(first) {
+          openView(first.dataset.view);
+        } else {
+          // nothing allowed -> force dashboard hidden app
+          toast('لا توجد صلاحيات عرض لأي تبويب.');
+        }
+      }
+
+      // Also disable some buttons/fields quickly based on detailed permissions if present
+      // (We keep current behavior unless permission nodes exist).
+      try{
+        const perms = userDocData?.permissions || {};
+        // Dashboard buttons
+        if(perms.dashboard?.buttons){
+          const b = perms.dashboard.buttons;
+          if($('dash_filter_save')) $('dash_filter_save').style.display = (b.save===true || isAdminClient(user,userDocData)) ? '' : 'none';
+          if($('dash_filter_clear')) $('dash_filter_clear').style.display = (b.clear===true || isAdminClient(user,userDocData)) ? '' : 'none';
+        }
+      }catch(e){ /* ignore */ }
+    }
+
+    async function loadCurrentUserDoc(user){
+      try{
+        const snap = await db.collection('users').doc(user.uid).get();
+        if(!snap.exists) return null;
+        return snap.data() || null;
+      }catch(e){
+        console.warn('loadCurrentUserDoc', e);
+        return null;
+      }
+    }
+
     // ===== Inventory Live (Fix: startInventoryLive/stopInventoryLive) =====
     let invUnsub = null;
     let invAll = [];
@@ -2526,9 +2623,14 @@
         btnLogout.classList.remove('hidden');
         authBox.classList.add('hidden');
         app.classList.remove('hidden');
-        // تحميل صلاحية المستخدم للنقل
-        loadUserRole(user.email).then((role)=>{
-          canTransfer = roleAllows(role);
+        // تحميل صلاحيات المستخدم (tabs + permissions) من users/{uid}
+        loadCurrentUserDoc(user).then((ud)=>{
+          CURRENT_USER_DOC = ud;
+          applyAccessControl(user, ud || {});
+
+          // تحميل صلاحية النقل (مبنية على role داخل userDoc أو الأدمن الثابت)
+          const role = (ud && (ud.role || ud.type || ud.permission)) ? (ud.role || ud.type || ud.permission) : '';
+          canTransfer = roleAllows(role) || isAdminClient(user, ud || {});
           const hint = document.getElementById('tr_hint');
           if(hint){
             hint.innerHTML = canTransfer
