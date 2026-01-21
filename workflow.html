@@ -3,6 +3,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -1251,8 +1252,8 @@ html, body {
                       <th>اللون الخارجي</th>
                       <th>موديل</th>
                       <th>اللوحة</th>
-                      <th>اسم الدفعة</th>
-                      <th>بالتاريخ</th>
+                      <th>اسم الدفعة بالتاريخ</th>
+                      <th>التاريخ</th>
                       <th>المكان</th>
                       <th>ملاحظات في السيارة</th>
                       <th>حجز - نواقص - تحديد مكان</th>
@@ -8013,13 +8014,35 @@ function startInventoryLive(){
     }
 
     async function loadMetaLists(){
-      await ensureMetaLists();
-      const ref = db.collection(META_LISTS_PATH.col).doc(META_LISTS_PATH.doc);
-      const snap = await ref.get();
-      const d = snap.data() || {};
-      const b = Array.isArray(d.branches) ? d.branches.filter(Boolean) : DEFAULT_BRANCHES;
-      const s = Array.isArray(d.statuses) ? d.statuses.filter(Boolean) : DEFAULT_STATUSES;
-      APP_LISTS = { branches: b.length?b:DEFAULT_BRANCHES, statuses: s.length?s:DEFAULT_STATUSES };
+      // لازم القوائم تشتغل حتى لو meta/lists عليها صلاحيات/غير موجودة
+      try{
+        await ensureMetaLists();
+        const ref = db.collection(META_LISTS_PATH.col).doc(META_LISTS_PATH.doc);
+        const snap = await ref.get();
+        const d = snap.data() || {};
+        const b = Array.isArray(d.branches) ? d.branches.filter(Boolean) : DEFAULT_BRANCHES;
+        const s = Array.isArray(d.statuses) ? d.statuses.filter(Boolean) : DEFAULT_STATUSES;
+        APP_LISTS = { branches: b.length?b:DEFAULT_BRANCHES, statuses: s.length?s:DEFAULT_STATUSES };
+      }catch(e){
+        console.warn('loadMetaLists fallback', e);
+        APP_LISTS = { branches:[...DEFAULT_BRANCHES], statuses:[...DEFAULT_STATUSES] };
+      }
+
+      // الاتفاق: الفروع تُقرأ من meta/list/branches
+      try{
+        const snap2 = await db.collection('meta').doc('list').collection('branches').get();
+        const arr = [];
+        snap2.forEach(d=>{
+          const data = d.data() || {};
+          const name = (data.name || data.title || data.branch || data.value || d.id || '').toString().trim();
+          if(name) arr.push(name);
+        });
+        const branches = Array.from(new Set(arr)).sort((a,b)=>a.localeCompare(b,'ar'));
+        if(branches.length) APP_LISTS.branches = branches;
+      }catch(e){
+        console.warn('load branches meta/list/branches failed', e);
+      }
+
       fillAllLists();
     }
 
@@ -8057,16 +8080,37 @@ function startInventoryLive(){
     async function addItemToList(kind, value){
       value = (value||'').trim();
       if(!value) return;
-      const ref = db.collection(META_LISTS_PATH.col).doc(META_LISTS_PATH.doc);
-      const snap = await ref.get();
-      const d = snap.data() || {};
-      const arr = (kind==='branches') ? (d.branches||[]) : (d.statuses||[]);
-      if(arr.includes(value)) return;
-      arr.push(value);
-      const payload = { updatedAt: firebase.firestore.FieldValue.serverTimestamp(), updatedBy: auth.currentUser?.email || '' };
-      payload[kind] = arr;
-      await ref.set(payload, {merge:true});
-      await logAction('admin','list_add',{kind, value});
+
+      // تحديث meta/lists (للتوافق)
+      try{
+        const ref = db.collection(META_LISTS_PATH.col).doc(META_LISTS_PATH.doc);
+        const snap = await ref.get();
+        const d = snap.data() || {};
+        const arr = (kind==='branches') ? (d.branches||[]) : (d.statuses||[]);
+        if(!arr.includes(value)){
+          arr.push(value);
+          const payload = { updatedAt: firebase.firestore.FieldValue.serverTimestamp(), updatedBy: auth.currentUser?.email || '' };
+          payload[kind] = arr;
+          await ref.set(payload, {merge:true});
+        }
+      }catch(e){
+        console.warn('addItemToList meta/lists failed', e);
+      }
+
+      // الاتفاق: الفروع تُحفظ أيضًا في meta/list/branches
+      if(kind==='branches'){
+        try{
+          await db.collection('meta').doc('list').collection('branches').doc(value).set({
+            name: value,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+            updatedBy: auth.currentUser?.email || ''
+          }, {merge:true});
+        }catch(e){
+          console.warn('add branch meta/list/branches failed', e);
+        }
+      }
+
+      try{ await logAction('admin','list_add',{kind, value}); }catch(e){}
       await loadMetaLists();
     }
 
