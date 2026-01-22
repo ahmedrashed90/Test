@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 
 <html dir="rtl" lang="ar">
@@ -465,15 +466,12 @@ html, body {
 <div class="card dashCard">
 <h3>كارت تتبع طلبات البيع (Tracking)</h3>
 <div class="body">
-<div class="dashKpis">
-<div class="dashKpi"><span>طلبات جديدة</span><b id="trk_new">—</b></div>
-<div class="dashKpi"><span>تحت الإجراء</span><b id="trk_inprog">—</b></div>
-</div>
 <div class="dashBtns" style="margin-top:10px">
-<button class="btn secondary" id="dash_trk_new">عرض الجديدة</button>
-<button class="btn secondary" id="dash_trk_inprog">عرض تحت الإجراء</button>
+<button class="btn secondary" id="dash_trk_new">عرض الجديدة (—)</button>
+<button class="btn secondary" id="dash_trk_inprog">عرض تحت الإجراء (—)</button>
+<button class="btn secondary" id="dash_trk_done">تم الانتهاء (—)</button>
 </div>
-<div class="small" style="margin-top:10px">يعرض الطلبات غير المؤرشفة فقط من erp_orders.</div>
+<div class="small" style="margin-top:10px">يعرض الطلبات حسب المرحلة من orders.</div>
 </div>
 </div>
 </div>
@@ -1134,7 +1132,7 @@ html, body {
 <input autocomplete="off" id="dashDataSearch" placeholder="ابحث بـ VIN / السيارة / البيان / المكان / الحالة">
 </input></div>
 <div class="field" style="min-width:200px">
-<label> </label>
+<label> </label>
 <button class="btn" id="dashDataExport">تصدير Excel</button>
 </div>
 </div>
@@ -6139,15 +6137,15 @@ function startInventoryLive(){
 
         // try best ordering (may require index/field)
         try{
-          snap = await tdb.collection('erp_orders').orderBy('createdAt','desc').limit(limit).get();
+          snap = await tdb.collection('orders').orderBy('createdAt','desc').limit(limit).get();
         }catch(e1){
           try{
-            snap = await tdb.collection('erp_orders').orderBy('created_at','desc').limit(limit).get();
+            snap = await tdb.collection('orders').orderBy('created_at','desc').limit(limit).get();
           }catch(e2){
             try{
-              snap = await tdb.collection('erp_orders').orderBy('date','desc').limit(limit).get();
+              snap = await tdb.collection('orders').orderBy('date','desc').limit(limit).get();
             }catch(e3){
-              snap = await tdb.collection('erp_orders').limit(limit).get();
+              snap = await tdb.collection('orders').limit(limit).get();
             }
           }
         }
@@ -6171,6 +6169,7 @@ function startInventoryLive(){
             phone: normalizePhone(guessField(d, ['phone','mobile','whatsapp','الجوال','رقم الجوال'])),
             branch: guessField(d, ['branch','branchName','branch_name','الفرع','المعرض']),
             vin,
+            currentStage: parseInt((guessField(d, ['currentStage','current_stage','stage','مرحلة','CurrentStage'])||0),10) || 0,
             status: status || '—',
             isArchived,
           });
@@ -6181,9 +6180,18 @@ function startInventoryLive(){
       }
 
       function classifyTrackingRow(r){
+        const cs = (typeof r.currentStage === 'number') ? r.currentStage : parseInt((r.currentStage||0),10);
+        if(!isNaN(cs)){
+          if(cs === 10) return 'done';
+          if(cs >= 1 && cs <= 9) return 'inprog';
+          if(cs === 0) return 'new';
+        }
+
         const s = (r.status||'').toString();
         // جديد
         if(!s || /جديد|new/i.test(s)) return 'new';
+        // تم الانتهاء
+        if(/تم\s*الانتهاء|مكتمل|منتهي|done|completed|closed/i.test(s)) return 'done';
         // تحت الإجراء
         if(/تحت|إجراء|قيد|in\s*progress|processing|under/i.test(s)) return 'inprog';
         // افتراضي نخليه تحت الإجراء
@@ -6200,18 +6208,30 @@ function startInventoryLive(){
       async function refreshTrackingKpis(){
         try{
           const rows = await fetchTrackingOrders(600);
-          let nNew=0, nIn=0;
+          let nNew=0, nIn=0, nDone=0;
           rows.forEach(r=>{
             const c = classifyTrackingRow(r);
             if(c==='new') nNew++;
+            else if(c==='done') nDone++;
             else nIn++;
           });
-          const elN = document.getElementById('trk_new'); if(elN) elN.textContent = nNew;
-          const elI = document.getElementById('trk_inprog'); if(elI) elI.textContent = nIn;
+
+          const bNew = document.getElementById('dash_trk_new');
+          const bIn  = document.getElementById('dash_trk_inprog');
+          const bDone= document.getElementById('dash_trk_done');
+
+          if(bNew)  bNew.textContent  = `عرض الجديدة (${nNew})`;
+          if(bIn)   bIn.textContent   = `عرض تحت الإجراء (${nIn})`;
+          if(bDone) bDone.textContent = `تم الانتهاء (${nDone})`;
         }catch(e){
           console.warn('tracking kpi error', e);
-          const elN = document.getElementById('trk_new'); if(elN) elN.textContent = '—';
-          const elI = document.getElementById('trk_inprog'); if(elI) elI.textContent = '—';
+          const bNew = document.getElementById('dash_trk_new');
+          const bIn  = document.getElementById('dash_trk_inprog');
+          const bDone= document.getElementById('dash_trk_done');
+
+          if(bNew)  bNew.textContent  = 'عرض الجديدة (—)';
+          if(bIn)   bIn.textContent   = 'عرض تحت الإجراء (—)';
+          if(bDone) bDone.textContent = 'تم الانتهاء (—)';
         }
       }
 
@@ -6220,10 +6240,10 @@ function startInventoryLive(){
           const rowsAll = await fetchTrackingOrders(600);
           const rows = rowsAll.filter(r=> classifyTrackingRow(r)===type);
 
-          const title = (type==='new') ? 'طلبات جديدة' : 'طلبات تحت الإجراء';
+          const title = (type==='new') ? 'طلبات جديدة' : (type==='done' ? 'تم الانتهاء' : 'طلبات تحت الإجراء');
 
           const html = `
-            <div class="small" style="margin-bottom:10px">المصدر: <b>erp_orders</b> — ${escapeHtml(title)}</div>
+            <div class="small" style="margin-bottom:10px">المصدر: <b>orders</b> — ${escapeHtml(title)}</div>
             <div style="overflow:auto">
               <table class="table stickyHead">
                 <thead>
@@ -6302,6 +6322,8 @@ function startInventoryLive(){
 
       document.getElementById('dash_trk_new')?.addEventListener('click', ()=> openTrackingModal('new'));
       document.getElementById('dash_trk_inprog')?.addEventListener('click', ()=> openTrackingModal('inprog'));
+
+      document.getElementById('dash_trk_done')?.addEventListener('click', ()=> openTrackingModal('done'));
 
       // refresh KPIs after inventory loaded
       setTimeout(()=>{ refreshTrackingKpis(); }, 1200);
