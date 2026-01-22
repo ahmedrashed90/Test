@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 
 <html dir="rtl" lang="ar">
@@ -904,7 +905,6 @@ html, body {
 <th>الداخلي</th>
 <th>الموديل</th>
 <th>المكان الحالي</th>
-<th style="min-width:220px">ملاحظة</th>
 <th>حذف</th>
 </tr>
 </thead>
@@ -7464,6 +7464,38 @@ function startInventoryLive(){
           cells.ap.textContent  = approvalsTextLocal(d.approvals);
           tr.dataset.vin = d.vin || vin;
           tr.dataset.missing = '0';
+
+          // ✅ Auto-fill الحركة fields from DB by VIN (status + notes)
+          try{
+            const stNorm = normStatus(d.status || '');
+            const stSel = document.getElementById('tr_status');
+            if(stSel && stNorm){
+              // ensure option exists
+              if(!Array.from(stSel.options||[]).some(o=>o.value===stNorm)){
+                const o=document.createElement('option');
+                o.value = stNorm;
+                o.textContent = stNorm;
+                stSel.appendChild(o);
+              }
+              stSel.value = stNorm;
+            }
+
+            const nLoc = (d.notesLocation || d.noteLocation || '').toString();
+            const nMis = (d.notesMissing || d.noteMissing || '').toString();
+
+            const noteEl = document.getElementById('tr_note');
+            const missEl = document.getElementById('tr_notesMissing');
+            if(noteEl) noteEl.value = nLoc;
+            if(missEl) missEl.value = nMis;
+
+            // show notes box if needed (status notes OR location notes OR note exists)
+            const box = document.getElementById('tr_note_box');
+            if(box){
+              const need = (stNorm === 'بها ملاحظات') || isNotesLocation(d.location || '') || !!nLoc;
+              if(need) box.classList.remove('hidden');
+              else box.classList.add('hidden');
+            }
+          }catch(e){ /* ignore */ }
         }
       }finally{
         setRowLoading(tr, false);
@@ -8353,7 +8385,6 @@ function reqStatusLabel(r){
         <td data-cell="int"></td>
         <td data-cell="model"></td>
         <td data-cell="loc"></td>
-        <td><input data-req-note placeholder="ملاحظة (اختياري)" /></td>
         <td><button class="btn danger" type="button" data-del-req style="padding:7px 10px;border-radius:10px">حذف</button></td>
       `;
       tb.appendChild(tr);
@@ -8378,8 +8409,7 @@ function reqStatusLabel(r){
       const items = [];
       tb.querySelectorAll('tr').forEach(tr=>{
         const vin = (tr.querySelector('input[data-req-vin]')?.value || '').trim();
-        const note = (tr.querySelector('input[data-req-note]')?.value || '').trim();
-        if(vin) items.push({ vin, note });
+        if(vin) items.push({ vin });
       });
       // remove duplicates by VIN (keep first)
       const seen = new Set();
@@ -8434,7 +8464,6 @@ function reqStatusLabel(r){
 
       const itemsFull = items.map(it=>({
         vin: it.vin,
-        note: it.note || '',
         fromLocation: fromMap[it.vin] || ''
       }));
 
