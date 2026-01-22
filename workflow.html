@@ -1,27 +1,19 @@
 
-
-
-
-
-
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+
+<html dir="rtl" lang="ar">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>mzj-workflow | الإدارة + المخزون</title>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;700;800&display=swap" rel="stylesheet">
-
-  <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
-
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
-  <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>mzj-workflow | الإدارة + المخزون</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<style>
     :root{--brown:#3e2420;--beige:#bc8f74;--cream:#fff8ef;--bg:#f6f2ed;--card:#fff;--text:#1f1f1f;--muted:#6b6b6b;--line:#e9dfd5;--shadow:0 10px 24px rgba(0,0,0,.08);--r:12px}
     *{box-sizing:border-box}
     body{margin:0;font-family:"Tajawal",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
@@ -314,13 +306,11 @@
     .btnRow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
 
 </style>
-
-  <style>
+<style>
     /* Dashboard modals wider */
     #dashDataModal .modal, #detailsModal .modal{width:96vw;max-width:96vw}
     #dashDataModal table.table{min-width:1200px}
   </style>
-
 <style>
 /* FIX: Tracking tab layout without mzj-ui */
 #tracking-tab,
@@ -350,1057 +340,843 @@ body {
   overflow-x: hidden;
 }
 </style>
-
-
 <style>
 html, body {
   direction: rtl;
   text-align: right;
 }
 </style>
-
 </head>
 <body>
-  <div class="wrap">
-
-    <div class="topbar">
-      <div class="brand">
-        <div class="dot"></div>
-        <div>
-          <div class="title">mzj-workflow — الإدارة + المخزون</div>
-          <div class="subtitle">المسار الموحد لبيانات السيارة: <b>cars/{VIN}</b></div>
-        </div>
-      </div>
-      <div class="right">
-        <span class="pill" id="authPill">غير مسجل</span>
-        <button class="btn secondary hidden" id="btnLogout">تسجيل خروج</button>
-      </div>
-    </div>
-
-    <!-- LOGIN -->
-    <div class="authBox" id="authBox">
-      <div class="card">
-        <h3>تسجيل الدخول</h3>
-        <div class="body">
-          <div class="row">
-            <div>
-              <label>البريد الإلكتروني</label>
-              <input id="loginEmail" type="email" placeholder="example@company.com" />
-            </div>
-            <div>
-              <label>كلمة المرور</label>
-              <input id="loginPass" type="password" placeholder="••••••••" />
-            </div>
-          </div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button class="btn primary" id="btnLogin">تسجيل الدخول</button>
-            <button class="btn secondary" id="btnReset">نسيت كلمة المرور</button>
-          </div>
-          <div class="small" style="margin-top:10px">يجب أن تكون مسجل داخل مشروع <b>mzj-workflow</b>.</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- APP -->
-    <div id="app" class="hidden">
-      <div class="tabs">
-        <div class="tabbar" role="tablist" aria-label="Tabs">
-          <div class="tab" role="tab" data-view="view-dashboard">الداش بورد</div>
-          <div class="tab active" role="tab" data-view="view-admin">الإدارة</div>
-          <div class="tab" role="tab" data-view="view-inventory">قاعدة البيانات</div>
-          <div class="tab" role="tab" data-view="view-transfer">الحركة</div>
-          <div class="tab" role="tab" data-view="view-requests">طلبات النقل</div>
-                  <div class="tab" role="tab" data-view="view-allcars">كل السيارات</div>
-          <div class="tab" role="tab" data-view="view-logs">سجل الحركات</div>
-          <div class="tab" role="tab" data-view="view-tracking">التراكينج</div>
-<div class="tab" role="tab" data-view="view-users">إدارة المستخدمين</div>
+<div class="wrap">
+<div class="topbar">
+<div class="brand">
+<div class="dot"></div>
+<div>
+<div class="title">mzj-workflow — الإدارة + المخزون</div>
+<div class="subtitle">المسار الموحد لبيانات السيارة: <b>cars/{VIN}</b></div>
 </div>
+</div>
+<div class="right">
+<span class="pill" id="authPill">غير مسجل</span>
+<button class="btn secondary hidden" id="btnLogout">تسجيل خروج</button>
+</div>
+</div>
+<!-- LOGIN -->
+<div class="authBox" id="authBox">
+<div class="card">
+<h3>تسجيل الدخول</h3>
+<div class="body">
+<div class="row">
+<div>
+<label>البريد الإلكتروني</label>
+<input id="loginEmail" placeholder="example@company.com" type="email"/>
+</div>
+<div>
+<label>كلمة المرور</label>
+<input id="loginPass" placeholder="••••••••" type="password"/>
+</div>
+</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<button class="btn primary" id="btnLogin">تسجيل الدخول</button>
+<button class="btn secondary" id="btnReset">نسيت كلمة المرور</button>
+</div>
+<div class="small" style="margin-top:10px">يجب أن تكون مسجل داخل مشروع <b>mzj-workflow</b>.</div>
+</div>
+</div>
+</div>
+<!-- APP -->
+<div class="hidden" id="app">
+<div class="tabs">
+<div aria-label="Tabs" class="tabbar" role="tablist">
+<div class="tab" data-view="view-dashboard" role="tab">الداش بورد</div>
+<div class="tab active" data-view="view-admin" role="tab">الإدارة</div>
+<div class="tab" data-view="view-inventory" role="tab">قاعدة البيانات</div>
+<div class="tab" data-view="view-transfer" role="tab">الحركة</div>
+<div class="tab" data-view="view-requests" role="tab">طلبات النقل</div>
+<div class="tab" data-view="view-allcars" role="tab">كل السيارات</div>
+<div class="tab" data-view="view-logs" role="tab">سجل الحركات</div>
+<div class="tab" data-view="view-tracking" role="tab">التراكينج</div>
+<div class="tab" data-view="view-users" role="tab">إدارة المستخدمين</div>
+</div>
+<!-- الداش بورد -->
+<div class="view" id="view-dashboard" role="tabpanel">
+<!-- Saved View Filters -->
+<div class="card">
+<h3>الداش بورد</h3>
+<div class="body">
+<div class="dashFilters">
+<div>
+<label>المكان</label>
+<select class="selWithAdd" id="dash_filter_location">
+<option value="">— اختر —</option>
+</select>
+</div>
+<div class="dashStatusBox">
+<div class="small" style="margin-bottom:6px">الحالات (يمكن اختيار أكثر من حالة)</div>
+<div class="dashChecks" id="dash_filter_statuses">
+<label class="dashChk"><input type="checkbox" value="متاح للبيع"/> متاح للبيع</label>
+<label class="dashChk"><input type="checkbox" value="حجز"/> حجز</label>
+<label class="dashChk"><input type="checkbox" value="بها ملاحظات"/> بها ملاحظات</label>
+<label class="dashChk"><input type="checkbox" value="مباع تحت التسليم"/> مباع تحت التسليم</label>
+<label class="dashChk"><input type="checkbox" value="مباع تم التسليم"/> مباع تم التسليم</label>
+</div>
+</div>
+<div class="dashFilterActions">
+<button class="btn secondary" id="dash_filter_show">عرض</button>
+<button class="btn primary" id="dash_filter_save">حفظ</button>
+<button class="btn danger" id="dash_filter_clear">تفريغ</button>
+</div>
+</div>
+<div class="small" id="dash_filter_meta" style="margin-top:10px">—</div>
+</div>
+</div>
+<!-- Cards -->
+<div class="dashGrid">
+<div id="dash_saved_cards"></div>
 
-        <!-- الداش بورد -->
-        <div class="view" id="view-dashboard" role="tabpanel">
 
-          <!-- Saved View Filters -->
-          <div class="card">
-            <h3>الداش بورد</h3>
-            <div class="body">
-              <div class="dashFilters">
-                <div>
-                  <label>المكان</label>
-                  <select id="dash_filter_location" class="selWithAdd">
-                    <option value="">— اختر —</option>
-                  </select>
-                </div>
-                <div class="dashStatusBox">
-                  <div class="small" style="margin-bottom:6px">الحالات (يمكن اختيار أكثر من حالة)</div>
-                  <div class="dashChecks" id="dash_filter_statuses">
-                    <label class="dashChk"><input type="checkbox" value="متاح للبيع"> متاح للبيع</label>
-                    <label class="dashChk"><input type="checkbox" value="حجز"> حجز</label>
-                    <label class="dashChk"><input type="checkbox" value="بها ملاحظات"> بها ملاحظات</label>
-                    <label class="dashChk"><input type="checkbox" value="مباع تحت التسليم"> مباع تحت التسليم</label>
-                    <label class="dashChk"><input type="checkbox" value="مباع تم التسليم"> مباع تم التسليم</label>
-                  </div>
-                </div>
-                <div class="dashFilterActions">
-                  <button class="btn secondary" id="dash_filter_show">عرض</button>
-                  <button class="btn primary" id="dash_filter_save">حفظ</button>
-                  <button class="btn danger" id="dash_filter_clear">تفريغ</button>
-                </div>
-              </div>
-              <div class="small" id="dash_filter_meta" style="margin-top:10px">—</div>
-            </div>
-          </div>
-
-          <!-- Cards -->
-          <div class="dashGrid">
-      <div id="dash_saved_cards"></div>
-
-            <div class="card dashCard">
-              <h3>كارت النواقص</h3>
-              <div class="body">
-                <div class="dashKpis">
-                  <div class="dashKpi"><span>إجمالي النواقص (كل الفروع)</span><b id="miss_total">—</b></div>
-                </div>
-                <div class="dashBtns">
-<button type="button" class="btn secondary" data-miss-branch="الصالة">فرع 1: الصالة</button>
-                  <button type="button" class="btn secondary" data-miss-branch="الملتقى">فرع 2: الملتقى</button>
-                  <button type="button" class="btn secondary" data-miss-branch="القادسية">فرع 3: القادسية</button>
-                </div>
-                <div class="small" id="miss_meta" style="margin-top:10px">يُحسب من الإجمالي الفعلي (متاح للبيع + محجوز + بها ملاحظات) بالاعتماد على catalog.</div>
-              </div>
-            </div>
-
-            <div class="card dashCard">
-              <h3>كارت المخزون (عام)</h3>
-              <div class="body">
-                <div class="dashKpis">
-                  <div class="dashKpi"><span>الإجمالي الفعلي</span><b id="stk_totalActual">—</b></div>
-                  <div class="dashKpi"><span>إجمالي المفاتيح</span><b id="stk_keysTotal">—</b></div>
-                </div>
-                <div class="dashKpis">
-                  <div class="dashKpi"><span>متاح</span><b id="stk_avail">—</b></div>
-                  <div class="dashKpi"><span>محجوز</span><b id="stk_reserved">—</b></div>
-                  <div class="dashKpi"><span>بها ملاحظات</span><b id="stk_notes">—</b></div>
-                  <div class="dashKpi"><span>مباع تحت التسليم</span><b id="stk_under">—</b></div>
-                  <div class="dashKpi"><span>مباع تم التسليم</span><b id="stk_delivered">—</b></div>
-                </div>
-                <div class="dashBtns">
-                  <button type="button" class="btn secondary" id="btn_go_agency">الوكالة</button>
-                  <button type="button" class="btn secondary" data-go-status="متاح للبيع">المتاح للبيع</button>
-                  <button type="button" class="btn secondary" data-go-status="بها ملاحظات">سيارات بها ملاحظات</button>
-                  <button type="button" class="btn secondary" data-go-status="مباع تحت التسليم">مباع تحت التسليم</button>
-                </div>
-              </div>
-            </div>
-
-            <div class="card dashCard">
-              <h3>كارت الوكالة</h3>
-              <div class="body">
-                <div class="dashKpis">
-                  <div class="dashKpi"><span>الإجمالي الفعلي</span><b id="ag_totalActual">—</b></div>
-                  <div class="dashKpi"><span>إجمالي المفاتيح</span><b id="ag_keysTotal">—</b></div>
-                </div>
-                <div class="dashKpis">
-                  <div class="dashKpi"><span>متاح</span><b id="ag_avail">—</b></div>
-                  <div class="dashKpi"><span>محجوز</span><b id="ag_reserved">—</b></div>
-                  <div class="dashKpi"><span>بها ملاحظات</span><b id="ag_notes">—</b></div>
-                  <div class="dashKpi"><span>مباع تحت التسليم</span><b id="ag_under">—</b></div>
-                  <div class="dashKpi"><span>مباع تم التسليم</span><b id="ag_delivered">—</b></div>
-                </div>
-                <div class="dashBtns">
-          <button type="button" class="btn btn-sm kpiBtn show-branch-btn" data-go-location="الوكالة">عرض سيارات الوكالة</button>
-        </div>
-              </div>
-            </div>
-
-            <div class="card dashCard">
-              <h3>كارت فرع 1 : الصالة</h3>
-              <div class="body">
-                <div class="dashKpis">
-                  <div class="dashKpi"><span>الإجمالي الفعلي</span><b id="b1_totalActual">—</b></div>
-                  <div class="dashKpi"><span>إجمالي المفاتيح</span><b id="b1_keysTotal">—</b></div>
-                </div>
-                <div class="dashKpis">
-                  <div class="dashKpi"><span>متاح</span><b id="b1_avail">—</b></div>
-                  <div class="dashKpi"><span>محجوز</span><b id="b1_reserved">—</b></div>
-                  <div class="dashKpi"><span>بها ملاحظات</span><b id="b1_notes">—</b></div>
-                  <div class="dashKpi"><span>مباع تحت التسليم</span><b id="b1_under">—</b></div>
-                  <div class="dashKpi"><span>مباع تم التسليم</span><b id="b1_delivered">—</b></div>
-                </div>
-                <div class="dashBtns"><button type="button" class="btn secondary" data-go-location="الصالة">عرض سيارات الصالة</button></div>
-              </div>
-            </div>
-
-            <div class="card dashCard">
-              <h3>كارت فرع 2 : الملتقى</h3>
-              <div class="body">
-                <div class="dashKpis">
-                  <div class="dashKpi"><span>الإجمالي الفعلي</span><b id="b2_totalActual">—</b></div>
-                  <div class="dashKpi"><span>إجمالي المفاتيح</span><b id="b2_keysTotal">—</b></div>
-                </div>
-                <div class="dashKpis">
-                  <div class="dashKpi"><span>متاح</span><b id="b2_avail">—</b></div>
-                  <div class="dashKpi"><span>محجوز</span><b id="b2_reserved">—</b></div>
-                  <div class="dashKpi"><span>بها ملاحظات</span><b id="b2_notes">—</b></div>
-                  <div class="dashKpi"><span>مباع تحت التسليم</span><b id="b2_under">—</b></div>
-                  <div class="dashKpi"><span>مباع تم التسليم</span><b id="b2_delivered">—</b></div>
-                </div>
-                <div class="dashBtns"><button type="button" class="btn secondary" data-go-location="الملتقى">عرض سيارات الملتقى</button></div>
-              </div>
-            </div>
-
-            <div class="card dashCard">
-              <h3>كارت فرع 3 : القادسية</h3>
-              <div class="body">
-                <div class="dashKpis">
-                  <div class="dashKpi"><span>الإجمالي الفعلي</span><b id="b3_totalActual">—</b></div>
-                  <div class="dashKpi"><span>إجمالي المفاتيح</span><b id="b3_keysTotal">—</b></div>
-                </div>
-                <div class="dashKpis">
-                  <div class="dashKpi"><span>متاح</span><b id="b3_avail">—</b></div>
-                  <div class="dashKpi"><span>محجوز</span><b id="b3_reserved">—</b></div>
-                  <div class="dashKpi"><span>بها ملاحظات</span><b id="b3_notes">—</b></div>
-                  <div class="dashKpi"><span>مباع تحت التسليم</span><b id="b3_under">—</b></div>
-                  <div class="dashKpi"><span>مباع تم التسليم</span><b id="b3_delivered">—</b></div>
-                </div>
-                <div class="dashBtns"><button type="button" class="btn secondary" data-go-location="القادسية">عرض سيارات القادسية</button></div>
-              </div>
-            </div>
-
-            <div class="card dashCard">
-              <h3>كارت الموافقة المالية والإدارية</h3>
-              <div class="body">
-                <div class="dashKpis">
-                  <div class="dashKpi"><span>ناقص موافقة مالية</span><b id="ap_need_fin">—</b></div>
-                  <div class="dashKpi"><span>ناقص موافقة إدارية</span><b id="ap_need_adm">—</b></div>
-                </div>
-                <div class="dashBtns">
-                  <button class="btn secondary" id="ap_show_fin">عرض الناقص المالي</button>
-                  <button class="btn secondary" id="ap_show_adm">عرض الناقص الإداري</button>
-                </div>
-                <div class="small" style="margin-top:10px">مربوط بالحالة: مباع تحت التسليم</div>
-              </div>
-            </div>
-
-            <div class="card dashCard">
-              <h3>كارت الطلبات</h3>
-              <div class="body">
-                <div class="dashKpis">
-                  <div class="dashKpi"><span>تم استلام الطلب</span><b id="rq_s1">—</b></div>
-                  <div class="dashKpi"><span>تم ارسال السيارة</span><b id="rq_s2">—</b></div>
-                  <div class="dashKpi"><span>تم استلام السيارة</span><b id="rq_s3">—</b></div>
-                  <div class="dashKpi"><span>تم الانتهاء</span><b id="rq_s4">—</b></div>
-                </div>
+<div class="card dashCard">
+<h3>كارت الموافقة المالية والإدارية</h3>
+<div class="body">
+<div class="dashKpis">
+<div class="dashKpi"><span>ناقص موافقة مالية</span><b id="ap_need_fin">—</b></div>
+<div class="dashKpi"><span>ناقص موافقة إدارية</span><b id="ap_need_adm">—</b></div>
+</div>
+<div class="dashBtns">
+<button class="btn secondary" id="ap_show_fin">عرض الناقص المالي</button>
+<button class="btn secondary" id="ap_show_adm">عرض الناقص الإداري</button>
+</div>
+<div class="small" style="margin-top:10px">مربوط بالحالة: مباع تحت التسليم</div>
+</div>
+</div>
+<div class="card dashCard">
+<h3>كارت الطلبات</h3>
+<div class="body">
+<div class="dashKpis">
+<div class="dashKpi"><span>تم استلام الطلب</span><b id="rq_s1">—</b></div>
+<div class="dashKpi"><span>تم ارسال السيارة</span><b id="rq_s2">—</b></div>
+<div class="dashKpi"><span>تم استلام السيارة</span><b id="rq_s3">—</b></div>
+<div class="dashKpi"><span>تم الانتهاء</span><b id="rq_s4">—</b></div>
+</div>
 <div class="small" style="margin-top:10px">الأرشفة تتم من تاب قاعدة البيانات بعد اكتمال الطلب.</div>
-              </div>
-            </div>
-
-            <div class="card dashCard">
-              <h3>كارت تتبع طلبات البيع (Tracking)</h3>
-              <div class="body">
-                <div class="dashKpis">
-                  <div class="dashKpi"><span>طلبات جديدة</span><b id="trk_new">—</b></div>
-                  <div class="dashKpi"><span>تحت الإجراء</span><b id="trk_inprog">—</b></div>
-                </div>
-                <div class="dashBtns" style="margin-top:10px">
-                  <button class="btn secondary" id="dash_trk_new">عرض الجديدة</button>
-                  <button class="btn secondary" id="dash_trk_inprog">عرض تحت الإجراء</button>
-                </div>
-                <div class="small" style="margin-top:10px">يعرض الطلبات غير المؤرشفة فقط من erp_orders.</div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-
-        <!-- الإدارة -->
-        
-        <div class="view active" id="view-admin" role="tabpanel">
-          <!-- Admin Sub Tabs -->
-          <div class="card">
-            <h3>الإدارة</h3>
-            <div class="body">
-
-              <div class="subTabs" role="tablist" aria-label="تبويبات الإدارة">
-                <button class="subTab active" type="button" id="adm_tab_edit" data-sub="edit" role="tab" aria-selected="true">تعديل</button>
-                <button class="subTab" type="button" id="adm_tab_add" data-sub="add" role="tab" aria-selected="false">إضافة سيارة</button>
-                <button class="subTab" type="button" id="adm_tab_io" data-sub="io" role="tab" aria-selected="false">استيراد / تصدير</button>
-              </div>
-
-              <!-- تعديل -->
-              <div class="subView" id="adm_view_edit" role="tabpanel">
-                <div class="small" style="margin-bottom:10px">اكتب رقم الهيكل (VIN) وسيتم جلب البيانات تلقائيًا، ثم عدّل واحفظ.</div>
-
-                <div class="btnRow">
-                  <button class="btn primary" id="btnSave" type="button">حفظ</button>
-                  <button class="btn secondary" id="btnClear" type="button">تفريغ</button>
-                </div>
-
-                <div class="row">
-                  <div><label>الهيكل (VIN)</label><input id="f_vin" placeholder="VIN" /></div>
-                  <div><label>السيارة</label><input id="f_car" placeholder="مثال: سوناتا" /></div>
-                </div>
-
-                <div class="row">
-                  <div><label>البيان</label><input id="f_statement" /></div>
-                  <div><label>الوكيل</label><input id="f_agent" /></div>
-                </div>
-
-                <div class="row">
-                  <div><label>اللون الداخلي</label><input id="f_int" /></div>
-                  <div><label>اللون الخارجي</label><input id="f_ext" /></div>
-                </div>
-
-                <div class="row">
-                  <div><label>موديل</label><input id="f_model" placeholder="2025 / 2026" /></div>
-                  <div><label>اللوحة</label><input id="f_plate" /></div>
-                </div>
-
-                <div class="row">
-                  <div><label>اسم الدفعة بالتاريخ</label><input id="f_batch" /></div>
-                  <div>
-                    <label>المكان (الفرع)</label>
-                    <select id="f_location" class="selWithAdd">
-                      <option value="">— اختر —</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div class="row">
-                  <div>
-                    <label>الحالة</label>
-                    <select id="f_status" class="selWithAdd">
-                      <option value="">— اختر —</option>
-                    </select>
-                  </div>
-                  <div><label>ملاحظات في السيارة</label><input id="f_notesLoc" /></div>
-                </div>
-
-                <div class="row">
-                  <div><label>حجز - نواقص - تحديد مكان</label><input id="f_notesMissing" /></div>
-                  <div id="f_carNotes_box" class="hidden"><label>ملاحظات السيارات</label><input id="f_carNotes" placeholder="تُفتح عند الحالة: بها ملاحظات" /></div>
-                </div>
-
-                <div class="row">
-                  <div class="span2">
-                    <div style="margin:10px 0 8px;color:var(--brown);font-weight:900">التشيك</div>
-                    <div class="checks">
-                      <div class="checkItem"><span>فرشات</span><input id="c_farshat" type="checkbox"></div>
-                      <div class="checkItem"><span>طفاية</span><input id="c_tafaia" type="checkbox"></div>
-                      <div class="checkItem"><span>شنطة</span><input id="c_shanta" type="checkbox"></div>
-                      <div class="checkItem"><span>اسبير</span><input id="c_spare" type="checkbox"></div>
-                      <div class="checkItem"><span>ريموت</span><input id="c_remote" type="checkbox"></div>
-                      <div class="checkItem"><span>شاشة</span><input id="c_screen" type="checkbox"></div>
-                      <div class="checkItem"><span>مسجل</span><input id="c_recorder" type="checkbox"></div>
-                      <div class="checkItem"><span>مكيف</span><input id="c_ac" type="checkbox"></div>
-                      <div class="checkItem"><span>كاميرا</span><input id="c_camera" type="checkbox"></div>
-                      <div class="checkItem"><span>حساس</span><input id="c_sensors" type="checkbox"></div>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="row">
-                  <div>
-                    <label>الموافقة المالية</label>
-                    <select id="a_financial">
-                      <option value="">—</option>
-                      <option value="true">نعم</option>
-                      <option value="false">لا</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label>الموافقة الإدارية</label>
-                    <select id="a_admin">
-                      <option value="">—</option>
-                      <option value="true">نعم</option>
-                      <option value="false">لا</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div class="row">
-                  <div class="span2">
-                    <label>Tracking (اختياري)</label>
-                    <input id="f_tracking" placeholder="رابط/كود تتبع (اختياري)" />
-                  </div>
-                </div>
-
-                <div class="small">المسار الموحد: <b>cars</b> فقط.</div>
-              </div>
-
-              <!-- إضافة سيارة -->
-              <div class="subView hidden" id="adm_view_add" role="tabpanel">
-                <div class="small" style="margin-bottom:10px">اكتب رقم الهيكل (VIN) وباقي البيانات ثم احفظ.</div>
-
-                <div class="btnRow">
-                  <button class="btn primary" id="btnSaveNew" type="button">حفظ</button>
-                  <button class="btn secondary" id="btnClearNew" type="button">تفريغ</button>
-                </div>
-
-                <div class="row">
-                  <div><label>الهيكل (VIN)</label><input id="n_vin" placeholder="VIN" /></div>
-                  <div><label>السيارة</label><input id="n_car" placeholder="مثال: سوناتا" /></div>
-                </div>
-
-                <div class="row">
-                  <div><label>البيان</label><input id="n_statement" /></div>
-                  <div><label>الوكيل</label><input id="n_agent" /></div>
-                </div>
-
-                <div class="row">
-                  <div><label>اللون الداخلي</label><input id="n_int" /></div>
-                  <div><label>اللون الخارجي</label><input id="n_ext" /></div>
-                </div>
-
-                <div class="row">
-                  <div><label>موديل</label><input id="n_model" placeholder="2025 / 2026" /></div>
-                  <div><label>اللوحة</label><input id="n_plate" /></div>
-                </div>
-
-                <div class="row">
-                  <div><label>اسم الدفعة بالتاريخ</label><input id="n_batch" /></div>
-                  <div>
-                    <label>المكان (الفرع)</label>
-                    <select id="n_location" class="selWithAdd">
-                      <option value="">— اختر —</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div class="row">
-                  <div>
-                    <label>الحالة</label>
-                    <select id="n_status" class="selWithAdd">
-                      <option value="">— اختر —</option>
-                    </select>
-                  </div>
-                  <div><label>ملاحظات في السيارة</label><input id="n_notesLoc" /></div>
-                </div>
-
-                <div class="row">
-                  <div><label>حجز - نواقص - تحديد مكان</label><input id="n_notesMissing" /></div>
-                  <div id="n_carNotes_box" class="hidden"><label>ملاحظات السيارات</label><input id="n_carNotes" placeholder="تُفتح عند الحالة: بها ملاحظات" /></div>
-                </div>
-
-                <div class="row">
-                  <div class="span2">
-                    <div style="margin:10px 0 8px;color:var(--brown);font-weight:900">التشيك</div>
-                    <div class="checks">
-                      <div class="checkItem"><span>فرشات</span><input id="n_farshat" type="checkbox"></div>
-                      <div class="checkItem"><span>طفاية</span><input id="n_tafaia" type="checkbox"></div>
-                      <div class="checkItem"><span>شنطة</span><input id="n_shanta" type="checkbox"></div>
-                      <div class="checkItem"><span>اسبير</span><input id="n_spare" type="checkbox"></div>
-                      <div class="checkItem"><span>ريموت</span><input id="n_remote" type="checkbox"></div>
-                      <div class="checkItem"><span>شاشة</span><input id="n_screen" type="checkbox"></div>
-                      <div class="checkItem"><span>مسجل</span><input id="n_recorder" type="checkbox"></div>
-                      <div class="checkItem"><span>مكيف</span><input id="n_ac" type="checkbox"></div>
-                      <div class="checkItem"><span>كاميرا</span><input id="n_camera" type="checkbox"></div>
-                      <div class="checkItem"><span>حساس</span><input id="n_sensors" type="checkbox"></div>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="row">
-                  <div>
-                    <label>الموافقة المالية</label>
-                    <select id="n_financial">
-                      <option value="">—</option>
-                      <option value="true">نعم</option>
-                      <option value="false">لا</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label>الموافقة الإدارية</label>
-                    <select id="n_admin">
-                      <option value="">—</option>
-                      <option value="true">نعم</option>
-                      <option value="false">لا</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div class="row">
-                  <div class="span2">
-                    <label>Tracking (اختياري)</label>
-                    <input id="n_tracking" placeholder="رابط/كود تتبع (اختياري)" />
-                  </div>
-                </div>
-
-                <div class="small">المسار الموحد: <b>cars</b> فقط.</div>
-              </div>
-
-              <!-- استيراد / تصدير -->
-              <div class="subView hidden" id="adm_view_io" role="tabpanel">
-                <div class="btnRow">
-                  <button class="btn secondary" id="btnTemplate" type="button">تصدير قالب فاضي</button>
-                  <button class="btn secondary" id="btnExportAll" type="button">تصدير البيانات</button>
-                  <button class="btn primary" id="btnImport" type="button">استيراد من شيت</button>
-                </div>
-
-                <div class="small" style="margin-top:10px">
+</div>
+</div>
+<div class="card dashCard">
+<h3>كارت تتبع طلبات البيع (Tracking)</h3>
+<div class="body">
+<div class="dashKpis">
+<div class="dashKpi"><span>طلبات جديدة</span><b id="trk_new">—</b></div>
+<div class="dashKpi"><span>تحت الإجراء</span><b id="trk_inprog">—</b></div>
+</div>
+<div class="dashBtns" style="margin-top:10px">
+<button class="btn secondary" id="dash_trk_new">عرض الجديدة</button>
+<button class="btn secondary" id="dash_trk_inprog">عرض تحت الإجراء</button>
+</div>
+<div class="small" style="margin-top:10px">يعرض الطلبات غير المؤرشفة فقط من erp_orders.</div>
+</div>
+</div>
+</div>
+</div>
+<!-- الإدارة -->
+<div class="view active" id="view-admin" role="tabpanel">
+<!-- Admin Sub Tabs -->
+<div class="card">
+<h3>الإدارة</h3>
+<div class="body">
+<div aria-label="تبويبات الإدارة" class="subTabs" role="tablist">
+<button aria-selected="true" class="subTab active" data-sub="edit" id="adm_tab_edit" role="tab" type="button">تعديل</button>
+<button aria-selected="false" class="subTab" data-sub="add" id="adm_tab_add" role="tab" type="button">إضافة سيارة</button>
+<button aria-selected="false" class="subTab" data-sub="io" id="adm_tab_io" role="tab" type="button">استيراد / تصدير</button>
+</div>
+<!-- تعديل -->
+<div class="subView" id="adm_view_edit" role="tabpanel">
+<div class="small" style="margin-bottom:10px">اكتب رقم الهيكل (VIN) وسيتم جلب البيانات تلقائيًا، ثم عدّل واحفظ.</div>
+<div class="btnRow">
+<button class="btn primary" id="btnSave" type="button">حفظ</button>
+<button class="btn secondary" id="btnClear" type="button">تفريغ</button>
+</div>
+<div class="row">
+<div><label>الهيكل (VIN)</label><input id="f_vin" placeholder="VIN"/></div>
+<div><label>السيارة</label><input id="f_car" placeholder="مثال: سوناتا"/></div>
+</div>
+<div class="row">
+<div><label>البيان</label><input id="f_statement"/></div>
+<div><label>الوكيل</label><input id="f_agent"/></div>
+</div>
+<div class="row">
+<div><label>اللون الداخلي</label><input id="f_int"/></div>
+<div><label>اللون الخارجي</label><input id="f_ext"/></div>
+</div>
+<div class="row">
+<div><label>موديل</label><input id="f_model" placeholder="2025 / 2026"/></div>
+<div><label>اللوحة</label><input id="f_plate"/></div>
+</div>
+<div class="row">
+<div><label>اسم الدفعة بالتاريخ</label><input id="f_batch"/></div>
+<div>
+<label>المكان (الفرع)</label>
+<select class="selWithAdd" id="f_location">
+<option value="">— اختر —</option>
+</select>
+</div>
+</div>
+<div class="row">
+<div>
+<label>الحالة</label>
+<select class="selWithAdd" id="f_status">
+<option value="">— اختر —</option>
+</select>
+</div>
+<div><label>ملاحظات في السيارة</label><input id="f_notesLoc"/></div>
+</div>
+<div class="row">
+<div><label>حجز - نواقص - تحديد مكان</label><input id="f_notesMissing"/></div>
+<div class="hidden" id="f_carNotes_box"><label>ملاحظات السيارات</label><input id="f_carNotes" placeholder="تُفتح عند الحالة: بها ملاحظات"/></div>
+</div>
+<div class="row">
+<div class="span2">
+<div style="margin:10px 0 8px;color:var(--brown);font-weight:900">التشيك</div>
+<div class="checks">
+<div class="checkItem"><span>فرشات</span><input id="c_farshat" type="checkbox"/></div>
+<div class="checkItem"><span>طفاية</span><input id="c_tafaia" type="checkbox"/></div>
+<div class="checkItem"><span>شنطة</span><input id="c_shanta" type="checkbox"/></div>
+<div class="checkItem"><span>اسبير</span><input id="c_spare" type="checkbox"/></div>
+<div class="checkItem"><span>ريموت</span><input id="c_remote" type="checkbox"/></div>
+<div class="checkItem"><span>شاشة</span><input id="c_screen" type="checkbox"/></div>
+<div class="checkItem"><span>مسجل</span><input id="c_recorder" type="checkbox"/></div>
+<div class="checkItem"><span>مكيف</span><input id="c_ac" type="checkbox"/></div>
+<div class="checkItem"><span>كاميرا</span><input id="c_camera" type="checkbox"/></div>
+<div class="checkItem"><span>حساس</span><input id="c_sensors" type="checkbox"/></div>
+</div>
+</div>
+</div>
+<div class="row">
+<div>
+<label>الموافقة المالية</label>
+<select id="a_financial">
+<option value="">—</option>
+<option value="true">نعم</option>
+<option value="false">لا</option>
+</select>
+</div>
+<div>
+<label>الموافقة الإدارية</label>
+<select id="a_admin">
+<option value="">—</option>
+<option value="true">نعم</option>
+<option value="false">لا</option>
+</select>
+</div>
+</div>
+<div class="row">
+<div class="span2">
+<label>Tracking (اختياري)</label>
+<input id="f_tracking" placeholder="رابط/كود تتبع (اختياري)">
+</input></div>
+</div>
+<div class="small">المسار الموحد: <b>cars</b> فقط.</div>
+</div>
+<!-- إضافة سيارة -->
+<div class="subView hidden" id="adm_view_add" role="tabpanel">
+<div class="small" style="margin-bottom:10px">اكتب رقم الهيكل (VIN) وباقي البيانات ثم احفظ.</div>
+<div class="btnRow">
+<button class="btn primary" id="btnSaveNew" type="button">حفظ</button>
+<button class="btn secondary" id="btnClearNew" type="button">تفريغ</button>
+</div>
+<div class="row">
+<div><label>الهيكل (VIN)</label><input id="n_vin" placeholder="VIN"/></div>
+<div><label>السيارة</label><input id="n_car" placeholder="مثال: سوناتا"/></div>
+</div>
+<div class="row">
+<div><label>البيان</label><input id="n_statement"/></div>
+<div><label>الوكيل</label><input id="n_agent"/></div>
+</div>
+<div class="row">
+<div><label>اللون الداخلي</label><input id="n_int"/></div>
+<div><label>اللون الخارجي</label><input id="n_ext"/></div>
+</div>
+<div class="row">
+<div><label>موديل</label><input id="n_model" placeholder="2025 / 2026"/></div>
+<div><label>اللوحة</label><input id="n_plate"/></div>
+</div>
+<div class="row">
+<div><label>اسم الدفعة بالتاريخ</label><input id="n_batch"/></div>
+<div>
+<label>المكان (الفرع)</label>
+<select class="selWithAdd" id="n_location">
+<option value="">— اختر —</option>
+</select>
+</div>
+</div>
+<div class="row">
+<div>
+<label>الحالة</label>
+<select class="selWithAdd" id="n_status">
+<option value="">— اختر —</option>
+</select>
+</div>
+<div><label>ملاحظات في السيارة</label><input id="n_notesLoc"/></div>
+</div>
+<div class="row">
+<div><label>حجز - نواقص - تحديد مكان</label><input id="n_notesMissing"/></div>
+<div class="hidden" id="n_carNotes_box"><label>ملاحظات السيارات</label><input id="n_carNotes" placeholder="تُفتح عند الحالة: بها ملاحظات"/></div>
+</div>
+<div class="row">
+<div class="span2">
+<div style="margin:10px 0 8px;color:var(--brown);font-weight:900">التشيك</div>
+<div class="checks">
+<div class="checkItem"><span>فرشات</span><input id="n_farshat" type="checkbox"/></div>
+<div class="checkItem"><span>طفاية</span><input id="n_tafaia" type="checkbox"/></div>
+<div class="checkItem"><span>شنطة</span><input id="n_shanta" type="checkbox"/></div>
+<div class="checkItem"><span>اسبير</span><input id="n_spare" type="checkbox"/></div>
+<div class="checkItem"><span>ريموت</span><input id="n_remote" type="checkbox"/></div>
+<div class="checkItem"><span>شاشة</span><input id="n_screen" type="checkbox"/></div>
+<div class="checkItem"><span>مسجل</span><input id="n_recorder" type="checkbox"/></div>
+<div class="checkItem"><span>مكيف</span><input id="n_ac" type="checkbox"/></div>
+<div class="checkItem"><span>كاميرا</span><input id="n_camera" type="checkbox"/></div>
+<div class="checkItem"><span>حساس</span><input id="n_sensors" type="checkbox"/></div>
+</div>
+</div>
+</div>
+<div class="row">
+<div>
+<label>الموافقة المالية</label>
+<select id="n_financial">
+<option value="">—</option>
+<option value="true">نعم</option>
+<option value="false">لا</option>
+</select>
+</div>
+<div>
+<label>الموافقة الإدارية</label>
+<select id="n_admin">
+<option value="">—</option>
+<option value="true">نعم</option>
+<option value="false">لا</option>
+</select>
+</div>
+</div>
+<div class="row">
+<div class="span2">
+<label>Tracking (اختياري)</label>
+<input id="n_tracking" placeholder="رابط/كود تتبع (اختياري)">
+</input></div>
+</div>
+<div class="small">المسار الموحد: <b>cars</b> فقط.</div>
+</div>
+<!-- استيراد / تصدير -->
+<div class="subView hidden" id="adm_view_io" role="tabpanel">
+<div class="btnRow">
+<button class="btn secondary" id="btnTemplate" type="button">تصدير قالب فاضي</button>
+<button class="btn secondary" id="btnExportAll" type="button">تصدير البيانات</button>
+<button class="btn primary" id="btnImport" type="button">استيراد من شيت</button>
+</div>
+<div class="small" style="margin-top:10px">
                   الاستيراد يدعم 3 اختيارات: <b>استبدال كامل</b> / <b>إضافة فوق الحالي</b> / <b>تحديث من الشيت</b>.
-                  <br>الهيكل (VIN) هو المفتاح.
+                  <br/>الهيكل (VIN) هو المفتاح.
                 </div>
-              </div>
-
-            </div>
-          </div>
-        </div>
-
-
-        <!-- المخزون -->
-        <div class="view" id="view-inventory" role="tabpanel">
-          <div class="card">
-            <h3>المخزون (قراءة فقط)</h3>
-            <div class="body">
-              <div class="toolbar">
-                <div class="field" style="flex:1">
-                  <label>بحث عام</label>
-                  <input id="inv_search" placeholder="ابحث بالهيكل/السيارة/الوكيل/اللوحة/المكان..." />
-                </div>
-                <div class="field">
-                  <label>الفرع (المكان)</label>
-                  <select id="inv_location">
-                    <option value="">الكل</option>
-                  </select>
-                </div>
-                <div class="field">
-                  <label>الحالة</label>
-                  <select id="inv_status">
-                    <option value="">الكل</option>
-                    <option value="مباع تحت التسليم">مباع تحت التسليم</option>
-                    <option value="متاح للبيع">متاح للبيع</option>
-                    <option value="حجز">حجز</option>
-                    <option value="مباع تم التسليم">مباع تم التسليم</option>
-                    <option value="بها ملاحظات">بها ملاحظات</option>
-                    <option value="مؤرشف">أرشيف</option>
-                  </select>
-                </div>
-                <div class="field">
-                  <label>الأرشيف</label>
-                  <select id="inv_archive">
-                    <option value="active" selected>المخزون</option>
-                    <option value="archived">المؤرشف</option>
-                    <option value="all">الكل</option>
-                  </select>
-                </div>
-                <div class="field">
-                  <label>الموديل</label>
-                  <select id="inv_model">
-                    <option value="">الكل</option>
-                  </select>
-                </div>
-                <div>
-                  <button class="btn secondary" id="inv_export">تصدير النتائج</button>
-                </div>
-              </div>
-
-              <div class="small" style="margin-bottom:10px">
+</div>
+</div>
+</div>
+</div>
+<!-- المخزون -->
+<div class="view" id="view-inventory" role="tabpanel">
+<div class="card">
+<h3>المخزون (قراءة فقط)</h3>
+<div class="body">
+<div class="toolbar">
+<div class="field" style="flex:1">
+<label>بحث عام</label>
+<input id="inv_search" placeholder="ابحث بالهيكل/السيارة/الوكيل/اللوحة/المكان...">
+</input></div>
+<div class="field">
+<label>الفرع (المكان)</label>
+<select id="inv_location">
+<option value="">الكل</option>
+</select>
+</div>
+<div class="field">
+<label>الحالة</label>
+<select id="inv_status">
+<option value="">الكل</option>
+<option value="مباع تحت التسليم">مباع تحت التسليم</option>
+<option value="متاح للبيع">متاح للبيع</option>
+<option value="حجز">حجز</option>
+<option value="مباع تم التسليم">مباع تم التسليم</option>
+<option value="بها ملاحظات">بها ملاحظات</option>
+<option value="مؤرشف">أرشيف</option>
+</select>
+</div>
+<div class="field">
+<label>الأرشيف</label>
+<select id="inv_archive">
+<option selected="" value="active">المخزون</option>
+<option value="archived">المؤرشف</option>
+<option value="all">الكل</option>
+</select>
+</div>
+<div class="field">
+<label>الموديل</label>
+<select id="inv_model">
+<option value="">الكل</option>
+</select>
+</div>
+<div>
+<button class="btn secondary" id="inv_export">تصدير النتائج</button>
+</div>
+</div>
+<div class="small" style="margin-bottom:10px">
                 يعرض: VIN, السيارة, البيان, الوكيل, الألوان, الموديل, اللوحة, الدفعة, المكان, الملاحظات, الحالة, ملاحظات السيارات, Tracking + زر عرض المزيد.
               </div>
-
-              <div class="tableWrap">
-                <table id="inv_table">
-                  <thead>
-                    <tr>
-                      <th>الهيكل (VIN)</th>
-                      <th>السيارة</th>
-                      <th>البيان</th>
-                      <th>الوكيل</th>
-                      <th>اللون الداخلي</th>
-                      <th>اللون الخارجي</th>
-                      <th>موديل</th>
-                      <th>اللوحة</th>
-                      <th>اسم الدفعة بالتاريخ</th>
-                      <th>المكان</th>
-                      <th>ملاحظات في السيارة</th>
-                      <th>حجز - نواقص - تحديد مكان</th>
-                      <th>الحالة</th>
-                      <th>Tracking</th>
-                      <th>الموافقات</th>
-                      <th>التشيك</th>
-                      <th>طلبات النقل</th>
-                      <th>الأرشيف</th>
-                    </tr>
-                  </thead>
-                  <tbody></tbody>
-                </table>
-              </div>
-
-              <div class="small" id="inv_meta" style="margin-top:10px">—</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- نقل السيارات -->
-        <div class="view" id="view-transfer" role="tabpanel">
-          <div class="grid">
-
-            <div class="card">
-              <h3>إنشاء حركة (أكثر من سيارة إلى مكان واحد)</h3>
-              <div class="body">
-
-                <div class="toolbar" style="margin-bottom:8px">
-                  <div class="field" style="min-width:unset">
-                    <button class="btn secondary" id="tr_addRow">➕ إضافة سيارة</button>
-                    <button class="btn danger" id="tr_clearRows">تفريغ القائمة</button>
-                  </div>
-                </div>
-
-                
-
-                <div class="focusBar">
-                  <div class="row">
-                                    <div>
-                                      <label>المكان المستهدف</label>
-                                      <select id="tr_to" class="selWithAdd">
-                                        <option value="">— اختر —</option>
-                                      </select>
-                                    </div>
-
-                                    <div>
-                                      <label>الحالة</label>
-                                      <select id="tr_status" class="selWithAdd">
-                                        <option value="">— اختر —</option>
-                                      </select>
-                                    </div>
-
-                                    <div>
-                                      <label>حجز - نواقص - تحديد مكان</label>
-                                      <textarea id="tr_notesMissing" rows="2" placeholder="اكتب ملاحظات الحجز أو النواقص..." style="min-width:260px"></textarea>
-                                    </div>
-
-                                    <div id="tr_note_box" class="hidden">
-                                      <label>ملاحظة (مطلوبة عند اختيار: سيارات بها ملاحظات)</label>
-                                      <input id="tr_note" placeholder="اكتب الملاحظة هنا..." />
-                                    </div>
-                                  </div>
-                </div>
-
+<div class="tableWrap">
+<table id="inv_table">
+<thead>
+<tr>
+<th>الهيكل (VIN)</th>
+<th>السيارة</th>
+<th>البيان</th>
+<th>الوكيل</th>
+<th>اللون الداخلي</th>
+<th>اللون الخارجي</th>
+<th>موديل</th>
+<th>اللوحة</th>
+<th>اسم الدفعة بالتاريخ</th>
+<th>المكان</th>
+<th>ملاحظات في السيارة</th>
+<th>حجز - نواقص - تحديد مكان</th>
+<th>الحالة</th>
+<th>Tracking</th>
+<th>الموافقات</th>
+<th>التشيك</th>
+<th>طلبات النقل</th>
+<th>الأرشيف</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+<div class="small" id="inv_meta" style="margin-top:10px">—</div>
+</div>
+</div>
+</div>
+<!-- نقل السيارات -->
+<div class="view" id="view-transfer" role="tabpanel">
+<div class="grid">
+<div class="card">
+<h3>إنشاء حركة (أكثر من سيارة إلى مكان واحد)</h3>
+<div class="body">
+<div class="toolbar" style="margin-bottom:8px">
+<div class="field" style="min-width:unset">
+<button class="btn secondary" id="tr_addRow">➕ إضافة سيارة</button>
+<button class="btn danger" id="tr_clearRows">تفريغ القائمة</button>
+</div>
+</div>
+<div class="focusBar">
+<div class="row">
+<div>
+<label>المكان المستهدف</label>
+<select class="selWithAdd" id="tr_to">
+<option value="">— اختر —</option>
+</select>
+</div>
+<div>
+<label>الحالة</label>
+<select class="selWithAdd" id="tr_status">
+<option value="">— اختر —</option>
+</select>
+</div>
+<div>
+<label>حجز - نواقص - تحديد مكان</label>
+<textarea id="tr_notesMissing" placeholder="اكتب ملاحظات الحجز أو النواقص..." rows="2" style="min-width:260px"></textarea>
+</div>
+<div class="hidden" id="tr_note_box">
+<label>ملاحظة (مطلوبة عند اختيار: سيارات بها ملاحظات)</label>
+<input id="tr_note" placeholder="اكتب الملاحظة هنا...">
+</input></div>
+</div>
+</div>
 <div class="tableWrap" id="tr_tableWrap" style="max-height:260px;margin-bottom:10px">
-                  <table id="tr_vinTable">
-                    <thead>
-                      <tr>
-                        <th style="min-width:220px">الهيكل (VIN)</th>
-                        <th>السيارة</th>
-                        <th>المكان الحالي</th>
-                        <th>الحالة</th>
-                        <th>الموافقات</th>
-                        <th>حذف</th>
-                      </tr>
-                    </thead>
-                    <tbody></tbody>
-                  </table>
-                </div>
-
-                
-
-                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
+<table id="tr_vinTable">
+<thead>
+<tr>
+<th style="min-width:220px">الهيكل (VIN)</th>
+<th>السيارة</th>
+<th>المكان الحالي</th>
+<th>الحالة</th>
+<th>الموافقات</th>
+<th>حذف</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
 <button class="btn primary" id="tr_submit">تنفيذ الحركة</button>
-                </div>
-
-                <div class="small" id="tr_hint" style="margin-top:10px">
+</div>
+<div class="small" id="tr_hint" style="margin-top:10px">
                   المسموح بالحركة: <b>الادارة / اداري</b>. سيتم تسجيل آخر الحركات مع البريد المنفذ.
                 
             <div class="card" style="margin-top:14px">
-              <h3>سجل آخر الحركات</h3>
-              <div class="body">
-                <div class="tableWrap" style="max-height:360px">
-                  <table id="log_table">
-                    <thead>
-                      <tr>
-                        <th>نوع الطلب</th>
-                        <th>رقم الهيكل</th>
-                        <th>من</th>
-                        <th>إلى</th>
-                        <th>ملاحظات</th>
-                        <th>المستخدم</th>
-                      </tr>
-                    </thead>
-                    <tbody></tbody>
-                  </table>
-                </div>
-                <div class="small" id="log_meta" style="margin-top:8px">آخر الحركات: 0</div>
-              </div>
-            </div>
+<h3>سجل آخر الحركات</h3>
+<div class="body">
+<div class="tableWrap" style="max-height:360px">
+<table id="log_table">
+<thead>
+<tr>
+<th>نوع الطلب</th>
+<th>رقم الهيكل</th>
+<th>من</th>
+<th>إلى</th>
+<th>ملاحظات</th>
+<th>المستخدم</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
 </div>
-
-              </div>
-            </div>
+<div class="small" id="log_meta" style="margin-top:8px">آخر الحركات: 0</div>
+</div>
+</div>
+</div>
+</div>
+</div>
 <div class="small" id="tr_meta" style="margin-top:10px">—</div>
-              </div>
-            </div>
-
-          </div>
 </div>
-        </div>
-
 </div>
-        </div>
+</div>
+</div>
+</div>
 
-      </div>
-    </div>
 
-  </div>
 
-        <!-- الطلبات -->
-        <div class="view" id="view-requests" role="tabpanel">
-          <div class="card">
-            <h3>طلبات النقل</h3>
-            <div class="body">
-              <div id="req_focusbar" class="reqFocus">
-                <div class="reqFocusGrid">
-                  <div>
-                    <label>اختر القسم</label>
-                    <select id="req_mode">
-                      <option value="create">إنشاء طلب</option>
-                      <option value="track">متابعة الطلبات</option>
-                      <option value="done">الطلبات المكتملة</option>
-                    </select>
-                  </div>
 
-                  <div class="reqOnlyCreate">
-                    <label>نوع الطلب</label>
-                    <select id="req_type">
-                      <option value="transfer">نقل</option>
-                      <option value="photo">تصوير</option>
-                    </select>
-                  </div>
 
-                  <div class="reqOnlyCreate">
-                    <label id="req_loc_label">مكان النقل</label>
-                    <select id="req_to" class="selWithAdd">
-                      <option value="">— اختر —</option>
-                    </select>
-                  </div>
-
-                  <div id="req_photo_date_box" class="hidden reqOnlyCreate">
-                    <label>تاريخ التصوير</label>
-                    <input id="req_photo_date" type="date" />
-                  </div>
-                </div>
-                <div class="small" style="margin-top:8px">اختار القسم + نوع الطلب + مكان النقل + تاريخ التصوير (لو تصوير) ثم اكتب أرقام الهياكل.</div>
-              </div>
-
-              <!-- إنشاء طلب -->
-              <div id="req_create_box">
+<!-- الطلبات -->
+<div class="view" id="view-requests" role="tabpanel">
+<div class="card">
+<h3>طلبات النقل</h3>
+<div class="body">
+<div class="reqFocus" id="req_focusbar">
+<div class="reqFocusGrid">
+<div>
+<label>اختر القسم</label>
+<select id="req_mode">
+<option value="create">إنشاء طلب</option>
+<option value="track">متابعة الطلبات</option>
+<option value="done">الطلبات المكتملة</option>
+</select>
+</div>
+<div class="reqOnlyCreate">
+<label>نوع الطلب</label>
+<select id="req_type">
+<option value="transfer">نقل</option>
+<option value="photo">تصوير</option>
+</select>
+</div>
+<div class="reqOnlyCreate">
+<label id="req_loc_label">مكان النقل</label>
+<select class="selWithAdd" id="req_to">
+<option value="">— اختر —</option>
+</select>
+</div>
+<div class="hidden reqOnlyCreate" id="req_photo_date_box">
+<label>تاريخ التصوير</label>
+<input id="req_photo_date" type="date">
+</input></div>
+</div>
+<div class="small" style="margin-top:8px">اختار القسم + نوع الطلب + مكان النقل + تاريخ التصوير (لو تصوير) ثم اكتب أرقام الهياكل.</div>
+</div>
+<!-- إنشاء طلب -->
+<div id="req_create_box">
 <div class="toolbar" style="margin-bottom:8px">
-                  <div class="field" style="min-width:unset">
-                    <button class="btn secondary" id="req_addRow">➕ إضافة رقم هيكل</button>
-                    <button class="btn danger" id="req_clearRows">تفريغ القائمة</button>
-                  </div>
-                </div>
-
-                <div class="tableWrap" style="max-height:320px;margin-bottom:10px">
-                  <table id="req_vinTable">
-                    <thead>
-                      <tr>
-                        <th style="min-width:220px">رقم الهيكل (VIN)</th>
-                        <th>السيارة</th>
-                        <th>الفئة</th>
-                        <th>الخارجي</th>
-                        <th>الداخلي</th>
-                        <th>الموديل</th>
-                        <th>المكان الحالي</th>
-                        <th style="min-width:220px">ملاحظة</th>
-                        <th>حذف</th>
-                      </tr>
-                    </thead>
-                    <tbody></tbody>
-                  </table>
-                </div>
+<div class="field" style="min-width:unset">
+<button class="btn secondary" id="req_addRow">➕ إضافة رقم هيكل</button>
+<button class="btn danger" id="req_clearRows">تفريغ القائمة</button>
+</div>
+</div>
+<div class="tableWrap" style="max-height:320px;margin-bottom:10px">
+<table id="req_vinTable">
+<thead>
+<tr>
+<th style="min-width:220px">رقم الهيكل (VIN)</th>
+<th>السيارة</th>
+<th>الفئة</th>
+<th>الخارجي</th>
+<th>الداخلي</th>
+<th>الموديل</th>
+<th>المكان الحالي</th>
+<th style="min-width:220px">ملاحظة</th>
+<th>حذف</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
 <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
-                  <button class="btn primary" id="req_submit">إرسال الطلب</button>
-                </div>
-
-                <div class="small" id="req_create_hint" style="margin-top:10px">—</div>
-              </div>
-
-              <!-- متابعة الطلبات -->
-              <div id="req_track_box" class="hidden">
-                <div class="small" style="margin-bottom:10px">يعرض الطلبات غير المكتملة فقط.</div>
-                <div class="tableWrap" style="max-height:520px">
-                  <table id="req_table_open">
-                    <thead>
-                      <tr>
-                        <th>التاريخ</th>
-                        <th>النوع</th>
-                        <th>عدد الهياكل</th>
-                        <th>من</th>
-                        <th>المكان المستهدف</th>
+<button class="btn primary" id="req_submit">إرسال الطلب</button>
+</div>
+<div class="small" id="req_create_hint" style="margin-top:10px">—</div>
+</div>
+<!-- متابعة الطلبات -->
+<div class="hidden" id="req_track_box">
+<div class="small" style="margin-bottom:10px">يعرض الطلبات غير المكتملة فقط.</div>
+<div class="tableWrap" style="max-height:520px">
+<table id="req_table_open">
+<thead>
+<tr>
+<th>التاريخ</th>
+<th>النوع</th>
+<th>عدد الهياكل</th>
+<th>من</th>
+<th>المكان المستهدف</th>
 <th>فتح</th>
-                      </tr>
-                    </thead>
-                    <tbody></tbody>
-                  </table>
-                </div>
-                <div class="small" id="req_open_meta" style="margin-top:10px">—</div>
-              </div>
-
-              <!-- الطلبات المكتملة -->
-              <div id="req_done_box" class="hidden">
-                <div class="small" style="margin-bottom:10px">يعرض الطلبات المكتملة فقط.</div>
-                <div class="tableWrap" style="max-height:520px">
-                  <table id="req_table_done">
-                    <thead>
-                      <tr>
-                        <th>التاريخ</th>
-                        <th>النوع</th>
-                        <th>عدد الهياكل</th>
-                        <th>من</th>
-                        <th>المكان المستهدف</th>
-                        <th>اكتمل</th>
-                        <th>فتح</th>
-                      </tr>
-                    </thead>
-                    <tbody></tbody>
-                  </table>
-                </div>
-                <div class="small" id="req_done_meta" style="margin-top:10px">—</div>
-              </div>
-
-            </div>
-          </div>
-        </div>
-
-  
-        <!-- كل السيارات -->
-        <div class="view" id="view-allcars" role="tabpanel">
-          <div class="card">
-            <h3>كل السيارات</h3>
-            <div class="body">
-              <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px">
-                <div class="small">التجميع حسب (السيارة + البيان + الموديل) مع إجمالي العدد.</div>
-                <button class="btn secondary" id="btnExportAllCars">تصدير Excel</button>
-              </div>
-
-              <div class="tableWrap" style="padding:0">
-                <table id="allCarsTable">
-                  <thead>
-                    <tr>
-                      <th style="width:60px">#</th>
-                      <th>السيارة</th>
-                      <th>البيان</th>
-                      <th>الموديل</th>
-                      <th style="width:140px">إجمالي العدد</th>
-                    </tr>
-                  </thead>
-                  <tbody></tbody>
-                </table>
-              </div>
-
-              <div class="small" id="allCarsMeta" style="margin-top:8px">—</div>
-            </div>
-          </div>
-        </div>
-
-
-        <!-- سجل الحركات -->
-        <div class="view" id="view-logs" role="tabpanel">
-          <div class="card">
-            <h3>سجل الحركات</h3>
-            <div class="body">
-              <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end">
-                <div style="min-width:160px">
-                  <div class="small">من تاريخ</div>
-                  <input id="lg_from" type="date" class="input" />
-                </div>
-                <div style="min-width:160px">
-                  <div class="small">إلى تاريخ</div>
-                  <input id="lg_to" type="date" class="input" />
-                </div>
-                <div style="min-width:160px">
-                  <div class="small">فلترة</div>
-                  <select id="lg_filter" class="input">
-                    <option value="all">الكل</option>
-                    <option value="vin">رقم الهيكل</option>
-                    <option value="car">السيارة</option>
-                    <option value="from">من</option>
-                    <option value="to">إلى</option>
-                  </select>
-                </div>
-                <div id="lg_search_box" style="min-width:220px">
-                  <div class="small">بحث</div>
-                  <input id="lg_search" class="input" placeholder="اكتب رقم الهيكل أو اسم السيارة" />
-                </div>
-                <div id="lg_from_box" class="hidden" style="min-width:260px">
-                  <div class="small">اختار المكان (من)</div>
-                  <select id="lg_from_loc" class="input"></select>
-                </div>
-                <div id="lg_to_box" class="hidden" style="min-width:260px">
-                  <div class="small">اختار المكان (إلى)</div>
-                  <select id="lg_to_loc" class="input"></select>
-                </div>
-
-                <button class="btn primary" id="lg_apply">عرض</button>
-                <button class="btn secondary" id="lg_export">تصدير Excel</button>
-                <select id="lg_paper" class="input" style="width:120px;min-width:120px">
-                  <option value="A3" selected>A3</option>
-                                  </select>
-                <button class="btn secondary" id="lg_pdf">تصدير PDF</button>
-              </div>
-
-              <div style="margin-top:12px;overflow:auto">
-                <table class="table" id="lg_table">
-                  <thead>
-                    <tr>
-                      <th>رقم الهيكل (VIN)</th>
-                      <th>السيارة</th>
-                      <th>البيان</th>
-                      <th>الوكيل</th>
-                      <th>اللون الداخلي</th>
-                      <th>اللون الخارجي</th>
-                      <th>موديل</th>
-                      <th>اللوحة</th>
-                      <th>اسم الدفعة بالتاريخ</th>
-                      <th>التاريخ</th>
-                      <th>المكان</th>
-                      <th>ملاحظات في السيارة</th>
-                      <th>حجز - نواقص - تحديد مكان</th>
-                      <th>الحالة</th>
-                      <th>حساس</th>
-                      <th>كاميرا</th>
-                      <th>مكيف</th>
-                      <th>مسجل</th>
-                      <th>شاشة</th>
-                      <th>ريموت</th>
-                      <th>فرشات</th>
-                      <th>طفاية</th>
-                      <th>شنطة سلامة</th>
-                      <th>اسبير</th>
-                      <th>الموافقة المالية</th>
-                      <th>الموافقة الادارية</th>
-                      <th>منفذ الحركة</th>
-                    </tr>
-                  </thead>
-                  <tbody></tbody>
-                </table>
-              </div>
-
-              <div class="small" id="lg_meta" style="margin-top:10px">—</div>
-            </div>
-          </div>
-        </div>
-
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+<div class="small" id="req_open_meta" style="margin-top:10px">—</div>
+</div>
+<!-- الطلبات المكتملة -->
+<div class="hidden" id="req_done_box">
+<div class="small" style="margin-bottom:10px">يعرض الطلبات المكتملة فقط.</div>
+<div class="tableWrap" style="max-height:520px">
+<table id="req_table_done">
+<thead>
+<tr>
+<th>التاريخ</th>
+<th>النوع</th>
+<th>عدد الهياكل</th>
+<th>من</th>
+<th>المكان المستهدف</th>
+<th>اكتمل</th>
+<th>فتح</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+<div class="small" id="req_done_meta" style="margin-top:10px">—</div>
+</div>
+</div>
+</div>
+</div>
+<!-- كل السيارات -->
+<div class="view" id="view-allcars" role="tabpanel">
+<div class="card">
+<h3>كل السيارات</h3>
+<div class="body">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+<div class="small">التجميع حسب (السيارة + البيان + الموديل) مع إجمالي العدد.</div>
+<button class="btn secondary" id="btnExportAllCars">تصدير Excel</button>
+</div>
+<div class="tableWrap" style="padding:0">
+<table id="allCarsTable">
+<thead>
+<tr>
+<th style="width:60px">#</th>
+<th>السيارة</th>
+<th>البيان</th>
+<th>الموديل</th>
+<th style="width:140px">إجمالي العدد</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+<div class="small" id="allCarsMeta" style="margin-top:8px">—</div>
+</div>
+</div>
+</div>
+<!-- سجل الحركات -->
+<div class="view" id="view-logs" role="tabpanel">
+<div class="card">
+<h3>سجل الحركات</h3>
+<div class="body">
+<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end">
+<div style="min-width:160px">
+<div class="small">من تاريخ</div>
+<input class="input" id="lg_from" type="date">
+</input></div>
+<div style="min-width:160px">
+<div class="small">إلى تاريخ</div>
+<input class="input" id="lg_to" type="date">
+</input></div>
+<div style="min-width:160px">
+<div class="small">فلترة</div>
+<select class="input" id="lg_filter">
+<option value="all">الكل</option>
+<option value="vin">رقم الهيكل</option>
+<option value="car">السيارة</option>
+<option value="from">من</option>
+<option value="to">إلى</option>
+</select>
+</div>
+<div id="lg_search_box" style="min-width:220px">
+<div class="small">بحث</div>
+<input class="input" id="lg_search" placeholder="اكتب رقم الهيكل أو اسم السيارة">
+</input></div>
+<div class="hidden" id="lg_from_box" style="min-width:260px">
+<div class="small">اختار المكان (من)</div>
+<select class="input" id="lg_from_loc"></select>
+</div>
+<div class="hidden" id="lg_to_box" style="min-width:260px">
+<div class="small">اختار المكان (إلى)</div>
+<select class="input" id="lg_to_loc"></select>
+</div>
+<button class="btn primary" id="lg_apply">عرض</button>
+<button class="btn secondary" id="lg_export">تصدير Excel</button>
+<select class="input" id="lg_paper" style="width:120px;min-width:120px">
+<option selected="" value="A3">A3</option>
+</select>
+<button class="btn secondary" id="lg_pdf">تصدير PDF</button>
+</div>
+<div style="margin-top:12px;overflow:auto">
+<table class="table" id="lg_table">
+<thead>
+<tr>
+<th>رقم الهيكل (VIN)</th>
+<th>السيارة</th>
+<th>البيان</th>
+<th>الوكيل</th>
+<th>اللون الداخلي</th>
+<th>اللون الخارجي</th>
+<th>موديل</th>
+<th>اللوحة</th>
+<th>اسم الدفعة بالتاريخ</th>
+<th>التاريخ</th>
+<th>المكان</th>
+<th>ملاحظات في السيارة</th>
+<th>حجز - نواقص - تحديد مكان</th>
+<th>الحالة</th>
+<th>حساس</th>
+<th>كاميرا</th>
+<th>مكيف</th>
+<th>مسجل</th>
+<th>شاشة</th>
+<th>ريموت</th>
+<th>فرشات</th>
+<th>طفاية</th>
+<th>شنطة سلامة</th>
+<th>اسبير</th>
+<th>الموافقة المالية</th>
+<th>الموافقة الادارية</th>
+<th>منفذ الحركة</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+<div class="small" id="lg_meta" style="margin-top:10px">—</div>
+</div>
+</div>
+</div>
 <!-- Import Modal -->
-  <div class="modalBackdrop" id="importModal">
-    <div class="modal" role="dialog" aria-modal="true">
-      <div class="modalHead">
-        <h4>استيراد من شيت</h4>
-        <button class="btn secondary" id="closeImport">إغلاق</button>
-      </div>
-      <div class="modalBody">
-        <label>اختر ملف Excel</label>
-        <input id="importFile" type="file" accept=".xlsx,.xls" />
-
-        <div style="margin-top:10px">
-          <label>نوع الاستيراد</label>
-          <select id="importMode">
-            <option value="replace">استبدال كامل (مسح القديم + إضافة الجديد)</option>
-            <option value="append">إضافة فوق الحالي (بدون مسح)</option>
-            <option value="update">تحديث من الشيت (تعديل الموجود فقط)</option>
-          </select>
-        </div>
-
-        <div class="small" id="importPreview" style="margin-top:10px">—</div>
-      </div>
-      <div class="modalFoot">
-        <button class="btn primary" id="runImport" disabled>تنفيذ الاستيراد</button>
-        <button class="btn danger" id="clearImport">تفريغ</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- DETAILS MODAL (Checklist + Approvals) -->
-  <div class="modalBackdrop" id="detailsModal">
-    <div class="modal" role="dialog" aria-modal="true">
-      <div class="modalHead">
-        <h4>عرض المزيد</h4>
-        <button class="btn secondary" id="detailsClose">إغلاق</button>
-      </div>
-      <div class="modalBody" id="detailsBody"></div>
-    </div>
-  </div>
-
-
-  <!-- REQUEST DETAILS MODAL -->
-  <div class="modalBackdrop" id="reqModal">
-    <div class="modal" role="dialog" aria-modal="true">
-      <div class="modalHead">
-        <h4 id="reqModalTitle">تفاصيل الطلب</h4>
-        <button class="btn secondary" id="reqClose">إغلاق</button>
-      </div>
-      <div class="modalBody" id="reqModalBody"></div>
-      <div class="modalFoot" id="reqModalFoot"></div>
-    </div>
-  </div>
-
-  <div class="toast" id="toast"></div>
-
-  
-        
-  <!-- Dashboard Data Modal -->
-  <div class="modalBackdrop" id="dashDataModal">
-    <div class="modal" role="dialog" aria-modal="true">
-      <div class="modalHead">
-        <h4 id="dashDataTitle">عرض البيانات</h4>
-        <button class="btn secondary" id="dashDataClose">إغلاق</button>
-      </div>
-      <div class="modalBody">
-        <div class="toolbar" style="gap:10px;align-items:flex-end;margin-bottom:10px">
-          <div class="field" style="flex:1;min-width:220px">
-            <label>بحث</label>
-            <input id="dashDataSearch" placeholder="ابحث بـ VIN / السيارة / البيان / المكان / الحالة" autocomplete="off" />
-          </div>
-          <div class="field" style="min-width:200px">
-            <label>&nbsp;</label>
-            <button class="btn" id="dashDataExport">تصدير Excel</button>
-          </div>
-        </div>
-        <div id="dashDataMeta" class="muted" style="margin-bottom:10px"></div>
-        <div style="overflow:auto;max-height:70vh;border:1px solid var(--line);border-radius:12px;background:#fff">
-          <table class="table" style="min-width:1100px">
-            <thead>
-              <tr>
-                <th>(VIN) الهيكل</th>
-                <th>السيارة</th>
-                <th>البيان</th>
-                <th>موديل</th>
-                <th>الوكيل</th>
-                <th>الداخلي</th>
-                <th>الخارجي</th>
-                <th>المكان</th>
-                <th>الحالة</th>
-                <th>الموافقات</th>
-              </tr>
-            </thead>
-            <tbody id="dashDataBody"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
-
-
-        <!-- التراكينج -->
-        <div class="view" id="view-tracking" role="tabpanel">
-          <div class="card" style="padding:16px;">
-            <iframe id="trackingFrame" title="Tracking"
-              style="width:100%; height:calc(100vh - 260px); border:0; border-radius:12px; background:transparent;"
-              loading="lazy"></iframe>
-
-            <!-- محتوى التراكينج (يُحقن داخل الـ iframe لتجنب مشاكل GitHub مع srcdoc الطويل) -->
-            <template id="trackingSrc">
-
+<div class="modalBackdrop" id="importModal">
+<div aria-modal="true" class="modal" role="dialog">
+<div class="modalHead">
+<h4>استيراد من شيت</h4>
+<button class="btn secondary" id="closeImport">إغلاق</button>
+</div>
+<div class="modalBody">
+<label>اختر ملف Excel</label>
+<input accept=".xlsx,.xls" id="importFile" type="file">
+<div style="margin-top:10px">
+<label>نوع الاستيراد</label>
+<select id="importMode">
+<option value="replace">استبدال كامل (مسح القديم + إضافة الجديد)</option>
+<option value="append">إضافة فوق الحالي (بدون مسح)</option>
+<option value="update">تحديث من الشيت (تعديل الموجود فقط)</option>
+</select>
+</div>
+<div class="small" id="importPreview" style="margin-top:10px">—</div>
+</input></div>
+<div class="modalFoot">
+<button class="btn primary" disabled="" id="runImport">تنفيذ الاستيراد</button>
+<button class="btn danger" id="clearImport">تفريغ</button>
+</div>
+</div>
+</div>
+<!-- DETAILS MODAL (Checklist + Approvals) -->
+<div class="modalBackdrop" id="detailsModal">
+<div aria-modal="true" class="modal" role="dialog">
+<div class="modalHead">
+<h4>عرض المزيد</h4>
+<button class="btn secondary" id="detailsClose">إغلاق</button>
+</div>
+<div class="modalBody" id="detailsBody"></div>
+</div>
+</div>
+<!-- REQUEST DETAILS MODAL -->
+<div class="modalBackdrop" id="reqModal">
+<div aria-modal="true" class="modal" role="dialog">
+<div class="modalHead">
+<h4 id="reqModalTitle">تفاصيل الطلب</h4>
+<button class="btn secondary" id="reqClose">إغلاق</button>
+</div>
+<div class="modalBody" id="reqModalBody"></div>
+<div class="modalFoot" id="reqModalFoot"></div>
+</div>
+</div>
+<div class="toast" id="toast"></div>
+<!-- Dashboard Data Modal -->
+<div class="modalBackdrop" id="dashDataModal">
+<div aria-modal="true" class="modal" role="dialog">
+<div class="modalHead">
+<h4 id="dashDataTitle">عرض البيانات</h4>
+<button class="btn secondary" id="dashDataClose">إغلاق</button>
+</div>
+<div class="modalBody">
+<div class="toolbar" style="gap:10px;align-items:flex-end;margin-bottom:10px">
+<div class="field" style="flex:1;min-width:220px">
+<label>بحث</label>
+<input autocomplete="off" id="dashDataSearch" placeholder="ابحث بـ VIN / السيارة / البيان / المكان / الحالة">
+</input></div>
+<div class="field" style="min-width:200px">
+<label> </label>
+<button class="btn" id="dashDataExport">تصدير Excel</button>
+</div>
+</div>
+<div class="muted" id="dashDataMeta" style="margin-bottom:10px"></div>
+<div style="overflow:auto;max-height:70vh;border:1px solid var(--line);border-radius:12px;background:#fff">
+<table class="table" style="min-width:1100px">
+<thead>
+<tr>
+<th>(VIN) الهيكل</th>
+<th>السيارة</th>
+<th>البيان</th>
+<th>موديل</th>
+<th>الوكيل</th>
+<th>الداخلي</th>
+<th>الخارجي</th>
+<th>المكان</th>
+<th>الحالة</th>
+<th>الموافقات</th>
+</tr>
+</thead>
+<tbody id="dashDataBody"></tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<!-- التراكينج -->
+<div class="view" id="view-tracking" role="tabpanel">
+<div class="card" style="padding:16px;">
+<iframe id="trackingFrame" loading="lazy" style="width:100%; height:calc(100vh - 260px); border:0; border-radius:12px; background:transparent;" title="Tracking"></iframe>
+<!-- محتوى التراكينج (يُحقن داخل الـ iframe لتجنب مشاكل GitHub مع srcdoc الطويل) -->
+<template id="trackingSrc">
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+
+<html dir="rtl" lang="ar">
 <head>
-  <link rel="icon" type="image/x-icon" href="assets/favicon.png">
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MZJ – تتبع المبيعات</title>
-  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet" />
-  <style>
+<link href="assets/favicon.png" rel="icon" type="image/x-icon"/>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MZJ – تتبع المبيعات</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&amp;display=swap" rel="stylesheet">
+<style>
     :root{
       --brown:#3e2420;
       --beige:#bc8f74;
@@ -1770,9 +1546,8 @@ html, body {
 }
 
 </style>
-  <link rel="stylesheet" href="./mzj-ui.css" />
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
-
+<link href="./mzj-ui.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 <style>
   /* ===== Sales Safe Refactor: hide legacy topbar ONLY (keep #tabsBar visible) ===== */
   .legacy-sales .topbar,
@@ -1784,14 +1559,11 @@ html, body {
   /* Keep content spacing nice */
   .legacy-sales{padding-top: 6px;}
 </style>
-
-
 <style>
   /* Ensure the functional tabs bar (بحث عن طلب / كل الطلبات) is visible when JS enables it */
   .legacy-sales #tabsBar{ display:flex !important; }
   .legacy-sales #tabsBar[style*="display: none"]{ display:none !important; } /* respect JS when it hides */
 </style>
-
 <style>
 /* Embedded in Workflow Dashboard (Tracking Tab) */
 html,body{height:100%;}
@@ -1809,241 +1581,222 @@ body{overflow-x:hidden !important;}
 .mzj-content{padding:0 !important; margin:0 !important;}
 .legacy{padding:0 !important; margin:0 !important;}
 </style>
-
 <style>
 html, body {
   direction: rtl;
   text-align: right;
 }
 </style>
-
-</head>
+</link></link></link></head>
 <body class="mzj">
-
-  <!-- MZJ Unified Topbar -->
-  <div class="mzj-shell" id="mzjShell">
-    <main class="mzj-content">
-      <div class="legacy legacy-sales">
-
-  
-  <!-- Topbar (Matched with Admin) -->
-  <div class="topbar">
-    <div class="topbar-inner">
-      <div class="brand">
-        <div class="logo" title="MZJ">MZJ</div>
-        <div class="brand-text">
-          <h1>لوحة تتبع المبيعات</h1>
-          <small class="hint">مجموعة محمد بن ذعار العجمي للسيارات</small>
-        </div>
-      </div>
-
-      <div class="tabs">
-        <a class="tab" href="admin.html">الإدارة</a>
-        <a class="tab active" href="sales.html">المبيعات</a>
-        <a class="tab" href="inventory.html">المخزون</a>
-        <a class="tab" href="dashboard.html">الداش بورد</a>
-        <a class="tab" href="vt.html">نقل السيارات</a>
-        <a class="tab" href="photoshoot-user.html">إدارة الطلبات</a>
-        <a class="tab" href="cars.html">كل السيارات</a>
-        <a class="tab" href="Activity.html">سجل النشاط</a>
-      </div>
-
-      <div class="topbar-actions">
-        <div class="status-badge">
-          <span class="dot warn" id="connDot"></span>
-          <span id="connText">—</span>
-        </div>
-        <span id="whoami" class="whoami"></span>
-        <button id="logoutBtn" class="tb-btn" style="display:none;">تسجيل الخروج</button>
-      </div>
-    </div>
-  </div>
+<!-- MZJ Unified Topbar -->
+<div class="mzj-shell" id="mzjShell">
+<main class="mzj-content">
+<div class="legacy legacy-sales">
+<!-- Topbar (Matched with Admin) -->
+<div class="topbar">
+<div class="topbar-inner">
+<div class="brand">
+<div class="logo" title="MZJ">MZJ</div>
+<div class="brand-text">
+<h1>لوحة تتبع المبيعات</h1>
+<small class="hint">مجموعة محمد بن ذعار العجمي للسيارات</small>
+</div>
+</div>
+<div class="tabs">
+<a class="tab" href="admin.html">الإدارة</a>
+<a class="tab active" href="sales.html">المبيعات</a>
+<a class="tab" href="inventory.html">المخزون</a>
+<a class="tab" href="dashboard.html">الداش بورد</a>
+<a class="tab" href="vt.html">نقل السيارات</a>
+<a class="tab" href="photoshoot-user.html">إدارة الطلبات</a>
+<a class="tab" href="cars.html">كل السيارات</a>
+<a class="tab" href="Activity.html">سجل النشاط</a>
+</div>
+<div class="topbar-actions">
+<div class="status-badge">
+<span class="dot warn" id="connDot"></span>
+<span id="connText">—</span>
+</div>
+<span class="whoami" id="whoami"></span>
+<button class="tb-btn" id="logoutBtn" style="display:none;">تسجيل الخروج</button>
+</div>
+</div>
+</div>
 <div class="wrap">
-
-    <!-- Auth -->
-    <div class="card" id="authCard">
-      <h3 class="title"><span class="icon">🔐</span>تسجيل الدخول</h3>
-      <div class="row">
-        <div class="col-4">
-          <label>البريد الإلكتروني</label>
-          <input id="email" type="email" placeholder="user@mzjcars.com" />
-        </div>
-        <div class="col-4">
-          <label>كلمة السر</label>
-          <input id="password" type="password" placeholder="••••••••" />
-        </div>
-        <div class="col-4" style="display:flex;align-items:flex-end;gap:8px;">
-          <button class="btn" id="loginBtn">دخول</button>
-        </div>
-      </div>
-      <div id="authMsg" class="muted" style="margin-top:6px;"></div>
-      <div class="hint">الدخول مطلوب لإدارة الطلبات وتحديث مراحلها.</div>
-    </div>
-
-    <!-- Search -->
-    <div class="card" id="orderCard" style="display:none;">
-      <h3 class="title"><span class="icon">📄</span>البحث عن طلب</h3>
-      <div class="row">
-        <div class="col-4">
-          <label>رقم الطلب</label>
-          <input id="orderId" placeholder="SAL-ORD-2025-01109 أو SAL-ORD-2025-01109_1" />
-        </div>
-        <div class="col-4" style="display:none;">
-          <label>رقم الهيكل (VIN)</label>
-          <input id="vinInput" placeholder="اكتب رقم الهيكل (VIN)" />
-        </div>
-        <div class="col-4" style="display:flex;align-items:flex-end;gap:8px;">
-          <button class="btn" id="loadBtn">فتح الطلب</button>
-          <button class="btn-outline" id="clearBtn">تفريغ</button>
-        </div>
-      </div>
-      <div id="orderMsg" class="muted" style="margin-top:6px;"></div>
-      <div class="hint">اكتب رقم الطلب ثم اضغط فتح الطلب.</div>
-    </div>
-
-    <!-- Tabs -->
-    <div class="tabs" id="tabsBar">
-      <button class="tab-btn tab-active" id="tabSearchBtn">بحث عن طلب</button>
-      <button class="tab-btn" id="tabListBtn">كل الطلبات</button>
-      <button class="tab-btn" id="tabArchiveBtn">الأرشيف</button>
-    </div>
-
-    <!-- ERP details -->
-    <div class="card" id="erpCard" style="display:none;">
-      <h3 class="title">
-        <span class="icon">📊</span>
+<!-- Auth -->
+<div class="card" id="authCard">
+<h3 class="title"><span class="icon">🔐</span>تسجيل الدخول</h3>
+<div class="row">
+<div class="col-4">
+<label>البريد الإلكتروني</label>
+<input id="email" placeholder="user@mzjcars.com" type="email">
+</input></div>
+<div class="col-4">
+<label>كلمة السر</label>
+<input id="password" placeholder="••••••••" type="password"/>
+</div>
+<div class="col-4" style="display:flex;align-items:flex-end;gap:8px;">
+<button class="btn" id="loginBtn">دخول</button>
+</div>
+</div>
+<div class="muted" id="authMsg" style="margin-top:6px;"></div>
+<div class="hint">الدخول مطلوب لإدارة الطلبات وتحديث مراحلها.</div>
+</div>
+<!-- Search -->
+<div class="card" id="orderCard" style="display:none;">
+<h3 class="title"><span class="icon">📄</span>البحث عن طلب</h3>
+<div class="row">
+<div class="col-4">
+<label>رقم الطلب</label>
+<input id="orderId" placeholder="SAL-ORD-2025-01109 أو SAL-ORD-2025-01109_1"/>
+</div>
+<div class="col-4" style="display:none;">
+<label>رقم الهيكل (VIN)</label>
+<input id="vinInput" placeholder="اكتب رقم الهيكل (VIN)"/>
+</div>
+<div class="col-4" style="display:flex;align-items:flex-end;gap:8px;">
+<button class="btn" id="loadBtn">فتح الطلب</button>
+<button class="btn-outline" id="clearBtn">تفريغ</button>
+</div>
+</div>
+<div class="muted" id="orderMsg" style="margin-top:6px;"></div>
+<div class="hint">اكتب رقم الطلب ثم اضغط فتح الطلب.</div>
+</div>
+<!-- Tabs -->
+<div class="tabs" id="tabsBar">
+<button class="tab-btn tab-active" id="tabSearchBtn">بحث عن طلب</button>
+<button class="tab-btn" id="tabListBtn">كل الطلبات</button>
+<button class="tab-btn" id="tabArchiveBtn">الأرشيف</button>
+</div>
+<!-- ERP details -->
+<div class="card" id="erpCard" style="display:none;">
+<h3 class="title">
+<span class="icon">📊</span>
         تفاصيل الطلب من نظام المبيعات (ERP)
       </h3>
-      <div id="erpMeta" class="muted" style="margin-bottom:6px;"></div>
-      <!-- اختيار رقم الهيكل لو الطلب فيه أكثر من VIN -->
-      <div id="vinPickerBox" class="vin-box">
-        <div class="vin-box-header">
-          <div class="vin-box-title">اختر رقم الهيكل للعمل عليه</div>
-          <div class="vin-chip" id="vinCountChip"></div>
-        </div>
-        <select id="vinPicker"></select>
-        <div class="hint">أي تحديث في مراحل تتبع الطلب سيكون لهذا رقم الهيكل فقط.</div>
-        <button id="trackLinkBtn" class="btn" type="button" style="margin-top:8px;width:100%;">رابط التتبع</button>
-        <button id="trackQrBtn" class="btn-outline" type="button" style="margin-top:8px;width:100%;">QR التتبع (اضغط لفتح)</button>
-      </div>
-
-      <div id="erpTotals" class="totals-box" style="display:none;"></div>
-      <div class="erp-table-wrap">
-        <table>
-          <thead>
-          <tr>
-            <th>اسم العميل</th>
-            <th>الرقم الضريبي للعميل</th>
-            <th>رقم جوال العميل</th>
-            <th>الفرع</th>
-            <th>تاريخ الطلب</th>
-            <th>تاريخ التسليم</th>
-            <th>مسؤول المبيعات</th>
-            <th>رقم الصنف</th>
-            <th>نوع الصنف</th>
-            <th>فئة الصنف</th>
-            <th>الموديل</th>
-            <th>رقم الهيكل VIN</th>
-            <th>اللون الداخلي</th>
-            <th>اللون الخارجي</th>
-            <th>الوكيل</th>
-            <th>الكمية</th>
-            <th>سعر الوحدة</th>
-            <th>قيمة الصنف</th>
-            <th>كود الضريبة</th>
-            <th>نوع الضريبة</th>
-            <th>نسبة الضريبة</th>
-            <th>قيمة الضريبة</th>
-            <th>الإجمالي قبل الضريبة</th>
-            <th>الإجمالي شامل الضريبة</th>
-          </tr>
-          </thead>
-          <tbody id="erpBody">
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Orders list tab -->
-    <div class="card" id="ordersListCard" style="display:none;">
-      <h3 class="title"><span class="icon">📋</span>كل الطلبات</h3>
-      <div class="hint">اضغط على رقم الطلب لفتحه، واختيار رقم الهيكل من الأعلى لو كان أكثر من سيارة.</div>
-      <div class="row" style="margin-top:10px;">
-        <div class="col-6">
-          <label>بحث سريع</label>
-          <input id="ordersSearch" placeholder="اكتب اسم العميل / رقم الجوال / رقم الهيكل (VIN) / رقم الطلب" />
-          <div class="hint">تقدر تبحث بأي جزء من البيانات.</div>
-        </div>
-      </div>
-      <div class="erp-table-wrap">
-        <table>
-          <thead>
-          <tr>
-            <th>رقم الطلب</th>
-            <th>اسم العميل</th>
-            <th>رقم الجوال</th>
-            <th>الفرع</th>
-            <th>رقم الهيكل VIN</th>
-          </tr>
-          </thead>
-          <tbody id="ordersListBody"></tbody>
-        </table>
-      </div>
-    </div>
-
-    
-    <!-- Archive list tab -->
-    <div class="card" id="archivesListCard" style="display:none;">
-      <h3 class="title"><span class="icon">🗄️</span>الأرشيف</h3>
-      <div class="hint">هنا تظهر الطلبات المؤرشفة. اضغط على رقم الطلب لعرض تفاصيله (قراءة فقط).</div>
-      <div class="row" style="margin-top:10px;">
-        <div class="col-6">
-          <label>بحث سريع</label>
-          <input id="archivesSearch" placeholder="اكتب رقم الطلب / اسم العميل / رقم الجوال" />
-          <div class="hint">البحث داخل الأرشيف فقط.</div>
-        </div>
-      </div>
-      <div class="erp-table-wrap">
-        <table>
-          <thead>
-          <tr>
-            <th>رقم الطلب</th>
-            <th>اسم العميل</th>
-            <th>رقم الجوال</th>
-            <th>الفرع</th>
-            <th>تاريخ الأرشفة</th>
-          </tr>
-          </thead>
-          <tbody id="archivesListBody"></tbody>
-        </table>
-      </div>
-    </div>
-
+<div class="muted" id="erpMeta" style="margin-bottom:6px;"></div>
+<!-- اختيار رقم الهيكل لو الطلب فيه أكثر من VIN -->
+<div class="vin-box" id="vinPickerBox">
+<div class="vin-box-header">
+<div class="vin-box-title">اختر رقم الهيكل للعمل عليه</div>
+<div class="vin-chip" id="vinCountChip"></div>
+</div>
+<select id="vinPicker"></select>
+<div class="hint">أي تحديث في مراحل تتبع الطلب سيكون لهذا رقم الهيكل فقط.</div>
+<button class="btn" id="trackLinkBtn" style="margin-top:8px;width:100%;" type="button">رابط التتبع</button>
+<button class="btn-outline" id="trackQrBtn" style="margin-top:8px;width:100%;" type="button">QR التتبع (اضغط لفتح)</button>
+</div>
+<div class="totals-box" id="erpTotals" style="display:none;"></div>
+<div class="erp-table-wrap">
+<table>
+<thead>
+<tr>
+<th>اسم العميل</th>
+<th>الرقم الضريبي للعميل</th>
+<th>رقم جوال العميل</th>
+<th>الفرع</th>
+<th>تاريخ الطلب</th>
+<th>تاريخ التسليم</th>
+<th>مسؤول المبيعات</th>
+<th>رقم الصنف</th>
+<th>نوع الصنف</th>
+<th>فئة الصنف</th>
+<th>الموديل</th>
+<th>رقم الهيكل VIN</th>
+<th>اللون الداخلي</th>
+<th>اللون الخارجي</th>
+<th>الوكيل</th>
+<th>الكمية</th>
+<th>سعر الوحدة</th>
+<th>قيمة الصنف</th>
+<th>كود الضريبة</th>
+<th>نوع الضريبة</th>
+<th>نسبة الضريبة</th>
+<th>قيمة الضريبة</th>
+<th>الإجمالي قبل الضريبة</th>
+<th>الإجمالي شامل الضريبة</th>
+</tr>
+</thead>
+<tbody id="erpBody">
+</tbody>
+</table>
+</div>
+</div>
+<!-- Orders list tab -->
+<div class="card" id="ordersListCard" style="display:none;">
+<h3 class="title"><span class="icon">📋</span>كل الطلبات</h3>
+<div class="hint">اضغط على رقم الطلب لفتحه، واختيار رقم الهيكل من الأعلى لو كان أكثر من سيارة.</div>
+<div class="row" style="margin-top:10px;">
+<div class="col-6">
+<label>بحث سريع</label>
+<input id="ordersSearch" placeholder="اكتب اسم العميل / رقم الجوال / رقم الهيكل (VIN) / رقم الطلب"/>
+<div class="hint">تقدر تبحث بأي جزء من البيانات.</div>
+</div>
+</div>
+<div class="erp-table-wrap">
+<table>
+<thead>
+<tr>
+<th>رقم الطلب</th>
+<th>اسم العميل</th>
+<th>رقم الجوال</th>
+<th>الفرع</th>
+<th>رقم الهيكل VIN</th>
+</tr>
+</thead>
+<tbody id="ordersListBody"></tbody>
+</table>
+</div>
+</div>
+<!-- Archive list tab -->
+<div class="card" id="archivesListCard" style="display:none;">
+<h3 class="title"><span class="icon">🗄️</span>الأرشيف</h3>
+<div class="hint">هنا تظهر الطلبات المؤرشفة. اضغط على رقم الطلب لعرض تفاصيله (قراءة فقط).</div>
+<div class="row" style="margin-top:10px;">
+<div class="col-6">
+<label>بحث سريع</label>
+<input id="archivesSearch" placeholder="اكتب رقم الطلب / اسم العميل / رقم الجوال"/>
+<div class="hint">البحث داخل الأرشيف فقط.</div>
+</div>
+</div>
+<div class="erp-table-wrap">
+<table>
+<thead>
+<tr>
+<th>رقم الطلب</th>
+<th>اسم العميل</th>
+<th>رقم الجوال</th>
+<th>الفرع</th>
+<th>تاريخ الأرشفة</th>
+</tr>
+</thead>
+<tbody id="archivesListBody"></tbody>
+</table>
+</div>
+</div>
 <!-- Stages -->
-    <div class="card" id="stagesCard" style="display:none;">
-      <h3 class="title"><span class="icon">🚦</span>مراحل تتبع الطلب</h3>
-      <div class="grid-2" id="stagesList"></div>
-      <div class="hint" style="margin-top:8px;">
+<div class="card" id="stagesCard" style="display:none;">
+<h3 class="title"><span class="icon">🚦</span>مراحل تتبع الطلب</h3>
+<div class="grid-2" id="stagesList"></div>
+<div class="hint" style="margin-top:8px;">
         اضغط على <strong>تم الانتهاء</strong> أمام أي مرحلة ليتم ختمها وتحديث صفحة تتبع العميل تلقائياً.  
         بعد ختم جميع المراحل لهذا الهيكل لا يمكن تعديلها مرة أخرى.
       </div>
-      <!-- Archive actions -->
-      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:flex-start;width:100%;margin:10px 0 0;">
-        <button id="archiveOrderBtn" class="btn-outline" type="button" style="font-size:12px;">
-          <i class="fa-solid fa-box-archive"></i> أرشفة الطلب
+<!-- Archive actions -->
+<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:flex-start;width:100%;margin:10px 0 0;">
+<button class="btn-outline" id="archiveOrderBtn" style="font-size:12px;" type="button">
+<i class="fa-solid fa-box-archive"></i> أرشفة الطلب
         </button>
-        <button id="unarchiveOrderBtn" class="btn-outline" type="button" style="font-size:12px;display:none;">
-          <i class="fa-solid fa-rotate-left"></i> إلغاء الأرشفة
+<button class="btn-outline" id="unarchiveOrderBtn" style="font-size:12px;display:none;" type="button">
+<i class="fa-solid fa-rotate-left"></i> إلغاء الأرشفة
         </button>
-        <span id="archiveHint" class="muted" style="font-size:12px;"></span>
-      </div>
-
-      
-      <div class="muted" id="stageMsg" style="margin-top:6px;"></div>
-    </div>
-  </div>
-
-  <script type="module">
+<span class="muted" id="archiveHint" style="font-size:12px;"></span>
+</div>
+<div class="muted" id="stageMsg" style="margin-top:6px;"></div>
+</div>
+</div>
+<script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
     import {
       getAuth,
@@ -4388,7 +4141,6 @@ if (ordersSearchInput) {
     buildStagesUI({ });
 
   </script>
-
 <script>
   // Topbar connection badge helper (non-invasive)
   (function(){
@@ -4404,198 +4156,177 @@ if (ordersSearchInput) {
     setTimeout(tick, 50);
   })();
 </script>
-
-  <script src="./mzj-ui.js"></script>
-
-      </div>
-    </main>
-  </div>
-
-
-  <!-- Message Modal (Edit before send) -->
-  <div id="msgModal" style="display:none;position:fixed;inset:0;z-index:9999;">
-    <div id="msgModalBackdrop" style="position:absolute;inset:0;background:rgba(0,0,0,.45);"></div>
-    <div style="position:relative;max-width:680px;margin:7vh auto;background:#fff;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.25);overflow:hidden;">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-bottom:1px solid #e5e7eb;">
-        <div style="display:flex;align-items:center;gap:10px;">
-          <div style="width:36px;height:36px;border-radius:12px;display:grid;place-items:center;background:rgba(188,143,116,.16);color:var(--brown);font-weight:900;">
-            <i class="fa-solid fa-paper-plane"></i>
-          </div>
-          <div>
-            <div id="msgModalTitle" style="font-weight:900;color:var(--brown);">إرسال رسالة</div>
-            <div id="msgModalSub" style="font-size:12px;color:var(--muted);margin-top:2px;">—</div>
-          </div>
-        </div>
-        <button id="msgModalClose" class="btn-outline" type="button" style="font-size:12px;">إغلاق</button>
-      </div>
-
-      <div style="padding:12px 14px;">
-        <label style="margin:0 0 6px 0;">نص الرسالة (تقدر تعدّل قبل الإرسال)</label>
-        <textarea id="msgModalText" rows="9" style="width:100%;padding:10px 12px;border-radius:12px;border:1px solid #e5e7eb;background:#f9fafb;font-family:inherit;font-size:14px;outline:none;resize:vertical;"></textarea>
-        <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-top:10px;">
-          <div class="muted" style="font-size:12px;">
-            <span class="badge" id="msgModalChannel">—</span>
-            <span class="badge" id="msgModalPhone">—</span>
-            <span class="badge" id="msgModalVin">—</span>
-          </div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <button id="msgModalCopy" class="btn-outline" type="button" style="font-size:12px;"><i class="fa-regular fa-copy"></i> نسخ النص</button>
-            <button id="msgModalReset" class="btn-outline" type="button" style="font-size:12px;"><i class="fa-solid fa-rotate-left"></i> رجوع للنص الأصلي</button>
-            <button id="msgModalSend" class="btn" type="button" style="font-size:12px;"><i class="fa-solid fa-paper-plane"></i> إرسال</button>
-          </div>
-        </div>
-        <div id="msgModalMsg" class="muted" style="margin-top:8px;"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Dynamic QR (Clickable) -->
-  <div id="trackQrModal" style="display:none;position:fixed;inset:0;z-index:9998;">
-    <div id="trackQrBackdrop" style="position:absolute;inset:0;background:rgba(0,0,0,.45);"></div>
-    <div style="position:relative;max-width:420px;margin:10vh auto;background:#fff;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.25);overflow:hidden;">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-bottom:1px solid #e5e7eb;">
-        <div style="display:flex;align-items:center;gap:10px;">
-          <div style="width:36px;height:36px;border-radius:12px;display:grid;place-items:center;background:rgba(188,143,116,.16);color:var(--brown);font-weight:900;">
-            <i class="fa-solid fa-qrcode"></i>
-          </div>
-          <div>
-            <div style="font-weight:900;color:var(--brown);">QR تتبع العميل</div>
-            <div id="trackQrSub" style="font-size:12px;color:var(--muted);margin-top:2px;">اضغط على الـ QR لفتح التتبع مباشرة</div>
-          </div>
-        </div>
-        <button id="trackQrClose" class="btn-outline" type="button" style="font-size:12px;">إغلاق</button>
-      </div>
-      <div style="padding:14px;text-align:center;">
-        <a id="trackQrLink" href="#" target="_blank" style="display:inline-block;text-decoration:none;">
-          <img id="trackQrImg" alt="QR Tracking" style="width:240px;height:240px;border-radius:14px;border:1px solid #e5e7eb;background:#fff;"/>
-        </a>
-        <div class="hint" style="margin-top:10px;">رابط التتبع: <button id="trackQrCopy" class="link-btn" type="button">نسخ الرابط</button></div>
-      </div>
-    </div>
-  </div>
-
+<script src="./mzj-ui.js"></script>
+</div>
+</main>
+</div>
+<!-- Message Modal (Edit before send) -->
+<div id="msgModal" style="display:none;position:fixed;inset:0;z-index:9999;">
+<div id="msgModalBackdrop" style="position:absolute;inset:0;background:rgba(0,0,0,.45);"></div>
+<div style="position:relative;max-width:680px;margin:7vh auto;background:#fff;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.25);overflow:hidden;">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-bottom:1px solid #e5e7eb;">
+<div style="display:flex;align-items:center;gap:10px;">
+<div style="width:36px;height:36px;border-radius:12px;display:grid;place-items:center;background:rgba(188,143,116,.16);color:var(--brown);font-weight:900;">
+<i class="fa-solid fa-paper-plane"></i>
+</div>
+<div>
+<div id="msgModalTitle" style="font-weight:900;color:var(--brown);">إرسال رسالة</div>
+<div id="msgModalSub" style="font-size:12px;color:var(--muted);margin-top:2px;">—</div>
+</div>
+</div>
+<button class="btn-outline" id="msgModalClose" style="font-size:12px;" type="button">إغلاق</button>
+</div>
+<div style="padding:12px 14px;">
+<label style="margin:0 0 6px 0;">نص الرسالة (تقدر تعدّل قبل الإرسال)</label>
+<textarea id="msgModalText" rows="9" style="width:100%;padding:10px 12px;border-radius:12px;border:1px solid #e5e7eb;background:#f9fafb;font-family:inherit;font-size:14px;outline:none;resize:vertical;"></textarea>
+<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-top:10px;">
+<div class="muted" style="font-size:12px;">
+<span class="badge" id="msgModalChannel">—</span>
+<span class="badge" id="msgModalPhone">—</span>
+<span class="badge" id="msgModalVin">—</span>
+</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;">
+<button class="btn-outline" id="msgModalCopy" style="font-size:12px;" type="button"><i class="fa-regular fa-copy"></i> نسخ النص</button>
+<button class="btn-outline" id="msgModalReset" style="font-size:12px;" type="button"><i class="fa-solid fa-rotate-left"></i> رجوع للنص الأصلي</button>
+<button class="btn" id="msgModalSend" style="font-size:12px;" type="button"><i class="fa-solid fa-paper-plane"></i> إرسال</button>
+</div>
+</div>
+<div class="muted" id="msgModalMsg" style="margin-top:8px;"></div>
+</div>
+</div>
+</div>
+<!-- Dynamic QR (Clickable) -->
+<div id="trackQrModal" style="display:none;position:fixed;inset:0;z-index:9998;">
+<div id="trackQrBackdrop" style="position:absolute;inset:0;background:rgba(0,0,0,.45);"></div>
+<div style="position:relative;max-width:420px;margin:10vh auto;background:#fff;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.25);overflow:hidden;">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-bottom:1px solid #e5e7eb;">
+<div style="display:flex;align-items:center;gap:10px;">
+<div style="width:36px;height:36px;border-radius:12px;display:grid;place-items:center;background:rgba(188,143,116,.16);color:var(--brown);font-weight:900;">
+<i class="fa-solid fa-qrcode"></i>
+</div>
+<div>
+<div style="font-weight:900;color:var(--brown);">QR تتبع العميل</div>
+<div id="trackQrSub" style="font-size:12px;color:var(--muted);margin-top:2px;">اضغط على الـ QR لفتح التتبع مباشرة</div>
+</div>
+</div>
+<button class="btn-outline" id="trackQrClose" style="font-size:12px;" type="button">إغلاق</button>
+</div>
+<div style="padding:14px;text-align:center;">
+<a href="#" id="trackQrLink" style="display:inline-block;text-decoration:none;" target="_blank">
+<img alt="QR Tracking" id="trackQrImg" style="width:240px;height:240px;border-radius:14px;border:1px solid #e5e7eb;background:#fff;"/>
+</a>
+<div class="hint" style="margin-top:10px;">رابط التتبع: <button class="link-btn" id="trackQrCopy" type="button">نسخ الرابط</button></div>
+</div>
+</div>
+</div>
 </body>
 </html>
-
-            </template>
-          </div>
-        </div>
-
+</template>
 </div>
-        </div>
+</div>
 
-        <!-- الأرشيف (فارغ مؤقتًا) -->
 
-                <!-- إدارة المستخدمين -->
-        <div class="view" id="view-users" role="tabpanel">
-          <div class="grid">
-            <div class="card">
-              <h3>إدارة المستخدمين</h3>
-              <div class="body">
-                <div class="toolbar">
-                  <div class="field" style="flex:1;min-width:240px">
-                    <label>بحث</label>
-                    <input id="ua_search" placeholder="ابحث بالبريد أو الاسم أو UID" autocomplete="off" />
-                  </div>
-                  <div class="field" style="min-width:220px">
-                    <label>فلتر الحالة</label>
-                    <select id="ua_active_filter">
-                      <option value="all">الكل</option>
-                      <option value="active">نشط فقط</option>
-                      <option value="inactive">غير نشط فقط</option>
-                    </select>
-                  </div>
-                  <button id="ua_refresh" class="btn secondary">تحديث</button>
-                </div>
-
-                <div class="row" style="margin-top:8px">
-                  <div>
-                    <label>اسم المستخدم (لإنشاء سجل جديد)</label>
-                    <input id="ua_new_name" placeholder="اسم المستخدم" autocomplete="off" />
-                  </div>
-                  <div>
-                    <label>البريد الإلكتروني</label>
-                    <input id="ua_new_email" placeholder="email@example.com" autocomplete="off" />
-                  </div>
-                  <div>
-                    <label>UID (اختياري)</label>
-                    <input id="ua_new_uid" placeholder="UID" autocomplete="off" />
-                  </div>
-                  <div style="display:flex;align-items:flex-end;gap:8px">
-                    <button id="ua_create" class="btn primary">إنشاء سجل مستخدم</button>
-                  </div>
-                </div>
-                <div class="small" style="margin-top:8px;color:var(--muted)">
+<!-- الأرشيف (فارغ مؤقتًا) -->
+<!-- إدارة المستخدمين -->
+<div class="view" id="view-users" role="tabpanel">
+<div class="grid">
+<div class="card">
+<h3>إدارة المستخدمين</h3>
+<div class="body">
+<div class="toolbar">
+<div class="field" style="flex:1;min-width:240px">
+<label>بحث</label>
+<input autocomplete="off" id="ua_search" placeholder="ابحث بالبريد أو الاسم أو UID"/>
+</div>
+<div class="field" style="min-width:220px">
+<label>فلتر الحالة</label>
+<select id="ua_active_filter">
+<option value="all">الكل</option>
+<option value="active">نشط فقط</option>
+<option value="inactive">غير نشط فقط</option>
+</select>
+</div>
+<button class="btn secondary" id="ua_refresh">تحديث</button>
+</div>
+<div class="row" style="margin-top:8px">
+<div>
+<label>اسم المستخدم (لإنشاء سجل جديد)</label>
+<input autocomplete="off" id="ua_new_name" placeholder="اسم المستخدم"/>
+</div>
+<div>
+<label>البريد الإلكتروني</label>
+<input autocomplete="off" id="ua_new_email" placeholder="email@example.com"/>
+</div>
+<div>
+<label>UID (اختياري)</label>
+<input autocomplete="off" id="ua_new_uid" placeholder="UID"/>
+</div>
+<div style="display:flex;align-items:flex-end;gap:8px">
+<button class="btn primary" id="ua_create">إنشاء سجل مستخدم</button>
+</div>
+</div>
+<div class="small" style="margin-top:8px;color:var(--muted)">
                   ملاحظة: هذا التاب لإدارة صلاحيات المستخدمين في Firestore فقط (collection: <b>users</b>) حسب قالب الصلاحيات الذي اعتمدته.
                 </div>
-
-                <div class="hr" style="margin:12px 0"></div>
-
-                <div class="tableWrap" style="max-height:520px">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>الاسم</th>
-                        <th>البريد</th>
-                        <th>UID</th>
-                        <th>الحالة</th>
-                        <th>آخر تحديث</th>
-                        <th>إجراء</th>
-                      </tr>
-                    </thead>
-                    <tbody id="ua_tbody">
-                      <tr><td colspan="6" class="small muted">—</td></tr>
-                    </tbody>
-                  </table>
+<div class="hr" style="margin:12px 0"></div>
+<div class="tableWrap" style="max-height:520px">
+<table>
+<thead>
+<tr>
+<th>الاسم</th>
+<th>البريد</th>
+<th>UID</th>
+<th>الحالة</th>
+<th>آخر تحديث</th>
+<th>إجراء</th>
+</tr>
+</thead>
+<tbody id="ua_tbody">
+<tr><td class="small muted" colspan="6">—</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="card" id="ua_editor" style="display:none">
+<h3>صلاحيات المستخدم</h3>
+<div class="body">
+<div class="small muted" id="ua_editor_user">—</div>
+<div class="hr" style="margin:12px 0"></div>
+<div class="row">
+<div>
+<label>الاسم</label>
+<input id="ua_name"/>
+</div>
+<div>
+<label>البريد</label>
+<input id="ua_email"/>
+</div>
+<div>
+<label>الحالة</label>
+<select id="ua_active">
+<option value="true">نشط</option>
+<option value="false">غير نشط</option>
+</select>
+</div>
+<div style="display:flex;align-items:flex-end;gap:8px">
+<button class="btn primary" id="ua_save">حفظ</button>
+<button class="btn secondary" id="ua_close">إغلاق</button>
+</div>
+</div>
+<div class="hr" style="margin:12px 0"></div>
+<div class="small" style="margin-bottom:8px"><b>التابات</b></div>
+<div class="checks" id="ua_tabs_box"></div>
+<div class="hr" style="margin:12px 0"></div>
+<div class="small" style="margin-bottom:8px"><b>الصلاحيات التفصيلية</b></div>
+<div id="ua_perms_box"></div>
+<div class="hr" style="margin:12px 0"></div>
+<div class="small muted">تُحفظ الصلاحيات بنفس شكل القالب: tabs + permissions (buttons/fields/sections...)
                 </div>
-              </div>
-            </div>
-
-            <div class="card" id="ua_editor" style="display:none">
-              <h3>صلاحيات المستخدم</h3>
-              <div class="body">
-                <div class="small muted" id="ua_editor_user">—</div>
-                <div class="hr" style="margin:12px 0"></div>
-
-                <div class="row">
-                  <div>
-                    <label>الاسم</label>
-                    <input id="ua_name" />
-                  </div>
-                  <div>
-                    <label>البريد</label>
-                    <input id="ua_email" />
-                  </div>
-                  <div>
-                    <label>الحالة</label>
-                    <select id="ua_active">
-                      <option value="true">نشط</option>
-                      <option value="false">غير نشط</option>
-                    </select>
-                  </div>
-                  <div style="display:flex;align-items:flex-end;gap:8px">
-                    <button id="ua_save" class="btn primary">حفظ</button>
-                    <button id="ua_close" class="btn secondary">إغلاق</button>
-                  </div>
-                </div>
-
-                <div class="hr" style="margin:12px 0"></div>
-
-                <div class="small" style="margin-bottom:8px"><b>التابات</b></div>
-                <div id="ua_tabs_box" class="checks"></div>
-
-                <div class="hr" style="margin:12px 0"></div>
-
-                <div class="small" style="margin-bottom:8px"><b>الصلاحيات التفصيلية</b></div>
-                <div id="ua_perms_box"></div>
-
-                <div class="hr" style="margin:12px 0"></div>
-                <div class="small muted">تُحفظ الصلاحيات بنفس شكل القالب: tabs + permissions (buttons/fields/sections...)
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+</div>
+</div>
+</div>
+</div>
 <script>
     // Helper: short selector by id
     const $ = (id)=>document.getElementById(id);
@@ -6059,6 +5790,9 @@ function startInventoryLive(){
       const host = document.getElementById('dash_saved_cards');
       if(!host) return;
       const cards = (typeof getDashCardsFromCache === 'function') ? getDashCardsFromCache() : (readSavedDashCards ? readSavedDashCards() : []);
+      const __delAllow = ['ceo@mzjcars.com','mr.ahmed_rashed@outlook.sa'];
+      const __curEmail = ((auth && auth.currentUser && auth.currentUser.email) ? auth.currentUser.email : '').toString().trim().toLowerCase();
+      const __canDeleteSaved = __delAllow.includes(__curEmail);
 
       host.innerHTML = (cards||[]).map(card=>{
         const loc = (card.location||'').toString().trim();
@@ -6086,7 +5820,7 @@ function startInventoryLive(){
               <div class="dashKpis">${kpis.join('')}</div>
               <div class="dashBtns">
                 <button class="btn secondary" data-saved-open="${escapeHtml(card.id)}">عرض</button>
-                <button class="btn danger" data-saved-del="${escapeHtml(card.id)}">حذف</button>
+                <button class="btn danger" data-saved-del="${escapeHtml(card.id)}" ${__canDeleteSaved ? "" : "disabled style=\"opacity:.55;cursor:not-allowed\" title=\"صلاحية للحسابات: ceo@mzjcars.com / mr.ahmed_rashed@outlook.sa\""}>حذف</button>
               </div>
             </div>
           </div>
@@ -6109,6 +5843,7 @@ function startInventoryLive(){
         btn.addEventListener('click', async ()=>{
           const id = btn.getAttribute('data-saved-del');
           if(!id) return;
+          if(!__canDeleteSaved){ toast('غير مصرح بحذف الكروت'); return; }
           if(!confirm('حذف هذا الكارت؟')) return;
           if(typeof deleteDashCard === 'function'){
             await deleteDashCard(id);
