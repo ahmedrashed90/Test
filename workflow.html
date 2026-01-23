@@ -2,6 +2,7 @@
 
 
 
+
 <!DOCTYPE html>
 
 <html dir="rtl" lang="ar">
@@ -85,6 +86,9 @@
 
     .modalBackdrop{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;padding:14px;z-index:9998}
     .modalBackdrop.show{display:flex}
+    #missingModal .modal{max-height:85vh;display:flex;flex-direction:column}
+    #missingModal .modalBody{overflow:auto}
+
     .modal{width:min(720px,96vw);background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 20px 40px rgba(0,0,0,.2);overflow:hidden}
     .modalHead{display:flex;align-items:center;justify-content:space-between;padding:14px;border-bottom:1px solid var(--line);background:var(--cream)}
     .modalHead h4{margin:0;color:var(--brown)}
@@ -227,7 +231,7 @@
     }
 
 
-/* داش بورد: تمييز الإجمالي الفعلي وإجمالي المفاتيح */
+/* داش بورد: تمييز الإجمالي الفعلي و */
 #stk_totalActual, #stk_keysTotal,
 #ag_totalActual,  #ag_keysTotal,
 #b1_totalActual,  #b1_keysTotal,
@@ -237,7 +241,7 @@
 }
 
 
-/* داش بورد: إبراز الإجمالي الفعلي وإجمالي المفاتيح */
+/* داش بورد: إبراز الإجمالي الفعلي و */
 #view-dashboard .dashKpi:has(#stk_totalActual),
 #view-dashboard .dashKpi:has(#stk_keysTotal),
 #view-dashboard .dashKpi:has(#ag_totalActual),
@@ -457,6 +461,7 @@ html, body {
 
 <div class="dashGrid" style="margin-top:14px">
   <div id="dash_missing_saved_cards"></div>
+  <div id="dash_total_stock_card"></div>
 </div>
 <!-- Cards -->
 <div class="dashGrid">
@@ -5151,6 +5156,7 @@ function startInventoryLive(){
       }
     
       try{ renderMissingSavedCard(); }catch(e){}
+      try{ renderTotalStockCard(); }catch(e){}
 }
 
 
@@ -5939,15 +5945,12 @@ function startInventoryLive(){
         const all = filterCars(loc, statuses);
         const countBy = (st)=> filterCars(loc, [st]).length;
 
-        const totalActual = all.filter(x=>['متاح للبيع','حجز','بها ملاحظات'].includes(normStatus((x.status||'').toString().trim()))).length;
-        const keysTotal = all.filter(x=>['متاح للبيع','حجز','بها ملاحظات','مباع تحت التسليم'].includes(normStatus((x.status||'').toString().trim()))).length;
-
-        const list = statuses.length ? statuses : ['متاح للبيع','محجوز','بها ملاحظات','مباع تحت التسليم','مباع تم التسليم'];
+        const totalActual = all.filter(x=>['متاح للبيع','حجز','بها ملاحظات'].includes(normStatus((x.status||'').toString().trim()))).length; 
+const list = statuses.length ? statuses : ['متاح للبيع','محجوز','بها ملاحظات','مباع تحت التسليم','مباع تم التسليم'];
 
         const kpis = [];
-        kpis.push(`<div class="dashKpi kpiHighlight" data-card="${escapeHtml(card.id)}" data-kpi="totalActual"><div>الإجمالي الفعلي</div><b>${totalActual}</b></div>`);
-        kpis.push(`<div class="dashKpi kpiHighlight" data-card="${escapeHtml(card.id)}" data-kpi="keysTotal"><div>إجمالي المفاتيح</div><b>${keysTotal}</b></div>`);
-        list.forEach(st=>{
+        kpis.push(`<div class="dashKpi kpiHighlight" data-card="${escapeHtml(card.id)}" data-kpi="totalActual"><div>الإجمالي الفعلي</div><b>${totalActual}</b></div>`); 
+list.forEach(st=>{
           kpis.push(`<div class="dashKpi" data-card="${escapeHtml(card.id)}" data-status="${escapeHtml(st)}"><div>${escapeHtml(st)}</div><b>${countBy(st)}</b></div>`);
         });
 
@@ -5992,6 +5995,21 @@ function startInventoryLive(){
           renderSavedDashCards();
           toast('تم الحذف');
         });
+
+      // KPI clicks داخل الكروت المحفوظة (الإجمالي الفعلي)
+      host.querySelectorAll('[data-kpi="totalActual"]').forEach(kpi=>{
+        kpi.style.cursor = 'pointer';
+        kpi.addEventListener('click', ()=>{
+          const cardId = kpi.getAttribute('data-card') || '';
+          const cards2 = (typeof getDashCardsFromCache === 'function') ? getDashCardsFromCache() : (readSavedDashCards ? readSavedDashCards() : []);
+          const c = (cards2||[]).find(x=>x.id===cardId);
+          if(!c) return;
+          const cars = filterCars((c.location||''), (c.statuses||[]))
+            .filter(x=>!['مباع تحت التسليم','مباع تم التسليم'].includes(normStatus(x.status||'')));
+          openDashDataModal('الإجمالي الفعلي', cars);
+        });
+      });
+
       });
 
       // KPI clicks
@@ -6014,6 +6032,7 @@ function startInventoryLive(){
     // ✅ لا LocalStorage: اختيار الفروع يتم حفظه في Firestore ليظهر عند كل المستخدمين.
 
     let __missingCard = null; // { branches: [] }
+    let __missingRowsLast = [];
     let __missingBranchesList = []; // loaded from Firestore: meta/lists/branches
 
     let __missingLastRows = [];
@@ -6166,103 +6185,100 @@ function startInventoryLive(){
     }
 
     function openMissingBranchesModal(title, rows){
+      // استخدم المودال الثابت (missingModal) علشان يفتح في نص الصفحة زي باقي الكروت
+      __missingRowsLast = Array.isArray(rows) ? rows : [];
+      const t = document.getElementById('missingTitle');
+      if(t) t.textContent = title || 'نواقص الفروع';
+
+      // reset search
+      const q = document.getElementById('missingSearch');
+      if(q) q.value = '';
+
+      // render rows
+      renderMissingModalRows(__missingRowsLast);
+
+      // meta
+      const meta = document.getElementById('missingMeta');
+      if(meta) meta.textContent = `عدد النتائج: ${__missingRowsLast.length}`;
+
+      showModal('missingModal');
+    }
+
+    function renderMissingModalRows(rows){
+      const tbody = document.getElementById('missingBody');
+      if(!tbody) return;
       const arr = Array.isArray(rows) ? rows : [];
-      const uid = 'mb_' + Date.now();
-      const qid = uid + '_q';
-      const xid = uid + '_x';
-      const tid = uid + '_t';
+      tbody.innerHTML = arr.length ? arr.map(r=>`
+        <tr>
+          <td>${escapeHtml(r.carName||'')}</td>
+          <td>${escapeHtml(r.statement||'')}</td>
+          <td>${escapeHtml(r.interiorColor||'')}</td>
+          <td>${escapeHtml(r.exteriorColor||'')}</td>
+          <td>${escapeHtml(r.model||'')}</td>
+          <td>${escapeHtml(r.year||'')}</td>
+          <td>${escapeHtml(String(r.branchCount??0))}</td>
+          <td>${escapeHtml(String(r.totalCount??0))}</td>
+        </tr>
+      `).join('') : `<tr><td colspan="8" class="muted" style="text-align:center">لا توجد نواقص</td></tr>`;
+    }
 
-      const headers = ['السيارة','البيان','اللون الداخلي','اللون الخارجي','الموديل','السنة','عدد الفرع','الإجمالي العام'];
+    // ===== Dashboard Card: اجمالي المخزون =====
+    function renderTotalStockCard(){
+      const host = document.getElementById('dash_total_stock_card');
+      if(!host) return;
 
-      function rowToArray(r){
-        return [
-          r.carName||'',
-          r.statement||'',
-          r.interiorColor||'',
-          r.exteriorColor||'',
-          r.model||'',
-          r.year||'',
-          String(r.branchCount||0),
-          String(r.totalCount||0),
-        ];
-      }
+      // الفلاتر الأساسية
+      const underCars     = dashCars.filter(c=>normStatus(c.status)==='مباع تحت التسليم');
+      const deliveredCars = dashCars.filter(c=>normStatus(c.status)==='مباع تم التسليم');
+      const notesCars     = dashCars.filter(c=>normStatus(c.status)==='بها ملاحظات');
+      const agencyAll     = dashCars.filter(c=>((c.location||'').toString().trim()==='الوكالة'));
 
-      const modalHtml = `
-        <div class="modal show" id="${uid}">
-          <div class="modalContent" style="max-width:1100px">
-            <div class="modalHead">
-              <h3 style="margin:0">${escapeHtml(title||'نواقص الفروع')}</h3>
-              <button class="btn danger" data-close="${uid}">إغلاق</button>
+      // ✅ الإجمالي الفعلي = إجمالي السيارات بدون (مباع تحت التسليم) - (مباع تم التسليم)
+      const totalActualCars = dashCars.filter(c=>!['مباع تحت التسليم','مباع تم التسليم'].includes(normStatus(c.status)));
+      const totalActual = totalActualCars.length;
+
+      // ✅ المتاح للبيع (حسب تعريفك): الإجمالي الفعلي لكل الفروع بدون الوكالة
+      const availCars  = totalActualCars.filter(c=>((c.location||'').toString().trim()!=='الوكالة'));
+
+      // ✅ الوكالة (ضمن الإجمالي الفعلي)
+      const agencyCars = totalActualCars.filter(c=>((c.location||'').toString().trim()==='الوكالة'));
+
+
+      host.innerHTML = `
+        <div class="card dashCard" id="dash_total_stock_one" style="min-height:260px">
+          <div class="cardHead">
+            <h3 style="margin:0">اجمالي المخزون</h3>
+          </div>
+          <div class="body">
+            <div class="dashKpis" style="margin-bottom:10px">
+              <div class="dashKpi kpiHighlight" data-totalstock="totalActual" style="cursor:pointer"><span>الإجمالي الفعلي</span><b>${totalActual}</b></div>
             </div>
-            <div class="modalBody">
-              <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
-                <input id="${qid}" class="input" placeholder="بحث (سيارة / بيان / ألوان / موديل / سنة)" style="flex:1;min-width:260px">
-                <button class="btn secondary" id="${xid}">تصدير Excel</button>
-              </div>
-              <div class="tableWrap">
-                <table class="table" id="${tid}">
-                  <thead>
-                    <tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr>
-                  </thead>
-                  <tbody>
-                    ${arr.map(r=>{
-                      const a = rowToArray(r);
-                      return `<tr>${a.map(v=>`<td>${escapeHtml(v)}</td>`).join('')}</tr>`;
-                    }).join('') || `<tr><td colspan="8" class="muted" style="text-align:center">لا توجد نواقص</td></tr>`}
-                  </tbody>
-                </table>
-              </div>
+
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn secondary" type="button" data-totalstock="agency">الوكالة (${agencyCars.length})</button>
+              <button class="btn secondary" type="button" data-totalstock="avail">المتاح للبيع (${availCars.length})</button>
+              <button class="btn secondary" type="button" data-totalstock="notes">بها ملاحظات (${notesCars.length})</button>
+              <button class="btn secondary" type="button" data-totalstock="under">مباع تحت التسليم (${underCars.length})</button>
             </div>
+
+            <div class="muted" style="margin-top:10px">الإجمالي الفعلي = إجمالي السيارات بدون (مباع تحت التسليم) - (مباع تم التسليم)</div>
           </div>
         </div>
       `;
 
-      // mount
-      const holder = document.createElement('div');
-      holder.innerHTML = modalHtml;
-      document.body.appendChild(holder);
-
-      // close
-      holder.querySelectorAll(`[data-close="${uid}"]`).forEach(b=>{
-        b.addEventListener('click', ()=>{
-          try{ holder.remove(); }catch(e){}
+      host.querySelectorAll('[data-totalstock]')?.forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const k = btn.getAttribute('data-totalstock') || '';
+          if(k==='totalActual') return openDashDataModal('الإجمالي الفعلي', totalActualCars);
+          if(k==='agency') return openDashDataModal('الوكالة (ضمن الإجمالي الفعلي)', agencyCars);
+          if(k==='avail')  return openDashDataModal('المتاح للبيع', availCars);
+          if(k==='notes')  return openDashDataModal('بها ملاحظات', notesCars);
+          if(k==='under')  return openDashDataModal('مباع تحت التسليم', underCars);
         });
-      });
-      holder.addEventListener('click', (e)=>{
-        if(e.target && e.target.id===uid){
-          try{ holder.remove(); }catch(_){}
-        }
-      });
-
-      // search
-      const q = holder.querySelector('#'+qid);
-      if(q){
-        q.addEventListener('input', ()=>{
-          const term = (q.value||'').toString().trim().toLowerCase();
-          const tbody = holder.querySelector('#'+tid+' tbody');
-          if(!tbody) return;
-          const filtered = !term ? arr : arr.filter(r=>{
-            const hay = (rowToArray(r).join(' ')||'').toLowerCase();
-            return hay.includes(term);
-          });
-          tbody.innerHTML = filtered.length ? filtered.map(r=>{
-            const a = rowToArray(r);
-            return `<tr>${a.map(v=>`<td>${escapeHtml(v)}</td>`).join('')}</tr>`;
-          }).join('') : `<tr><td colspan="8" class="muted" style="text-align:center">لا توجد نتائج</td></tr>`;
-        });
-      }
-
-      // export
-      holder.querySelector('#'+xid)?.addEventListener('click', ()=>{
-        try{
-          const rows2 = arr.map(r=>rowToArray(r));
-          exportRowsToExcel(headers, rows2, `missing_${(title||'branches').replace(/\s+/g,'_')}_${Date.now()}.xlsx`, 'missing');
-        }catch(e){
-          console.warn(e);
-          toast('تعذر التصدير');
-        }
       });
     }
+
+
 
 function renderMissingSavedCard(){
       const host = document.getElementById('dash_missing_saved_cards');
@@ -6288,7 +6304,7 @@ function renderMissingSavedCard(){
       }).join('');
 
       host.innerHTML = `
-        <div class="card dashCard" id="dash_missing_card_one">
+        <div class="card dashCard" id="dash_missing_card_one" style="min-height:260px">
           <div class="cardHead" style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
             <h3 style="margin:0">نواقص الفروع</h3>
             <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -6337,8 +6353,74 @@ function renderMissingSavedCard(){
     }
 
     function bindMissingBranchesUI(){
+      // ✅ ضمان فتح مودال النواقص عند الضغط على زر الفرع دائمًا
+      // بعض الكروت بتُعاد رندرها، فبنستخدم تفويض حدث عالمي مرة واحدة
+      if(!window.__missingBranchGlobalClickBound){
+        window.__missingBranchGlobalClickBound = true;
+        document.addEventListener('click', (ev)=>{
+          const btn = ev.target?.closest ? ev.target.closest('[data-missing-branch]') : null;
+          if(!btn) return;
+          ev.preventDefault();
+          ev.stopPropagation();
+          const br = (btn.getAttribute('data-missing-branch')||'').toString();
+          const rows = buildMissingRowsForBranch(br);
+          openMissingBranchesModal('نواقص: ' + br, rows);
+        }, true); // capture
+      }
       // close modal
       document.getElementById('missingClose')?.addEventListener('click', ()=>hideModal('missingModal'));
+      document.getElementById('missingModal')?.addEventListener('click', (e)=>{
+        if(e.target && e.target.id==='missingModal') hideModal('missingModal');
+      });
+
+      // فتح مودال النواقص عند الضغط على أي فرع داخل كارت نواقص الفروع (تفويض event delegation)
+      const __mbHost = document.getElementById('dash_missing_saved_cards');
+      __mbHost?.addEventListener('click', (ev)=>{
+        const btn = ev.target?.closest ? ev.target.closest('[data-missing-branch]') : null;
+        if(!btn) return;
+        const br = (btn.getAttribute('data-missing-branch')||'').toString();
+        const rows = buildMissingRowsForBranch(br);
+        openMissingBranchesModal('نواقص: ' + br, rows);
+      });
+
+
+      // بحث داخل مودال النواقص
+      document.getElementById('missingSearch')?.addEventListener('input', (e)=>{
+        const term = ((e.target && e.target.value) || '').toString().trim().toLowerCase();
+        const arr = Array.isArray(__missingRowsLast) ? __missingRowsLast : [];
+        const filtered = !term ? arr : arr.filter(r=>{
+          const hay = [
+            r.carName, r.statement, r.interiorColor, r.exteriorColor, r.model, r.year,
+            String(r.branchCount ?? 0), String(r.totalCount ?? 0)
+          ].join(' ').toLowerCase();
+          return hay.includes(term);
+        });
+
+        renderMissingModalRows(filtered);
+        const meta = document.getElementById('missingMeta');
+        if(meta) meta.textContent = `عدد النتائج: ${filtered.length}`;
+      });
+
+      // تصدير Excel
+      document.getElementById('missingExport')?.addEventListener('click', ()=>{
+        try{
+          const headers = ['السيارة','البيان','اللون الداخلي','اللون الخارجي','الموديل','السنة','عدد الفرع','الإجمالي العام'];
+          const rows = (Array.isArray(__missingRowsLast) ? __missingRowsLast : []).map(r=>[
+            r.carName||'',
+            r.statement||'',
+            r.interiorColor||'',
+            r.exteriorColor||'',
+            r.model||'',
+            r.year||'',
+            String(r.branchCount ?? 0),
+            String(r.totalCount ?? 0),
+          ]);
+          exportRowsToExcel(headers, rows, `missing_branches_${Date.now()}.xlsx`, 'missing');
+        }catch(err){
+          console.warn(err);
+          toast('تعذر التصدير');
+        }
+      });
 
       // save selection (no local storage)
       document.getElementById('dash_missing_save')?.addEventListener('click', async ()=>{
@@ -6899,7 +6981,7 @@ function bindDashboardActions(){
         const rows = `
           <div class="dashKpis" style="margin-bottom:10px">
             <div class="dashKpi"><span>الإجمالي الفعلي</span><b>${agg.totalActual}</b></div>
-            <div class="dashKpi"><span>إجمالي المفاتيح</span><b>${agg.keysTotal}</b></div>
+            <div class="dashKpi"><span></span><b>${agg.keysTotal}</b></div>
           </div>
           <div class="dashKpis">
             <div class="dashKpi"><span>متاح</span><b>${agg.avail}</b></div>
