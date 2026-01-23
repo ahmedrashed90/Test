@@ -1,6 +1,7 @@
 
 
 
+
 <!DOCTYPE html>
 
 <html dir="rtl" lang="ar">
@@ -432,6 +433,30 @@ html, body {
 </div>
 <div class="small" id="dash_filter_meta" style="margin-top:10px">—</div>
 </div>
+</div>
+
+<!-- نواقص الفروع -->
+<div class="card">
+  <h3>نواقص الفروع</h3>
+  <div class="body">
+    <div class="dashFilters">
+      <div class="dashStatusBox" style="grid-column:1 / -1">
+        <div class="small" style="margin-bottom:6px">الفروع (يمكن اختيار أكثر من فرع)</div>
+        <div class="dashChecks" id="dash_missing_branches">
+          <!-- تُحمّل تلقائيًا -->
+        </div>
+      </div>
+      <div class="dashFilterActions">
+        <button class="btn primary" id="dash_missing_save">حفظ</button>
+        <button class="btn danger" id="dash_missing_clear">تفريغ</button>
+      </div>
+    </div>
+    <div class="small" id="dash_missing_meta" style="margin-top:10px">—</div>
+  </div>
+</div>
+
+<div class="dashGrid" style="margin-top:14px">
+  <div id="dash_missing_saved_cards"></div>
 </div>
 <!-- Cards -->
 <div class="dashGrid">
@@ -1156,6 +1181,47 @@ html, body {
 <tbody id="dashDataBody"></tbody>
 </table>
 </div>
+</div>
+
+<!-- Missing Branches Modal -->
+<div class="modalBackdrop" id="missingModal">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modalHead">
+      <h4 id="missingTitle">نواقص الفروع</h4>
+      <button class="btn secondary" id="missingClose">إغلاق</button>
+    </div>
+    <div class="modalBody">
+      <div class="toolbar" style="gap:10px;align-items:flex-end;margin-bottom:10px">
+        <div class="field" style="flex:1;min-width:220px">
+          <label>بحث</label>
+          <input autocomplete="off" id="missingSearch" placeholder="ابحث بـ السيارة / البيان / الألوان / الموديل / السنة">
+          </input>
+        </div>
+        <div class="field" style="min-width:200px">
+          <label> </label>
+          <button class="btn" id="missingExport">تصدير Excel</button>
+        </div>
+      </div>
+      <div class="muted" id="missingMeta" style="margin-bottom:10px"></div>
+      <div style="overflow:auto;max-height:70vh;border:1px solid var(--line);border-radius:12px;background:#fff">
+        <table class="table" style="min-width:1100px">
+          <thead>
+            <tr>
+              <th>السيارة</th>
+              <th>البيان</th>
+              <th>اللون الداخلي</th>
+              <th>اللون الخارجي</th>
+              <th>الموديل</th>
+              <th>السنة</th>
+              <th>عدد الفرع</th>
+              <th>الإجمالي العام</th>
+            </tr>
+          </thead>
+          <tbody id="missingBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </div>
 </div>
 </div>
@@ -4856,6 +4922,7 @@ function startInventoryLive(){
             interiorColor: d.interiorColor || '',
             exteriorColor: d.exteriorColor || '',
             model: d.model || '',
+            year: (d.year || d.modelYear || d.yearModel || d['السنة'] || ''),
             plate: d.plate || '',
             batchName: d.batchName || '',
             location: d.location || '',
@@ -5082,7 +5149,9 @@ function startInventoryLive(){
           fmeta.textContent = '—';
         }
       }
-    }
+    
+      try{ renderMissingSavedCard(); }catch(e){}
+}
 
 
     function catKey(obj){
@@ -5117,7 +5186,7 @@ function startInventoryLive(){
     }
 
     
-    function openMissingModal(branch){
+    function openMissingModalLegacy(branch){
       const arr = computeMissingForBranch(branch);
       const uid = 'miss_' + Date.now();
       const searchId = uid + '_q';
@@ -5616,17 +5685,88 @@ function startInventoryLive(){
     }
 
     
+    
     // ===== Dashboard Cards: Saved cards + Data modal =====
-    const DASH_SAVED_CARDS_KEY = 'mzj_dash_cards';
+    // ✅ لا LocalStorage: الحفظ/المشاركة تتم في Firestore لتظهر عند كل المستخدمين
+
+    // 📌 ملاحظة مهمة:
+    // عند بعض البيئات المسار يكون meta/list/... وعند بيئات أخرى meta/lists/...
+    // عشان ما تتكرر مشكلة الصلاحيات/القراءة بين اليوزرات، بنستخدم مسارين (Primary + Fallback)
+
+    const DASH_CFG_REFS = [
+      db.collection('meta').doc('lists').collection('dashboard').doc('config'),  // primary
+      db.collection('meta').doc('list').collection('dashboard').doc('config')    // fallback
+    ];
+
+    function getDashCfgRef(){
+      return DASH_CFG_REFS[0];
+    }
+
+    // subscribe with fallback if primary fails (permissions / not found / etc)
+    function subscribeDashCfg(onData, onErr){
+      let unsub = null;
+      let triedFallback = false;
+
+      const startWith = (ref)=>{
+        try{
+          unsub = ref.onSnapshot((snap)=>{
+            onData && onData(snap);
+          }, async (err)=>{
+            // permission-denied / not-found -> try fallback once
+            const code = (err && (err.code || err.message || '')).toString();
+            if(!triedFallback && (code.includes('permission') || code.includes('PERMISSION') || code.includes('missing') || code.includes('not-found'))){
+              triedFallback = true;
+              try{ if(unsub) unsub(); }catch(_){}
+              return startWith(DASH_CFG_REFS[1]);
+            }
+            onErr && onErr(err);
+          });
+        }catch(e){
+          if(!triedFallback){
+            triedFallback = true;
+            return startWith(DASH_CFG_REFS[1]);
+          }
+          onErr && onErr(e);
+        }
+      };
+
+      startWith(DASH_CFG_REFS[0]);
+      return ()=>{ try{ if(unsub) unsub(); }catch(_){} };
+    }
+
+    async function setDashCfg(patch){
+      // best-effort write to both (so أي يوزر يقرأ من أي مسار يلاقي نفس الداتا)
+      patch = patch || {};
+      const ops = DASH_CFG_REFS.map(async (ref)=>{
+        try{ await ref.set(patch, { merge:true }); }catch(e){ /* ignore */ }
+      });
+      await Promise.all(ops);
+    }
+
+    async function getDashCfgOnce(){
+      // try primary then fallback
+      for(const ref of DASH_CFG_REFS){
+        try{
+          const s = await ref.get();
+          if(s && (s.exists===true || s.exists)) return (s.data()||{});
+        }catch(e){}
+      }
+      return {};
+    }
+
+    let __dashCardsShared = []; // synced from Firestore
 
     function readSavedDashCards(){
-      try{
-        const raw = localStorage.getItem(DASH_SAVED_CARDS_KEY);
-        return raw ? (JSON.parse(raw) || []) : [];
-      }catch(e){ return []; }
+      return Array.isArray(__dashCardsShared) ? __dashCardsShared.slice() : [];
     }
-    function writeSavedDashCards(arr){
-      try{ localStorage.setItem(DASH_SAVED_CARDS_KEY, JSON.stringify(arr||[])); }catch(e){}
+    async function writeSavedDashCards(arr){
+      try{
+        __dashCardsShared = Array.isArray(arr) ? arr.slice() : [];
+        await setDashCfg({ savedCards: __dashCardsShared });
+      }catch(e){
+        console.warn('writeSavedDashCards error', e);
+        toast('تعذر حفظ الكروت');
+      }
     }
         function makeCardTitle(loc){
       return (loc && loc.trim()) ? loc.trim() : 'كل الأماكن';
@@ -5869,17 +6009,405 @@ function startInventoryLive(){
     }
 
 
-    function bindDashboardActions(){
+    
+    // ===== Dashboard: Missing branches cards =====
+    // ✅ لا LocalStorage: اختيار الفروع يتم حفظه في Firestore ليظهر عند كل المستخدمين.
+
+    let __missingCard = null; // { branches: [] }
+    let __missingBranchesList = []; // loaded from Firestore: meta/lists/branches
+
+    let __missingLastRows = [];
+    let __missingLastTitle = 'نواقص الفروع';
+
+    async function loadMissingBranchesList(){
+      try{
+        const arr = [];
+
+        // 1) المسار المعتمد: meta/lists/branches (collection)
+        let snap = null;
+        try{ snap = await db.collection('meta').doc('lists').collection('branches').get(); }catch(e){}
+        // 1.1) fallback: meta/list/branches
+        if(!snap){ try{ snap = await db.collection('meta').doc('list').collection('branches').get(); }catch(e){} }
+        (snap||{forEach:()=>{}}).forEach(d=>{
+          const data = d.data() || {};
+          const name = (data.name || data.title || data.branch || data.value || d.id || '').toString().trim();
+          if(name) arr.push(name);
+        });
+
+        // 2) fallback: لو القائمة فاضية (فيه أنظمة بتخزنها Array داخل doc meta/lists)
+        if(!arr.length){
+          const docSnap = await db.collection('meta').doc('lists').get();
+          if((docSnap && (docSnap.exists === true || docSnap.exists)) || (docSnap && typeof docSnap.exists==='function' && docSnap.exists())){
+            const data = docSnap.data() || {};
+            const listArr =
+              (Array.isArray(data.branches) ? data.branches :
+               Array.isArray(data.locations) ? data.locations :
+               Array.isArray(data.places) ? data.places : []);
+            (listArr||[]).forEach(x=>{
+              const name = (x && (x.name||x.title||x.value)) ? (x.name||x.title||x.value) : x;
+              const n = (name||'').toString().trim();
+              if(n) arr.push(n);
+            });
+          }
+        }
+
+        __missingBranchesList = Array.from(new Set(arr)).sort((a,b)=>a.localeCompare(b,'ar'));
+      }catch(e){
+        console.warn('loadMissingBranchesList error', e);
+        __missingBranchesList = [];
+      }
+    }
+
+    function renderMissingBranchesChecks(){
+      const host = document.getElementById('dash_missing_branches');
+      if(!host) return;
+      host.innerHTML = '';
+      const selected = new Set((__missingCard?.branches)||[]);
+      (__missingBranchesList||[]).forEach(name=>{
+        const v = (name||'').toString().trim();
+        if(!v) return;
+        const lab = document.createElement('label');
+        lab.className = 'dashChk';
+        lab.innerHTML = `<input type="checkbox" value="${escapeHtml(v)}" ${selected.has(v)?'checked':''}/> ${escapeHtml(v)}`;
+        host.appendChild(lab);
+      });
+    }
+
+    function getSelectedMissingBranchesFromUI(){
+      const host = document.getElementById('dash_missing_branches');
+      if(!host) return [];
+      const arr = [];
+      host.querySelectorAll('input[type="checkbox"]')?.forEach(ch=>{
+        if(ch.checked){
+          const v = (ch.value||'').toString().trim();
+          if(v) arr.push(v);
+        }
+      });
+      // unique
+      return Array.from(new Set(arr));
+    }
+
+    function openMissingModal(title, rows){
+      __missingLastTitle = title || 'نواقص الفروع';
+      __missingLastRows = Array.isArray(rows) ? rows.slice() : [];
+      const t = document.getElementById('missingTitle');
+      const s = document.getElementById('missingSearch');
+      if(t) t.textContent = __missingLastTitle;
+      if(s) s.value = '';
+      renderMissingModalRows(__missingLastRows);
+      showModal('missingModal');
+    }
+
+    
+    // ===== Missing Branches: compute rows by تركيبـة (السيارة+البيان+ألوان+موديل+سنة) =====
+    function __mb_norm(v){ return (v||'').toString().trim(); }
+    function __mb_key(c){
+      return [
+        __mb_norm(c.carName),
+        __mb_norm(c.statement),
+        __mb_norm(c.interiorColor),
+        __mb_norm(c.exteriorColor),
+        __mb_norm(c.model),
+        __mb_norm(c.year)
+      ].join('||');
+    }
+
+    function __mb_isActual(st){
+      const s = __mb_norm(st);
+      return (s==='متاح للبيع' || s==='محجوز' || s==='حجز' || s==='بها ملاحظات');
+    }
+
+    function buildMissingRowsForBranch(branch){
+      const br = __mb_norm(branch);
+      if(!br) return [];
+
+      const totals = new Map();        // key -> total count across branches + warehouse
+      const branchCounts = new Map();  // key -> count in this branch
+
+      (dashCars||[]).forEach(c=>{
+        if(!__mb_isActual(c.status)) return;
+        const loc = __mb_norm(c.location);
+        const key = __mb_key(c);
+        if(!key) return;
+
+        // total across all locations + warehouse
+        totals.set(key, (totals.get(key)||0) + 1);
+
+        // count in branch only
+        if(loc===br) branchCounts.set(key, (branchCounts.get(key)||0) + 1);
+      });
+
+      const rows = [];
+      totals.forEach((totalCount, key)=>{
+        const bCount = branchCounts.get(key) || 0;
+        if(bCount===0 && totalCount>0){
+          const parts = key.split('||');
+          rows.push({
+            carName: parts[0]||'',
+            statement: parts[1]||'',
+            interiorColor: parts[2]||'',
+            exteriorColor: parts[3]||'',
+            model: parts[4]||'',
+            year: parts[5]||'',
+            branchCount: 0,
+            totalCount: totalCount
+          });
+        }
+      });
+
+      // sort for stable view
+      rows.sort((a,b)=>{
+        const A = (a.carName+a.model+a.year+a.exteriorColor+a.interiorColor+a.statement).toString();
+        const B = (b.carName+b.model+b.year+b.exteriorColor+b.interiorColor+b.statement).toString();
+        return A.localeCompare(B,'ar');
+      });
+
+      return rows;
+    }
+
+    function openMissingBranchesModal(title, rows){
+      const arr = Array.isArray(rows) ? rows : [];
+      const uid = 'mb_' + Date.now();
+      const qid = uid + '_q';
+      const xid = uid + '_x';
+      const tid = uid + '_t';
+
+      const headers = ['السيارة','البيان','اللون الداخلي','اللون الخارجي','الموديل','السنة','عدد الفرع','الإجمالي العام'];
+
+      function rowToArray(r){
+        return [
+          r.carName||'',
+          r.statement||'',
+          r.interiorColor||'',
+          r.exteriorColor||'',
+          r.model||'',
+          r.year||'',
+          String(r.branchCount||0),
+          String(r.totalCount||0),
+        ];
+      }
+
+      const modalHtml = `
+        <div class="modal show" id="${uid}">
+          <div class="modalContent" style="max-width:1100px">
+            <div class="modalHead">
+              <h3 style="margin:0">${escapeHtml(title||'نواقص الفروع')}</h3>
+              <button class="btn danger" data-close="${uid}">إغلاق</button>
+            </div>
+            <div class="modalBody">
+              <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
+                <input id="${qid}" class="input" placeholder="بحث (سيارة / بيان / ألوان / موديل / سنة)" style="flex:1;min-width:260px">
+                <button class="btn secondary" id="${xid}">تصدير Excel</button>
+              </div>
+              <div class="tableWrap">
+                <table class="table" id="${tid}">
+                  <thead>
+                    <tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr>
+                  </thead>
+                  <tbody>
+                    ${arr.map(r=>{
+                      const a = rowToArray(r);
+                      return `<tr>${a.map(v=>`<td>${escapeHtml(v)}</td>`).join('')}</tr>`;
+                    }).join('') || `<tr><td colspan="8" class="muted" style="text-align:center">لا توجد نواقص</td></tr>`}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // mount
+      const holder = document.createElement('div');
+      holder.innerHTML = modalHtml;
+      document.body.appendChild(holder);
+
+      // close
+      holder.querySelectorAll(`[data-close="${uid}"]`).forEach(b=>{
+        b.addEventListener('click', ()=>{
+          try{ holder.remove(); }catch(e){}
+        });
+      });
+      holder.addEventListener('click', (e)=>{
+        if(e.target && e.target.id===uid){
+          try{ holder.remove(); }catch(_){}
+        }
+      });
+
+      // search
+      const q = holder.querySelector('#'+qid);
+      if(q){
+        q.addEventListener('input', ()=>{
+          const term = (q.value||'').toString().trim().toLowerCase();
+          const tbody = holder.querySelector('#'+tid+' tbody');
+          if(!tbody) return;
+          const filtered = !term ? arr : arr.filter(r=>{
+            const hay = (rowToArray(r).join(' ')||'').toLowerCase();
+            return hay.includes(term);
+          });
+          tbody.innerHTML = filtered.length ? filtered.map(r=>{
+            const a = rowToArray(r);
+            return `<tr>${a.map(v=>`<td>${escapeHtml(v)}</td>`).join('')}</tr>`;
+          }).join('') : `<tr><td colspan="8" class="muted" style="text-align:center">لا توجد نتائج</td></tr>`;
+        });
+      }
+
+      // export
+      holder.querySelector('#'+xid)?.addEventListener('click', ()=>{
+        try{
+          const rows2 = arr.map(r=>rowToArray(r));
+          exportRowsToExcel(headers, rows2, `missing_${(title||'branches').replace(/\s+/g,'_')}_${Date.now()}.xlsx`, 'missing');
+        }catch(e){
+          console.warn(e);
+          toast('تعذر التصدير');
+        }
+      });
+    }
+
+function renderMissingSavedCard(){
+      const host = document.getElementById('dash_missing_saved_cards');
+      if(!host) return;
+
+      if(!__missingCard || !Array.isArray(__missingCard.branches) || !__missingCard.branches.length){
+        host.innerHTML = '';
+        const meta = document.getElementById('dash_missing_meta');
+        if(meta) meta.textContent = '—';
+        return;
+      }
+
+      const branches = __missingCard.branches.slice();
+      const items = branches.map(br=>{
+        const rows = buildMissingRowsForBranch(br);
+        const cnt = rows.length;
+        return `
+          <button class="linkBtn" type="button"
+            data-missing-branch="${escapeHtml(br)}"
+            style="border-radius:999px">
+            ${escapeHtml(br)} <span class="tag ${cnt? 'no':'ok'}" style="margin-right:8px">${cnt}</span>
+          </button>`;
+      }).join('');
+
+      host.innerHTML = `
+        <div class="card dashCard" id="dash_missing_card_one">
+          <div class="cardHead" style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+            <h3 style="margin:0">نواقص الفروع</h3>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn secondary" type="button" id="dash_missing_edit">تعديل</button>
+              <button class="btn danger" type="button" id="dash_missing_delete">حذف</button>
+            </div>
+          </div>
+          <div class="body">
+            <div class="small" style="margin-bottom:10px">اضغط على اسم الفرع لعرض النواقص</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">${items || '<span class="muted">—</span>'}</div>
+          </div>
+        </div>
+      `;
+
+      // bind branch click
+      host.querySelectorAll('[data-missing-branch]')?.forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const br = (btn.getAttribute('data-missing-branch')||'').toString();
+          const rows = buildMissingRowsForBranch(br);
+          openMissingBranchesModal('نواقص: ' + br, rows);
+        });
+      });
+
+      // edit/delete
+      document.getElementById('dash_missing_edit')?.addEventListener('click', ()=>{
+        // show checks area and sync checked
+        renderMissingBranchesChecks();
+        const meta = document.getElementById('dash_missing_meta');
+        if(meta) meta.textContent = 'وضع التعديل: اختر/احذف فروع ثم اضغط حفظ';
+        // scroll to the checks
+        try{ document.getElementById('dash_missing_branches')?.scrollIntoView({behavior:'smooth', block:'center'}); }catch(e){}
+      });
+
+      document.getElementById('dash_missing_delete')?.addEventListener('click', async ()=>{
+        try{
+          await setDashCfg({ missingBranches: [] });
+          toast('تم حذف كارت النواقص للجميع');
+        }catch(e){
+          console.warn(e);
+          toast('تعذر حذف الكارت');
+        }
+      });
+
+      const meta = document.getElementById('dash_missing_meta');
+      if(meta) meta.textContent = `عدد الفروع داخل الكارت: ${branches.length}`;
+    }
+
+    function bindMissingBranchesUI(){
+      // close modal
+      document.getElementById('missingClose')?.addEventListener('click', ()=>hideModal('missingModal'));
+
+      // save selection (no local storage)
+      document.getElementById('dash_missing_save')?.addEventListener('click', async ()=>{
+        const sel = getSelectedMissingBranchesFromUI();
+        if(!sel.length){
+          toast('اختر فرع واحد على الأقل');
+          return;
+        }
+        try{
+          await setDashCfg({ missingBranches: sel });
+          toast('تم حفظ كارت النواقص للجميع');
+        }catch(e){
+          console.warn(e);
+          toast('تعذر حفظ كارت النواقص');
+        }
+      });
+
+      // clear selection (UI only)
+      document.getElementById('dash_missing_clear')?.addEventListener('click', ()=>{
+        const host = document.getElementById('dash_missing_branches');
+        host?.querySelectorAll('input[type="checkbox"]')?.forEach(ch=>ch.checked=false);
+        toast('تم تفريغ الاختيار');
+      });
+    }
+
+    async function initMissingBranchesFeature(){
+      await loadMissingBranchesList();
+
+      // 🔴 sync selection from Firestore (shared for all users)
+      try{
+        subscribeDashCfg((snap)=>{
+          const d = snap.exists ? (snap.data()||{}) : {};
+          const sel = Array.isArray(d.missingBranches) ? d.missingBranches : [];
+          __missingCard = sel.length ? { branches: sel.slice() } : null;
+          renderMissingBranchesChecks();
+          renderMissingSavedCard();
+        }, (err)=>{
+          console.warn('missingBranches onSnapshot', err);
+        });
+      }catch(e){
+        console.warn('missingBranches live init error', e);
+      }
+
+      renderMissingBranchesChecks();
+      renderMissingSavedCard();
+      bindMissingBranchesUI();
+    }
+
+function bindDashboardActions(){
       // Dashboard data modal close (no refresh needed)
       const dashDataModal = document.getElementById('dashDataModal');
       const dashDataClose = document.getElementById('dashDataClose');
       if(dashDataClose) dashDataClose.addEventListener('click', ()=>{ if(dashDataModal) dashDataModal.classList.remove('show'); });
       if(dashDataModal) dashDataModal.addEventListener('click', (e)=>{ if(e.target===dashDataModal) dashDataModal.classList.remove('show'); });
 
-      // Missing (نواقص) buttons
-      document.querySelectorAll('[data-miss-branch]').forEach(btn=>{
-        btn.addEventListener('click', ()=> openMissingModal(btn.getAttribute('data-miss-branch')));
-      });
+      // Missing Branches Feature (نواقص الفروع)
+      try{ initMissingBranchesFeature(); }catch(e){}
+
+      // 🔴 Sync shared dashboard cards from Firestore (no localStorage)
+      try{
+        subscribeDashCfg((snap)=>{
+          const d = snap.exists ? (snap.data()||{}) : {};
+          __dashCardsShared = Array.isArray(d.savedCards) ? d.savedCards : [];
+          // re-render cards if dashboard is visible
+          try{ renderSavedDashCards(); }catch(_){}
+        }, (err)=>console.warn('dashboard cards onSnapshot', err));
+      }catch(e){
+        console.warn('dashboard cards live init error', e);
+      }
 
       // Inventory quick buttons -> OPEN MODAL (not navigate)
       const openBy = (loc, statuses)=> openCarsModalByFilter((loc||'').toString(), Array.isArray(statuses)? statuses: []);
@@ -6333,7 +6861,7 @@ function startInventoryLive(){
       });
 
       // saved filter buttons
-      document.getElementById('dash_filter_save')?.addEventListener('click', ()=>{
+      document.getElementById('dash_filter_save')?.addEventListener('click', async ()=>{
         const obj = getDashFilterFromUI();
         // keep old behavior (remember last filter)
         writeSavedDashFilter(obj);
@@ -6349,10 +6877,11 @@ function startInventoryLive(){
         const exists = cards.some(c=> (c.key===key));
         if(!exists){
           cards.unshift({id: 'c_'+Date.now().toString(36), key, title, location, statuses, createdAt: Date.now()});
-          writeSavedDashCards(cards);
+          await writeSavedDashCards(cards);
         }
 
         renderDashboard();
+        // سيتم التحديث تلقائيًا عبر onSnapshot
         renderSavedDashCards();
       markDashboardTotalsHighlight();
         toast(exists ? 'الكارت موجود بالفعل' : 'تم إنشاء كارت جديد');
@@ -6456,7 +6985,40 @@ function startInventoryLive(){
 
       });
 
-    }
+    
+
+      // ---- Missing branches UI bindings ----
+      try{
+        initMissingBranchesFeature();
+
+        document.getElementById('missingClose')?.addEventListener('click', ()=>hideModal('missingModal'));
+        document.getElementById('missingModal')?.addEventListener('click', (e)=>{
+          if(e.target && e.target.id==='missingModal') hideModal('missingModal');
+        });
+
+        document.getElementById('missingSearch')?.addEventListener('input', ()=>{
+          renderMissingModalRows(__missingLastRows);
+        });
+
+        document.getElementById('missingExport')?.addEventListener('click', ()=>{
+          const headers = ['السيارة','البيان','اللون الداخلي','اللون الخارجي','الموديل','السنة','عدد الفرع','الإجمالي العام'];
+          const rows = (__missingLastRows||[]).filter(r=>missingRowMatches(r, (document.getElementById('missingSearch')?.value||'').trim()))
+            .map(r=>[
+              r.carName||'',
+              r.statement||'',
+              r.interiorColor||'',
+              r.exteriorColor||'',
+              r.model||'',
+              (r.year||'').toString(),
+              (r.branchCount??0),
+              (r.totalAll??0)
+            ]);
+          exportRowsToExcel(headers, rows, `missing_${Date.now()}.xlsx`, 'missing');
+        });
+
+      }catch(e){ /* ignore */ }
+
+}
 
     function startDashboardLive(){
       if(dashCarsUnsub) return;
