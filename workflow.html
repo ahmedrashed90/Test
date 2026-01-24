@@ -5,7 +5,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
-<title>mzj-workflow | الإدارة + المخزون</title>
+<title>مجموعة محمد بن ذعار العجمي للسيارات</title>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
@@ -240,7 +240,58 @@
     }
     @media (max-width:720px){
       .dashGrid{grid-template-columns:1fr}
+
+/* === FIX: Card title total on the left + Notes column (Dash modal) === */
+.cardTitleRow{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:nowrap;
+  padding:14px 16px;           /* داخل الكارت */
+  border-bottom:1px solid var(--line);
+}
+.cardTitleRow h3{
+  margin:0;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.cardTotal{
+  white-space:nowrap;
+  font-weight:600;
+}
+.cardTotal b{font-weight:900;}
+.cardTitleRow{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:nowrap;}
+.cardTitleRow h3{margin:0;min-width:0;}
+.cardTotal{white-space:nowrap;}
+#dashDataModal .dashNotesCol{display:none;}
+#dashDataModal.showNotes .dashNotesCol{display:table-cell;}
     }
+
+
+/* === FIX (GLOBAL): Card title total stays in same row + Notes column (Dash modal) === */
+.cardTitleRow{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:nowrap}
+.cardTitleRow h3{margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:calc(100% - 90px)}
+.cardTotal{white-space:nowrap}
+#dashDataModal .dashNotesCol{display:none;}
+#dashDataModal.showNotes .dashNotesCol{display:table-cell;}
+
+/* === PATCH: totals inline text (label + bold number) === */
+.cardTotal{
+  border:none !important;
+  background:transparent !important;
+  padding:0 !important;
+  min-width:unset !important;
+  height:auto !important;
+  border-radius:0 !important;
+  font-weight:400 !important;
+  color:var(--brown) !important;
+}
+.cardTotal b{font-weight:900;}
+.cardTitleRow{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:nowrap;}
+.cardTitleRow h3{margin:0;min-width:0;}
+.cardTotal{white-space:nowrap;}
 
 
 /* داش بورد: تمييز الإجمالي الفعلي و */
@@ -376,8 +427,8 @@ html, body {
 <div class="brand">
 <div class="dot"></div>
 <div>
-<div class="title">mzj-workflow — الإدارة + المخزون</div>
-<div class="subtitle">المسار الموحد لبيانات السيارة: <b>cars/{VIN}</b></div>
+<div class="brand-title">مجموعة محمد بن ذعار العجمي للسيارات</div>
+<div class="brand-sub">Workflow</div>
 </div>
 </div>
 <div class="right">
@@ -465,7 +516,7 @@ html, body {
 
 
 <div class="card dashCard">
-<h3 id="dash_ap_title">كارت الموافقة المالية والإدارية</h3>
+<div class="cardTitleRow"><h3 id="dash_ap_title">كارت الموافقة المالية والإدارية</h3><span class="cardTotal">الإجمالي: <b id="dash_ap_total">—</b></span></div>
 <div class="body">
 <div class="dashKpis">
 <div class="dashKpi"><span>ناقص موافقة مالية</span><b id="ap_need_fin">—</b></div>
@@ -476,7 +527,7 @@ html, body {
 </div>
 </div>
 <div class="card dashCard">
-<h3 id="dash_req_title">طلبات النقل</h3>
+<div class="cardTitleRow"><h3 id="dash_req_title">طلبات النقل</h3><span class="cardTotal">الإجمالي: <b id="dash_req_total">—</b></span></div>
 <div class="body">
 <div class="dashKpis">
 <div class="dashKpi"><span>تم استلام الطلب</span><b id="rq_s1">—</b></div>
@@ -488,7 +539,7 @@ html, body {
 </div>
 </div>
 <div class="card dashCard">
-<h3 id="dash_trk_title">تتبع إجراءات البيع (Tracking)</h3>
+<div class="cardTitleRow"><h3 id="dash_trk_title">تتبع إجراءات البيع (Tracking)</h3><span class="cardTotal">الإجمالي: <b id="dash_trk_total">—</b></span></div>
 <div class="body">
 <div class="dashBtns" style="margin-top:10px">
 <button class="btn secondary" id="dash_trk_new">طلبات لم تبدأ (—)</button>
@@ -826,6 +877,7 @@ html, body {
 <th>السيارة</th>
 <th>المكان الحالي</th>
 <th>الحالة</th>
+<th class="dashNotesCol">ملاحظات</th>
 <th>الموافقات</th>
 <th>حذف</th>
 </tr>
@@ -1175,6 +1227,7 @@ html, body {
 <th>الخارجي</th>
 <th>المكان</th>
 <th>الحالة</th>
+<th class="dashNotesCol">ملاحظات</th>
 <th>الموافقات</th>
 </tr>
 </thead>
@@ -2842,7 +2895,9 @@ function startInventoryLive(){
 
       // إجمالي كارت الموافقات = جميع سيارات (مباع تحت التسليم)
       const apTitle = document.getElementById('dash_ap_title');
-      if(apTitle) apTitle.textContent = `كارت الموافقة المالية والإدارية (${under.length})`;
+      const apTot  = document.getElementById('dash_ap_total');
+      if(apTitle) apTitle.textContent = 'كارت الموافقة المالية والإدارية';
+      if(apTot) apTot.textContent = `${under.length}`;
       // Missing (catalog)
       const missMeta = document.getElementById('miss_meta');
       if(!dashCatalog.length){
@@ -3337,7 +3392,9 @@ function startInventoryLive(){
       // إجمالي كارت طلبات النقل = (تم استلام الطلب + تم ارسال السيارة + تم استلام السيارة)
       const ttl = (s1 + s2 + s3);
       const tEl = document.getElementById('dash_req_title');
-      if(tEl) tEl.textContent = `طلبات النقل (${ttl})`;
+      const tTot = document.getElementById('dash_req_total');
+      if(tEl) tEl.textContent = 'طلبات النقل';
+      if(tTot) tTot.textContent = `${ttl}`;
     }
 
     
@@ -3606,7 +3663,104 @@ function startInventoryLive(){
       }
     }
 
-    function openDashDataModal(title, cars){
+    
+    function getCarNotes(c){
+      try{
+        if(!c) return '';
+        if(c.__note!=null && (c.__note+'').toString().trim()!=='') return (c.__note+'').toString().trim();
+
+        const keys = [
+          // ✅ حقول الملاحظات المستخدمة فعليًا في قاعدة البيانات
+          'notesLocation','noteLocation','notesMissing','noteMissing',
+          'notes','note','carNotes','notesText','generalNote','statusNote',
+          'ملاحظات','ملاحظة',
+          'ملاحظات_السيارة','ملاحظة_السيارة',
+          'ملاحظات في السيارة','ملاحظات_في_السيارة'
+        ];
+
+        // direct fields
+        for(const k of keys){
+          if(c[k]!==undefined && c[k]!==null && (c[k]+'').toString().trim()!=='') return (c[k]+'').toString().trim();
+        }
+
+        // sometimes notes are nested
+        if(c.data && typeof c.data==='object'){
+          for(const k of keys){
+            if(c.data[k]!==undefined && c.data[k]!==null && (c.data[k]+'').toString().trim()!=='') return (c.data[k]+'').toString().trim();
+          }
+        }
+      }catch(_){}
+      return '';
+    }
+
+    // Enrich dashboard modal rows with notes from cars/{VIN} if missing
+    async function enrichDashCarsNotes(arr){
+      try{
+        if(!arr || !arr.length) return;
+        if(typeof db==='undefined' || !db || !db.collection) return;
+
+        const pickVin = (c)=>{
+          try{
+            const v = (c && (
+              c.vin || c.VIN || c.id ||
+              c['رقم الهيكل (VIN)'] || c['الهيكل (VIN)'] || c['رقم الهيكل'] || c['VIN#']
+            )) || '';
+            return (v+'').toString().trim();
+          }catch(_){ return ''; }
+        };
+
+        const tryFetchFrom = async (colName, vin)=>{
+          // 1) direct doc id = vin
+          try{
+            const snap = await db.collection(colName).doc(vin).get();
+            if(snap && snap.exists){
+              const d = snap.data() || {};
+              const note = getCarNotes(d);
+              if(note) return note;
+            }
+          }catch(_){}
+
+          // 2) fallback queries (in case docId isn't VIN)
+          const fields = ['vin','VIN','رقم الهيكل (VIN)','الهيكل (VIN)','رقم الهيكل'];
+          for(const f of fields){
+            try{
+              const q = await db.collection(colName).where(f,'==',vin).limit(1).get();
+              if(q && !q.empty){
+                const d = (q.docs[0] && q.docs[0].data()) || {};
+                const note = getCarNotes(d);
+                if(note) return note;
+              }
+            }catch(_){}
+          }
+          return '';
+        };
+
+        const tasks = [];
+        arr.forEach(c=>{
+          const vin = pickVin(c);
+          if(!vin) return;
+          if(getCarNotes(c)) return; // already has notes
+
+          tasks.push((async ()=>{
+            try{
+              // جرّب cars ثم erp_vins
+              let note = await tryFetchFrom('cars', vin);
+              if(!note) note = await tryFetchFrom('erp_vins', vin);
+              if(note) c.__note = note;
+            }catch(_){}
+          })());
+        });
+
+        if(tasks.length) await Promise.all(tasks);
+      }catch(_){}
+    }
+
+function openDashDataModal(title, cars, opts){
+      opts = opts || {};
+      const showNotes = !!opts.showNotes || (title||'').toString().includes('ملاحظات') || (title||'').toString().includes('بها ملاحظات');
+      const dashModal = document.getElementById('dashDataModal');
+      if(dashModal) dashModal.classList.toggle('showNotes', showNotes);
+
       dashDataLast = Array.isArray(cars)? cars.slice() : [];
       const t = document.getElementById('dashDataTitle');
       const meta = document.getElementById('dashDataMeta');
@@ -3662,6 +3816,7 @@ function startInventoryLive(){
             <td>${outC}</td>
             <td>${loc}</td>
             <td>${st}</td>
+            <td class="dashNotesCol">${escapeHtml(getCarNotes(c))||'—'}</td>
             <td>${apprCell}</td>
           </tr>`;
         }).join('');
@@ -3678,6 +3833,17 @@ function startInventoryLive(){
       // initial
       renderRows(dashDataLast);
 
+      // if notes missing, fetch them from cars/{VIN} then rerender
+      (async ()=>{
+        try{
+          if(showNotes){
+            await enrichDashCarsNotes(dashDataLast);
+            renderRows(dashDataFiltered());
+          }
+        }catch(_){}
+      })();
+
+
       // wire search
       if(search){
         const onSearch = ()=> renderRows(dashDataFiltered());
@@ -3688,11 +3854,16 @@ function startInventoryLive(){
       if(exportBtn){
         exportBtn.onclick = ()=>{
           const list = dashDataFiltered();
-          const headers = ['VIN','السيارة','البيان','موديل','الوكيل','الداخلي','الخارجي','المكان','الحالة'];
-          const rows = list.map(c=>[
-            c.vin||'', c.carName||'', c.statement||'', c.model||'', c.agent||'',
-            c.interiorColor||'', c.exteriorColor||'', c.location||'', (normStatus(c.status)||c.status||'')
-          ]);
+          const headers = ['VIN','السيارة','البيان','موديل','الوكيل','الداخلي','الخارجي','المكان','الحالة']
+            .concat((document.getElementById('dashDataModal')?.classList.contains('showNotes')) ? ['ملاحظات'] : []);
+          const rows = list.map(c=>{
+            const base = [
+              c.vin||'', c.carName||'', c.statement||'', c.model||'', c.agent||'',
+              c.interiorColor||'', c.exteriorColor||'', c.location||'', (normStatus(c.status)||c.status||'')
+            ];
+            if(document.getElementById('dashDataModal')?.classList.contains('showNotes')) base.push(getCarNotes(c)||'');
+            return base;
+          });
           exportRowsToExcel(headers, rows, 'dashboard_cars.xlsx', 'cars');
         };
       }
@@ -3704,6 +3875,9 @@ function startInventoryLive(){
     
     function filterCars(location, statuses){
       const locWanted = norm(location||'');
+      // statuses قد تأتي String من الـ KPI
+      if(typeof statuses === 'string' && statuses.trim()) statuses = [statuses.trim()];
+      if(!Array.isArray(statuses)) statuses = (statuses ? [statuses] : []);
       const setWanted = new Set((statuses||[]).map(s=>normStatus(s)));
       return dashCars.filter(c=>{
         const locOk = !locWanted || norm(c.location||'')===locWanted;
@@ -3716,8 +3890,12 @@ function startInventoryLive(){
 
 
     function openCarsModalByFilter(location, statuses){
+      // statuses قد تأتي String من الـ KPI
+      if(typeof statuses === 'string' && statuses.trim()) statuses = [statuses.trim()];
+      if(!Array.isArray(statuses)) statuses = (statuses ? [statuses] : []);
       const cars = filterCars(location, statuses);
-      openDashDataModal(makeCardTitle(location, normalizeStatuses(statuses)), cars);
+      const showNotes = statuses.map(s=>normStatus(s)).includes('بها ملاحظات');
+      openDashDataModal(makeCardTitle(location), cars, { showNotes });
     }
 
     function renderSavedDashCards(){
@@ -4033,8 +4211,7 @@ function openMissingBranchesModal(title, rows){
 
       // meta
       const cntEl = document.getElementById('missingCount');
-      if(cntEl) cntEl.textContent = String(__missingRowsLast.length);
-
+      if(cntEl) cntEl.innerHTML = `الإجمالي: <b>${__missingRowsLast.length}</b>`; 
       const sub = document.getElementById('missingSubMeta');
       if(sub) sub.textContent = 'اضغط على تصدير Excel لتحميل النواقص';
 
@@ -4252,8 +4429,7 @@ document.getElementById('dash_missing_delete')?.addEventListener('click', async 
         const meta = document.getElementById('missingMeta');
         if(meta) meta.textContent = `عدد النتائج: ${filtered.length}`;
         const cc = document.getElementById('missingCount');
-        if(cc) cc.textContent = String(filtered.length);
-      });
+        if(cc) cc.innerHTML = `الإجمالي: <b>${filtered.length}</b>`;       });
 
       // تصدير Excel
       document.getElementById('missingExport')?.addEventListener('click', ()=>{
@@ -4696,7 +4872,10 @@ function bindDashboardActions(){
 
           // إجمالي كارت تتبع إجراءات البيع = (لم تبدأ + تحت الإجراء + مكتملة)
           const tEl = document.getElementById('dash_trk_title');
-          if(tEl) tEl.textContent = `تتبع إجراءات البيع (Tracking) (${(nNew+nIn+nDone)})`;
+          const tTot = document.getElementById('dash_trk_total');
+          if(tEl) tEl.textContent = 'تتبع إجراءات البيع (Tracking)';
+          // ✅ الـ <span> يحتوي "الإجمالي:" بالفعل، لذلك نكتب الرقم فقط داخل الـ <b>
+          if(tTot) tTot.textContent = `${(nNew+nIn+nDone)}`;
         }catch(e){
           console.warn('tracking kpi error', e);
           const bNew = document.getElementById('dash_trk_new');
@@ -5056,7 +5235,7 @@ function bindDashboardActions(){
         });
 
         const headers = ['VIN','السيارة','البيان','الوكيل','اللون الداخلي','اللون الخارجي','الموديل','اللوحة','الدفعة','المكان','ملاحظة المكان','ملاحظة النواقص','الحالة','Tracking'];
-        const csv = [headers.join(',')].concat(rows.map(c=>[
+        const csv = '\ufeff' + [headers.join(',')].concat(rows.map(c=>[
           c.vin, c.carName, c.statement, c.agent, c.interiorColor, c.exteriorColor, c.model, c.plate, c.batchName, c.location, c.noteLocation, c.noteMissing, c.status, c.trackingLink
         ].map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(','))).join('\n');
 
