@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 
 <html dir="rtl" lang="ar">
@@ -380,12 +381,83 @@
     /* Approvals modal clickable rows */
     tr.apRow{cursor:pointer}
     tr.apRow:hover{background:rgba(188,143,116,.12)}
+
+/* ===== Dashboard Total Badge ===== */
+.dashTotalWrap{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:10px;
+  margin:6px 0 12px;
+}
+.dashTotalLabel{
+  font-size:12px;
+  font-weight:600;
+  color:rgba(62,36,32,.75);
+}
+.dashTotalBadge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  height:38px;
+  min-width:38px;
+  padding:0 12px;              /* يسمح لرقمين/3 أرقام بدون ما يبوظ */
+  border-radius:999px;          /* دائري/بيضاوي حسب الرقم */
+  background:#fff8ef;
+  border:2px solid #bc8f74;
+  color:#3e2420;
+  box-shadow:0 6px 14px rgba(62,36,32,.12);
+  font-weight:800;
+  font-size:15px;
+  line-height:1;
+}
+.dashTotalBadge b{font-weight:800;}
+
+/* === Dashboard: Total inline with card title === */
+.cardTitleRow .dashTitleTotal{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  white-space:nowrap;
+  font-size:12px;
+  font-weight:700;
+  color:rgba(62,36,32,.75);
+}
+.cardTitleRow .dashTitleTotal .dashTotalBadge{
+  height:30px;
+  min-width:30px;
+  padding:0 10px;
+  font-size:13px;
+  border-width:2px;
+  box-shadow:0 4px 10px rgba(62,36,32,.10);
+}
+.cardTitleRow .dashTitleTotal .dashTotalBadge b{font-weight:900;}
+
+
+
+/* ---- Badge alignment override ---- */
+.dashTotalWrap{
+  justify-content:flex-start;
+  align-items:center;
+  margin-top:-6px;
+  margin-bottom:8px;
+}
+
 </style>
 <style>
     /* Dashboard modals wider */
     #dashDataModal .modal, #detailsModal .modal{width:96vw;max-width:96vw}
     #dashDataModal table.table{min-width:1200px}
-  </style>
+  
+/* ---- Badge alignment override ---- */
+.dashTotalWrap{
+  justify-content:flex-start;
+  align-items:center;
+  margin-top:-6px;
+  margin-bottom:8px;
+}
+
+</style>
 <style>
 /* FIX: Tracking tab layout without mzj-ui */
 #tracking-tab,
@@ -414,12 +486,30 @@
 body {
   overflow-x: hidden;
 }
+
+/* ---- Badge alignment override ---- */
+.dashTotalWrap{
+  justify-content:flex-start;
+  align-items:center;
+  margin-top:-6px;
+  margin-bottom:8px;
+}
+
 </style>
 <style>
 html, body {
   direction: rtl;
   text-align: right;
 }
+
+/* ---- Badge alignment override ---- */
+.dashTotalWrap{
+  justify-content:flex-start;
+  align-items:center;
+  margin-top:-6px;
+  margin-bottom:8px;
+}
+
 </style>
 </head>
 <body>
@@ -517,8 +607,10 @@ html, body {
 
 
 <div class="card dashCard">
-<div class="cardTitleRow"><h3 id="dash_ap_title">كارت الموافقة المالية والإدارية</h3><span class="cardTotal">الإجمالي: <b id="dash_ap_total">—</b></span></div>
+<div class="cardTitleRow"><h3 id="dash_ap_title">كارت الموافقة المالية والإدارية</h3><div class="dashTitleTotal"><span>الإجمالي</span><span class="dashTotalBadge"><b id="dash_ap_total">—</b></span></div></div>
 <div class="body">
+
+
 <div class="dashKpis">
 <div class="dashKpi"><span>ناقص موافقة مالية</span><b id="ap_need_fin">—</b></div>
 <div class="dashKpi"><span>ناقص موافقة إدارية</span><b id="ap_need_adm">—</b></div>
@@ -528,8 +620,10 @@ html, body {
 </div>
 </div>
 <div class="card dashCard">
-<div class="cardTitleRow"><h3 id="dash_req_title">طلبات النقل</h3><span class="cardTotal">الإجمالي: <b id="dash_req_total">—</b></span></div>
+<div class="cardTitleRow"><h3 id="dash_req_title">طلبات النقل</h3><div class="dashTitleTotal"><span>الإجمالي</span><span class="dashTotalBadge"><b id="dash_req_total">—</b></span></div></div>
 <div class="body">
+
+
 <div class="dashKpis">
 <div class="dashKpi"><span>تم استلام الطلب</span><b id="rq_s1">—</b></div>
 <div class="dashKpi"><span>تم ارسال السيارة</span><b id="rq_s2">—</b></div>
@@ -540,8 +634,10 @@ html, body {
 </div>
 </div>
 <div class="card dashCard">
-<div class="cardTitleRow"><h3 id="dash_trk_title">تتبع إجراءات البيع (Tracking)</h3><span class="cardTotal">الإجمالي: <b id="dash_trk_total">—</b></span></div>
+<div class="cardTitleRow"><h3 id="dash_trk_title">تتبع إجراءات البيع (Tracking)</h3><div class="dashTitleTotal"><span>الإجمالي</span><span class="dashTotalBadge"><b id="dash_trk_total">—</b></span></div></div>
 <div class="body">
+
+
 <div class="dashBtns" style="margin-top:10px">
 <button class="btn secondary" id="dash_trk_new">طلبات لم تبدأ (—)</button>
 <button class="btn secondary" id="dash_trk_inprog">طلبات تحت الإجراء (—)</button>
@@ -1691,6 +1787,15 @@ html, body {
   .topbar-actions{justify-content:flex-start}
 }
 
+
+/* ---- Badge alignment override ---- */
+.dashTotalWrap{
+  justify-content:flex-start;
+  align-items:center;
+  margin-top:-6px;
+  margin-bottom:8px;
+}
+
 </style>
 <link href="./mzj-ui.css" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
@@ -1704,11 +1809,29 @@ html, body {
 
   /* Keep content spacing nice */
   .legacy-sales{padding-top: 6px;}
+
+/* ---- Badge alignment override ---- */
+.dashTotalWrap{
+  justify-content:flex-start;
+  align-items:center;
+  margin-top:-6px;
+  margin-bottom:8px;
+}
+
 </style>
 <style>
   /* Ensure the functional tabs bar (بحث عن طلب / كل الطلبات) is visible when JS enables it */
   .legacy-sales #tabsBar{ display:flex !important; }
   .legacy-sales #tabsBar[style*="display: none"]{ display:none !important; } /* respect JS when it hides */
+
+/* ---- Badge alignment override ---- */
+.dashTotalWrap{
+  justify-content:flex-start;
+  align-items:center;
+  margin-top:-6px;
+  margin-bottom:8px;
+}
+
 </style>
 <style>
 /* Embedded in Workflow Dashboard (Tracking Tab) */
@@ -1726,12 +1849,30 @@ body{overflow-x:hidden !important;}
 .mzj-topbar,.mzj-sidebar,.mzj-pagehead,#mzjSidebar,#mzjSidebarBtn,.mzj-breadcrumb{display:none !important;}
 .mzj-content{padding:0 !important; margin:0 !important;}
 .legacy{padding:0 !important; margin:0 !important;}
+
+/* ---- Badge alignment override ---- */
+.dashTotalWrap{
+  justify-content:flex-start;
+  align-items:center;
+  margin-top:-6px;
+  margin-bottom:8px;
+}
+
 </style>
 <style>
 html, body {
   direction: rtl;
   text-align: right;
 }
+
+/* ---- Badge alignment override ---- */
+.dashTotalWrap{
+  justify-content:flex-start;
+  align-items:center;
+  margin-top:-6px;
+  margin-bottom:8px;
+}
+
 </style>
 </link></link></link></head>
 <body class="mzj">
@@ -6922,7 +7063,16 @@ function bindDashboardActions(){
           td,th{ word-break: break-word; }
           th,td{ border:1px solid #999; padding:6px; vertical-align: top; }
           th{ background:#f3f3f3; }
-        </style></head><body>
+        
+/* ---- Badge alignment override ---- */
+.dashTotalWrap{
+  justify-content:flex-start;
+  align-items:center;
+  margin-top:-6px;
+  margin-bottom:8px;
+}
+
+</style></head><body>
         <h2>سجل الحركات</h2>
         <table><thead><tr>${cols.map(c=>`<th>${esc(c)}</th>`).join('')}</tr></thead><tbody>`;
 
