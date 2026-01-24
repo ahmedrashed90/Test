@@ -1,6 +1,3 @@
-
-
-
 <!DOCTYPE html>
 
 <html dir="rtl" lang="ar">
@@ -5636,7 +5633,22 @@ function bindDashboardActions(){
       try{
         const ref = db.collection('cars').doc(data.vin);
         const snap = await ref.get();
+        const prev = snap.exists ? (snap.data()||{}) : {};
         if(!snap.exists) data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+
+        // ✅ لو كانت السيارة "مباع تحت التسليم" وتم تغيير حالتها لأي حالة أخرى من تبويب الإدارة => امسح الموافقات
+        try{
+          const prevSt = normStatus(prev.status || prev.state || '');
+          const nextSt = normStatus(data.status || data.state || '');
+          if(prevSt === 'مباع تحت التسليم' && nextSt !== 'مباع تحت التسليم'){
+            data.approvals = firebase.firestore.FieldValue.delete();
+            data.approvalsNotes = firebase.firestore.FieldValue.delete();
+            data.approvalsAt = firebase.firestore.FieldValue.delete();
+            data.approvalsBy = firebase.firestore.FieldValue.delete();
+            data.approvalsStatus = firebase.firestore.FieldValue.delete();
+          }
+        }catch(_){}
+
         await ref.set(data, {merge:true});
         toast('تم الحفظ');
         logAction('admin','car_save',{vin:data.vin, carName:data.carName||data.car||'', model:data.model||'', location:data.location||'', status:data.status||''});
@@ -6227,6 +6239,60 @@ function bindDashboardActions(){
     // ===== Transfer Tab =====
     let canTransfer = false;
 
+
+
+// --- Auto-save (حجز/نواقص/تحديد مكان) ملاحظات Tab الحركة إلى cars/{VIN} ---
+let __trActiveVin = '';
+let __trSaveTimer = null;
+
+function setTransferActiveVin(v){
+  __trActiveVin = (v||'').toString().trim();
+}
+
+async function saveTransferNotesToCar(vin){
+  try{
+    const user = auth.currentUser;
+    if(!user) return; // لا نزعج المستخدم أثناء عدم تسجيل الدخول
+    vin = (vin||__trActiveVin||'').toString().trim();
+    if(!vin) return;
+
+    const noteEl = document.getElementById('tr_note');
+    const missEl = document.getElementById('tr_notesMissing');
+
+    const note = (noteEl?.value || '').toString().trim();
+    const missing = (missEl?.value || '').toString().trim();
+
+    const patch = {
+      notesMissing: missing ? missing : firebase.firestore.FieldValue.delete(),
+      noteMissing : missing ? missing : firebase.firestore.FieldValue.delete(),
+      notesLocation: note ? note : firebase.firestore.FieldValue.delete(),
+      noteLocation : note ? note : firebase.firestore.FieldValue.delete(),
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      updatedBy: user.email || ''
+    };
+
+    await db.collection('cars').doc(vin).set(patch, { merge:true });
+
+    // best-effort update local inventory cache
+    try{
+      const i = (invAll||[]).findIndex(x=>String(x.vin||'').trim()===vin);
+      if(i>=0){
+        invAll[i].notesMissing = missing;
+        invAll[i].noteMissing  = missing;
+        invAll[i].notesLocation = note;
+        invAll[i].noteLocation  = note;
+      }
+    }catch(_){}
+  }catch(e){
+    console.warn('saveTransferNotesToCar', e);
+  }
+}
+
+function scheduleSaveTransferNotes(){
+  if(__trSaveTimer) clearTimeout(__trSaveTimer);
+  __trSaveTimer = setTimeout(()=> saveTransferNotesToCar(__trActiveVin), 500);
+}
+
     async function loadUserRole(email){
       try{
         const doc = await db.collection('users').doc(email).get();
@@ -6339,6 +6405,8 @@ function bindDashboardActions(){
             const missEl = document.getElementById('tr_notesMissing');
             if(noteEl) noteEl.value = nLoc;
             if(missEl) missEl.value = nMis;
+
+            setTransferActiveVin(tr.dataset.vin || vin);
 
             // show notes box if needed (status notes OR location notes OR note exists)
             const box = document.getElementById('tr_note_box');
@@ -6492,7 +6560,18 @@ function bindDashboardActions(){
             financial: (cur.financial===true),
             admin: (cur.admin===true)
           };
+        }else{
+          // ✅ لو كانت السيارة كانت "مباع تحت التسليم" وتم تغييرها لأي حالة أخرى => امسح الموافقات
+          const prevSt = normStatus(d.status || d.state || '');
+          if(prevSt === 'مباع تحت التسليم'){
+            update.approvals = firebase.firestore.FieldValue.delete();
+            update.approvalsNotes = firebase.firestore.FieldValue.delete();
+            update.approvalsAt = firebase.firestore.FieldValue.delete();
+            update.approvalsBy = firebase.firestore.FieldValue.delete();
+            update.approvalsStatus = firebase.firestore.FieldValue.delete();
+          }
         }
+
 
         // في حالة الحالة: بها ملاحظات (أو مكان سيارات بها ملاحظات): خزّن الملاحظة
         if(noteRequired){
@@ -6566,6 +6645,19 @@ function bindDashboardActions(){
 
     const trSubmitBtn = $('tr_submit');
     if(trSubmitBtn) trSubmitBtn.addEventListener('click', ()=>submitTransfer().catch(e=>toast(e.message||'فشل التنفيذ')));
+
+
+const trNoteEl = document.getElementById('tr_note');
+const trMissEl = document.getElementById('tr_notesMissing');
+
+// حفظ تلقائي لأي تعديل في (حجز - نواقص - تحديد مكان) + الملاحظة
+[trNoteEl, trMissEl].forEach(el=>{
+  if(!el) return;
+  el.addEventListener('input', ()=>{ scheduleSaveTransferNotes(); });
+  el.addEventListener('blur',  ()=>{ saveTransferNotesToCar(__trActiveVin); });
+  el.addEventListener('change',()=>{ scheduleSaveTransferNotes(); });
+});
+
 
     // Logs live (last movements)
     function deriveMovementType(d){
@@ -6830,6 +6922,8 @@ function bindDashboardActions(){
         if(inp) inp.value = '';
       }
     }
+    scheduleSaveTransferNotes();
+
 
     function uiReqTypeChanged(){
       const t = document.getElementById('req_type')?.value || 'transfer';
