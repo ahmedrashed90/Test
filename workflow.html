@@ -12,26 +12,16 @@
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
 <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js">
 <script>
-async function moveCarsAfterReceive(r){
-  try {
-    const targetLoc = r.targetLocation || r.toLocation || r.to;
-    if (!targetLoc || !Array.isArray(r.items)) return;
+function showFastModal(title){
+  const m = document.getElementById('fastActionModal');
+  const t = document.getElementById('fastActionTitle');
+  if(t) t.textContent = title || 'جاري التنفيذ';
+  if(m) m.style.display = 'flex';
+}
 
-    const db = firebase.firestore();
-    const batch = db.batch();
-
-    r.items.forEach(it=>{
-      const vin = it.vin || it.VIN;
-      if(!vin) return;
-      const ref = db.collection('cars').doc(vin);
-      batch.update(ref, {
-        location: targetLoc,
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-    });
-
-    await batch.commit();
-  } catch(e){}
+function hideFastModal(){
+  const m = document.getElementById('fastActionModal');
+  if(m) m.style.display = 'none';
 }
 </script>
 
@@ -2186,6 +2176,16 @@ html, body {
 </div>
 </div>
 </div>
+
+<!-- Fast Action Modal (Lightweight) -->
+<div class="modalBackdrop" id="fastActionModal" style="display:none">
+  <div class="modal" style="max-width:360px;text-align:center">
+    <h4 id="fastActionTitle">جاري التنفيذ</h4>
+    <div class="small" style="margin:12px 0">برجاء الانتظار…</div>
+    <div class="loader"></div>
+  </div>
+</div>
+
 </body>
 </html>
 </template>
