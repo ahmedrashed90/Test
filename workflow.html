@@ -3,6 +3,7 @@
 
 
 
+
 <!DOCTYPE html>
 
 <html dir="rtl" lang="ar">
@@ -1217,7 +1218,6 @@ html, body {
               <th>اللون الداخلي</th>
               <th>اللون الخارجي</th>
               <th>الموديل</th>
-              <th>السنة</th>
               <th>عدد الفرع</th>
               <th>الإجمالي العام</th>
             </tr>
@@ -6121,13 +6121,13 @@ list.forEach(st=>{
     // ===== Missing Branches: compute rows by تركيبـة (السيارة+البيان+ألوان+موديل+سنة) =====
     function __mb_norm(v){ return (v||'').toString().trim(); }
     function __mb_key(c){
+      // التركيبة: (السيارة + البيان + اللون الداخلي + اللون الخارجي + الموديل)
       return [
         __mb_norm(c.carName),
         __mb_norm(c.statement),
         __mb_norm(c.interiorColor),
         __mb_norm(c.exteriorColor),
-        __mb_norm(c.model),
-        __mb_norm(c.year)
+        __mb_norm(c.model)
       ].join('||');
     }
 
@@ -6140,16 +6140,28 @@ list.forEach(st=>{
       const br = __mb_norm(branch);
       if(!br) return [];
 
-      const totals = new Map();        // key -> total count across branches + warehouse
+      // المصدر: مجموع "الإجمالي الفعلي" للمستودع + الفروع (بدون الوكالة)
+      // نعتمد على قائمة الفروع المحمّلة، ولو فاضية نستخدم fallback
+      let allowed = Array.isArray(__missingBranchesList) ? __missingBranchesList.slice() : [];
+      if(!allowed.length){
+        allowed = ['الملتقى','القادسية','الصالة','المستودع'];
+      }
+      const allowedSet = new Set(allowed.map(__mb_norm).filter(x=>x && x!=='الوكالة'));
+
+      const totals = new Map();        // key -> total count across (المستودع + الفروع)
       const branchCounts = new Map();  // key -> count in this branch
 
       (dashCars||[]).forEach(c=>{
+        // الإجمالي الفعلي = نفس حالات الـ KPI: متاح للبيع/محجوز/بها ملاحظات
         if(!__mb_isActual(c.status)) return;
+
         const loc = __mb_norm(c.location);
+        if(!allowedSet.has(loc)) return;
+
         const key = __mb_key(c);
         if(!key) return;
 
-        // total across all locations + warehouse
+        // total across allowed locations
         totals.set(key, (totals.get(key)||0) + 1);
 
         // count in branch only
@@ -6159,6 +6171,7 @@ list.forEach(st=>{
       const rows = [];
       totals.forEach((totalCount, key)=>{
         const bCount = branchCounts.get(key) || 0;
+        // النقص: لو كمية الفرع = 0 مع وجود نفس التركيبة في الإجمالي العام
         if(bCount===0 && totalCount>0){
           const parts = key.split('||');
           rows.push({
@@ -6167,7 +6180,6 @@ list.forEach(st=>{
             interiorColor: parts[2]||'',
             exteriorColor: parts[3]||'',
             model: parts[4]||'',
-            year: parts[5]||'',
             branchCount: 0,
             totalCount: totalCount
           });
@@ -6176,8 +6188,8 @@ list.forEach(st=>{
 
       // sort for stable view
       rows.sort((a,b)=>{
-        const A = (a.carName+a.model+a.year+a.exteriorColor+a.interiorColor+a.statement).toString();
-        const B = (b.carName+b.model+b.year+b.exteriorColor+b.interiorColor+b.statement).toString();
+        const A = (a.carName+a.model+a.exteriorColor+a.interiorColor+a.statement).toString();
+        const B = (b.carName+b.model+b.exteriorColor+b.interiorColor+b.statement).toString();
         return A.localeCompare(B,'ar');
       });
 
@@ -6215,11 +6227,10 @@ list.forEach(st=>{
           <td>${escapeHtml(r.interiorColor||'')}</td>
           <td>${escapeHtml(r.exteriorColor||'')}</td>
           <td>${escapeHtml(r.model||'')}</td>
-          <td>${escapeHtml(r.year||'')}</td>
           <td>${escapeHtml(String(r.branchCount??0))}</td>
-          <td>${escapeHtml(String(r.totalCount??0))}</td>
+          <td>${escapeHtml(String(r.totalCount??r.totalAll??0))}</td>
         </tr>
-      `).join('') : `<tr><td colspan="8" class="muted" style="text-align:center">لا توجد نواقص</td></tr>`;
+      `).join('') : `<tr><td colspan="7" class="muted" style="text-align:center">لا توجد نواقص</td></tr>`;
     }
 
     // ===== Dashboard Card: اجمالي المخزون =====
@@ -6390,7 +6401,7 @@ function renderMissingSavedCard(){
         const arr = Array.isArray(__missingRowsLast) ? __missingRowsLast : [];
         const filtered = !term ? arr : arr.filter(r=>{
           const hay = [
-            r.carName, r.statement, r.interiorColor, r.exteriorColor, r.model, r.year,
+            r.carName, r.statement, r.interiorColor, r.exteriorColor, r.model,
             String(r.branchCount ?? 0), String(r.totalCount ?? 0)
           ].join(' ').toLowerCase();
           return hay.includes(term);
@@ -6404,14 +6415,13 @@ function renderMissingSavedCard(){
       // تصدير Excel
       document.getElementById('missingExport')?.addEventListener('click', ()=>{
         try{
-          const headers = ['السيارة','البيان','اللون الداخلي','اللون الخارجي','الموديل','السنة','عدد الفرع','الإجمالي العام'];
+          const headers = ['السيارة','البيان','اللون الداخلي','اللون الخارجي','الموديل','عدد الفرع','الإجمالي العام'];
           const rows = (Array.isArray(__missingRowsLast) ? __missingRowsLast : []).map(r=>[
             r.carName||'',
             r.statement||'',
             r.interiorColor||'',
             r.exteriorColor||'',
             r.model||'',
-            r.year||'',
             String(r.branchCount ?? 0),
             String(r.totalCount ?? 0),
           ]);
@@ -7083,7 +7093,7 @@ function bindDashboardActions(){
         });
 
         document.getElementById('missingExport')?.addEventListener('click', ()=>{
-          const headers = ['السيارة','البيان','اللون الداخلي','اللون الخارجي','الموديل','السنة','عدد الفرع','الإجمالي العام'];
+          const headers = ['السيارة','البيان','اللون الداخلي','اللون الخارجي','الموديل','عدد الفرع','الإجمالي العام'];
           const rows = (__missingLastRows||[]).filter(r=>missingRowMatches(r, (document.getElementById('missingSearch')?.value||'').trim()))
             .map(r=>[
               r.carName||'',
@@ -7091,9 +7101,8 @@ function bindDashboardActions(){
               r.interiorColor||'',
               r.exteriorColor||'',
               r.model||'',
-              (r.year||'').toString(),
               (r.branchCount??0),
-              (r.totalAll??0)
+              (r.totalCount??r.totalAll??0)
             ]);
           exportRowsToExcel(headers, rows, `missing_${Date.now()}.xlsx`, 'missing');
         });
