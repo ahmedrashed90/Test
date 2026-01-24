@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 
 <html dir="rtl" lang="ar">
@@ -83,6 +84,22 @@
     .modalBackdrop.show{display:flex}
     #missingModal .modal{max-height:85vh;display:flex;flex-direction:column}
     #missingModal .modalBody{overflow:auto}
+
+    /* ===== Missing Branches Modal - enhanced look ===== */
+    #missingModal .modal{width:min(1100px,98vw)}
+    #missingModal .modalHead{gap:12px}
+    #missingModal .modalHead .titleWrap{display:flex;flex-direction:column;gap:4px}
+    #missingModal .modalHead .subMeta{font-size:12px;color:var(--muted);font-weight:700}
+    #missingModal .mbToolbar{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;padding:14px;border-bottom:1px solid var(--line);background:#fff}
+    #missingModal .mbToolbar .field{flex:1;min-width:260px}
+    #missingModal .mbActions{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end}
+    #missingModal .mbPill{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--cream);border-radius:999px;padding:7px 10px;font-weight:900;color:var(--brown);white-space:nowrap}
+    #missingModal .mbTableWrap{overflow:auto;max-height:70vh;border:1px solid var(--line);border-radius:12px;background:#fff;margin:14px}
+    #missingModal table{min-width:1100px}
+    #missingModal tbody tr:nth-child(even){background:#fafafa}
+    #missingModal tbody td{font-weight:700}
+    #missingModal .num{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}
+
 
     .modal{width:min(720px,96vw);background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 20px 40px rgba(0,0,0,.2);overflow:hidden}
     .modalHead{display:flex;align-items:center;justify-content:space-between;padding:14px;border-bottom:1px solid var(--line);background:var(--cream)}
@@ -436,26 +453,6 @@ html, body {
 </div>
 <div class="small" id="dash_filter_meta" style="margin-top:10px">—</div>
 </div>
-</div>
-
-<!-- نواقص الفروع -->
-<div class="card">
-  <h3>نواقص الفروع</h3>
-  <div class="body">
-    <div class="dashFilters">
-      <div class="dashStatusBox" style="grid-column:1 / -1">
-        <div class="small" style="margin-bottom:6px">الفروع (يمكن اختيار أكثر من فرع)</div>
-        <div class="dashChecks" id="dash_missing_branches">
-          <!-- تُحمّل تلقائيًا -->
-        </div>
-      </div>
-      <div class="dashFilterActions">
-        <button class="btn primary" id="dash_missing_save">حفظ</button>
-        <button class="btn danger" id="dash_missing_clear">تفريغ</button>
-      </div>
-    </div>
-    <div class="small" id="dash_missing_meta" style="margin-top:10px">—</div>
-  </div>
 </div>
 
 <div class="dashGrid" style="margin-top:14px">
@@ -1187,27 +1184,30 @@ html, body {
 </div>
 
 <!-- Missing Branches Modal -->
+
 <div class="modalBackdrop" id="missingModal">
   <div class="modal" role="dialog" aria-modal="true">
     <div class="modalHead">
-      <h4 id="missingTitle">نواقص الفروع</h4>
+      <div class="titleWrap">
+        <h4 id="missingTitle">نواقص الفروع</h4>
+        <div class="subMeta" id="missingSubMeta">—</div>
+      </div>
       <button class="btn secondary" id="missingClose">إغلاق</button>
     </div>
-    <div class="modalBody">
-      <div class="toolbar" style="gap:10px;align-items:flex-end;margin-bottom:10px">
-        <div class="field" style="flex:1;min-width:220px">
+    <div class="modalBody" style="padding:0">
+      <div class="mbToolbar">
+        <div class="field">
           <label>بحث</label>
-          <input autocomplete="off" id="missingSearch" placeholder="ابحث بـ السيارة / البيان / الألوان / الموديل / السنة">
-          </input>
+          <input autocomplete="off" id="missingSearch" placeholder="ابحث بـ السيارة / البيان / الألوان / الموديل"></input>
         </div>
-        <div class="field" style="min-width:200px">
-          <label> </label>
+        <div class="mbActions">
+          <div class="mbPill"><span>النتائج:</span> <span class="num" id="missingCount">0</span></div>
           <button class="btn" id="missingExport">تصدير Excel</button>
         </div>
       </div>
-      <div class="muted" id="missingMeta" style="margin-bottom:10px"></div>
-      <div style="overflow:auto;max-height:70vh;border:1px solid var(--line);border-radius:12px;background:#fff">
-        <table class="table" style="min-width:1100px">
+
+      <div class="mbTableWrap">
+        <table class="table">
           <thead>
             <tr>
               <th>السيارة</th>
@@ -1222,11 +1222,37 @@ html, body {
           <tbody id="missingBody"></tbody>
         </table>
       </div>
+
+      <div class="muted" id="missingMeta" style="padding:0 14px 14px"></div>
     </div>
   </div>
 </div>
 </div>
+
 </div>
+
+<!-- Dashboard Missing Branches Config Modal -->
+<div class="modalBackdrop" id="dashMissingCfgModal">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modalHead">
+      <h4>إعدادات كارت نواقص الفروع</h4>
+      <button class="btn secondary" id="dashMissingCfgClose">إغلاق</button>
+    </div>
+    <div class="modalBody">
+      <div class="small" style="margin-bottom:8px">اختر الفروع التي تريد ظهورها داخل كارت نواقص الفروع.</div>
+      <div class="dashStatusBox">
+        <div class="small" style="margin-bottom:6px">الفروع (يمكن اختيار أكثر من فرع)</div>
+        <div class="dashChecks" id="dash_missing_branches"><!-- تُحمّل تلقائيًا --></div>
+      </div>
+      <div class="small" id="dash_missing_meta" style="margin-top:10px">—</div>
+    </div>
+    <div class="modalFoot">
+      <button class="btn primary" id="dash_missing_save">حفظ</button>
+      <button class="btn danger" id="dash_missing_clear">تفريغ</button>
+    </div>
+  </div>
+</div>
+
 <!-- التراكينج -->
 <div class="view" id="view-tracking" role="tabpanel">
 <div class="card" style="padding:16px;">
@@ -2648,6 +2674,9 @@ function startInventoryLive(){
     let dashCarsUnsub = null;
     let dashCatalogUnsub = null;
     let dashCars = [];
+    // Promise resolves once dashCars receives first snapshot (avoids empty modals on first click)
+    let __dashCarsReadyResolve = null;
+    let dashCarsReady = new Promise(res=>{ __dashCarsReadyResolve = res; });
     let dashCatalog = [];
 
     function normStatus(s){
@@ -3957,7 +3986,39 @@ list.forEach(st=>{
       return rows;
     }
 
-    function openMissingBranchesModal(title, rows){
+    
+    async function __ensureDashCarsReady(){
+      try{
+        // if already has data, no need to wait
+        if(Array.isArray(dashCars) && dashCars.length) return true;
+        // wait up to 4 seconds for first snapshot
+        const t = new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')), 4000));
+        await Promise.race([dashCarsReady, t]);
+        return true;
+      }catch(e){
+        return false;
+      }
+    }
+
+    async function openMissingBranchesForBranch(branchName){
+      const br = (branchName||'').toString();
+      // open modal immediately with loading to give instant feedback
+      __missingRowsLast = [];
+      const t = document.getElementById('missingTitle'); if(t) t.textContent = 'نواقص: ' + br;
+      const q = document.getElementById('missingSearch'); if(q) q.value = '';
+      const tbody = document.getElementById('missingBody'); if(tbody) tbody.innerHTML = '<tr><td colspan="7" class="muted">جاري تحميل البيانات…</td></tr>';
+      const cntEl = document.getElementById('missingCount'); if(cntEl) cntEl.textContent = '—';
+      const meta = document.getElementById('missingMeta'); if(meta) meta.textContent = 'جاري تحميل بيانات المخزون…';
+      showModal('missingModal');
+
+      // ensure dashCars snapshot arrived
+      await __ensureDashCarsReady();
+
+      const rows = buildMissingRowsForBranch(br);
+      openMissingBranchesModal('نواقص: ' + br, rows);
+    }
+
+function openMissingBranchesModal(title, rows){
       // استخدم المودال الثابت (missingModal) علشان يفتح في نص الصفحة زي باقي الكروت
       __missingRowsLast = Array.isArray(rows) ? rows : [];
       const t = document.getElementById('missingTitle');
@@ -3971,8 +4032,14 @@ list.forEach(st=>{
       renderMissingModalRows(__missingRowsLast);
 
       // meta
+      const cntEl = document.getElementById('missingCount');
+      if(cntEl) cntEl.textContent = String(__missingRowsLast.length);
+
+      const sub = document.getElementById('missingSubMeta');
+      if(sub) sub.textContent = 'اضغط على تصدير Excel لتحميل النواقص';
+
       const meta = document.getElementById('missingMeta');
-      if(meta) meta.textContent = `عدد النتائج: ${__missingRowsLast.length}`;
+      if(meta) meta.textContent = __missingRowsLast.length ? 'التركيبات المعروضة هي التركيبات المتوفرة في الإجمالي العام وكميتها = 0 داخل الفرع.' : 'لا توجد نواقص لهذا الفرع.';
 
       showModal('missingModal');
     }
@@ -4101,22 +4168,21 @@ function renderMissingSavedCard(){
       host.querySelectorAll('[data-missing-branch]')?.forEach(btn=>{
         btn.addEventListener('click', ()=>{
           const br = (btn.getAttribute('data-missing-branch')||'').toString();
-          const rows = buildMissingRowsForBranch(br);
-          openMissingBranchesModal('نواقص: ' + br, rows);
+          openMissingBranchesForBranch(br);
         });
       });
 
       // edit/delete
       document.getElementById('dash_missing_edit')?.addEventListener('click', ()=>{
-        // show checks area and sync checked
+        // open config modal
         renderMissingBranchesChecks();
         const meta = document.getElementById('dash_missing_meta');
         if(meta) meta.textContent = 'وضع التعديل: اختر/احذف فروع ثم اضغط حفظ';
-        // scroll to the checks
-        try{ document.getElementById('dash_missing_branches')?.scrollIntoView({behavior:'smooth', block:'center'}); }catch(e){}
+        const m = document.getElementById('dashMissingCfgModal');
+        if(m) m.classList.add('show');
       });
 
-      document.getElementById('dash_missing_delete')?.addEventListener('click', async ()=>{
+document.getElementById('dash_missing_delete')?.addEventListener('click', async ()=>{
         if(!canUseDashDanger()) return toast('غير مصرح لك باستخدام زر الحذف');
         try{
           await setDashCfg({ missingBranches: [] });
@@ -4132,6 +4198,13 @@ function renderMissingSavedCard(){
     }
 
     function bindMissingBranchesUI(){
+      // Config modal close
+      const cfgModal = document.getElementById('dashMissingCfgModal');
+      const cfgClose = document.getElementById('dashMissingCfgClose');
+      if(cfgClose) cfgClose.addEventListener('click', ()=>{ if(cfgModal) cfgModal.classList.remove('show'); });
+      if(cfgModal) cfgModal.addEventListener('click', (e)=>{ if(e.target===cfgModal) cfgModal.classList.remove('show'); });
+
+
       // ✅ ضمان فتح مودال النواقص عند الضغط على زر الفرع دائمًا
       // بعض الكروت بتُعاد رندرها، فبنستخدم تفويض حدث عالمي مرة واحدة
       if(!window.__missingBranchGlobalClickBound){
@@ -4178,6 +4251,8 @@ function renderMissingSavedCard(){
         renderMissingModalRows(filtered);
         const meta = document.getElementById('missingMeta');
         if(meta) meta.textContent = `عدد النتائج: ${filtered.length}`;
+        const cc = document.getElementById('missingCount');
+        if(cc) cc.textContent = String(filtered.length);
       });
 
       // تصدير Excel
@@ -4920,6 +4995,9 @@ function bindDashboardActions(){
             approvals: d.approvals || {financial:false, admin:false}
           });
         });
+
+        // resolve dashCarsReady once
+        if(__dashCarsReadyResolve){ __dashCarsReadyResolve(true); __dashCarsReadyResolve = null; }
         loadDashLocationsIntoSelect();
         renderDashboard();
       });
