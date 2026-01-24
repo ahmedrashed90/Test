@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 
 <html dir="rtl" lang="ar">
@@ -2838,12 +2839,12 @@ let CURRENT_USER_DOC = null;
     }
 
 function startInventoryLive(){
-      if(invUnsub) return;
+      // ✅ Inventory now loads ONCE (get) to reduce quota
       // Load branches list for inventory filter
       loadInvBranches();
       const metaEl = $('inv_meta');
       if(metaEl) metaEl.textContent = 'جاري التحميل...';
-      invUnsub = db.collection('cars').onSnapshot((snap)=>{
+      db.collection('cars').get().then((snap)=>{
         invAll = [];
         snap.forEach(doc=>{
           const d = doc.data() || {};
@@ -2875,7 +2876,7 @@ function startInventoryLive(){
         fillInvLocationSelect();
         fillInvModelSelect();
         renderInventory();
-      }, (err)=>{
+      }).catch((err)=>{
         console.error(err);
         if($('inv_meta')) $('inv_meta').textContent = 'تعذر تحميل المخزون';
         toast(err?.message || 'تعذر تحميل المخزون');
@@ -2883,7 +2884,8 @@ function startInventoryLive(){
     }
 
     function stopInventoryLive(){
-      if(invUnsub){ invUnsub(); invUnsub=null; }
+      // no-op (no live listener)
+      invUnsub = null;
     }
 
 
@@ -7218,7 +7220,8 @@ const trMissEl = document.getElementById('tr_notesMissing');
     let reqUnsub = null;
 
     function stopRequestsLive(){
-      if(reqUnsub){ reqUnsub(); reqUnsub=null; }
+      // no-op (no live listener)
+      reqUnsub = null;
     }
 
     function fmtDate(ts){
@@ -7587,13 +7590,14 @@ if(type==='photo'){ $('req_photo_date').value=''; }
     }
 
     function startRequestsLive(){
+      // ✅ Requests now loads ONCE (get) to reduce quota
       stopRequestsLive();
-      reqUnsub = db.collection('requests').orderBy('createdAt','desc').limit(200).onSnapshot((snap)=>{
+      db.collection('requests').orderBy('createdAt','desc').limit(200).get().then((snap)=>{
         const all = [];
         snap.forEach(d=>all.push({ id:d.id, ...(d.data()||{}) }));
         renderReqList(all, '#req_table_open', $('req_open_meta'), false);
         renderReqList(all, '#req_table_done', $('req_done_meta'), true);
-      }, (err)=>toast(err.message||'فشل تحميل الطلبات'));
+      }).catch((err)=>toast(err?.message || 'فشل تحميل الطلبات'));
     }
 
     // ----- Request modal actions -----
@@ -7773,13 +7777,13 @@ if(type==='photo'){ $('req_photo_date').value=''; }
     let _allCarsRows = [];
 
     function startAllCarsLive(){
-      stopAllCarsLive();
+      // ✅ All Cars now loads ONCE (get) to reduce quota
       const tbody = document.querySelector('#allCarsTable tbody');
       const meta  = document.getElementById('allCarsMeta');
       if(!tbody) return;
 
       meta.textContent = 'جاري التحميل...';
-      _allCarsUnsub = db.collection('cars').onSnapshot((snap)=>{
+      db.collection('cars').get().then((snap)=>{
         const map = new Map();
         snap.forEach(doc=>{
           const d = doc.data() || {};
@@ -7796,13 +7800,11 @@ if(type==='photo'){ $('req_photo_date').value=''; }
 
         _allCarsRows = Array.from(map.values())
           .sort((a,b)=>{
-            // sort by car then model then statement
             return (a.carName||'').localeCompare(b.carName||'') ||
                    (a.model||'').localeCompare(b.model||'') ||
                    (a.statement||'').localeCompare(b.statement||'');
           });
 
-        // render
         tbody.innerHTML = '';
         _allCarsRows.forEach((r,i)=>{
           const tr = document.createElement('tr');
@@ -7817,13 +7819,14 @@ if(type==='photo'){ $('req_photo_date').value=''; }
         });
 
         meta.textContent = `إجمالي السجلات في المخزون: ${snap.size} | إجمالي الصفوف بعد التجميع: ${_allCarsRows.length}`;
-      }, (err)=>{
+      }).catch((err)=>{
         meta.textContent = 'تعذر تحميل البيانات. راجع الصلاحيات.';
         console.error(err);
       });
     }
 
     function stopAllCarsLive(){
+      // no-op (no live listener)
       if(_allCarsUnsub){ _allCarsUnsub(); _allCarsUnsub = null; }
     }
 
@@ -8214,12 +8217,11 @@ if(type==='photo'){ $('req_photo_date').value=''; }
     }
 
     function uaStartLive(){
-      if(usersUnsub) return;
-      // try orderBy email if field exists
+      // ✅ Users admin now loads ONCE (get) to reduce quota
       let q = db.collection('users');
       try{ q = q.orderBy('email'); }catch(_){ /* ignore */ }
 
-      usersUnsub = q.onSnapshot((snap)=>{
+      q.get().then((snap)=>{
         const arr = [];
         snap.forEach(doc=>{
           const d = doc.data() || {};
@@ -8227,13 +8229,14 @@ if(type==='photo'){ $('req_photo_date').value=''; }
         });
         uaCache = arr;
         uaRenderList();
-      }, (err)=>{
-        console.warn('users live error', err);
+      }).catch((err)=>{
+        console.warn('users load error', err);
       });
     }
 
     function uaStopLive(){
-      if(usersUnsub){ usersUnsub(); usersUnsub = null; }
+      // no-op (no live listener)
+      usersUnsub = null;
     }
 
     // Bind UI
