@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 
 <html dir="rtl" lang="ar">
@@ -5428,15 +5429,16 @@ function bindDashboardActions(){
     // ===== UI: Tabs =====
     const tabs = Array.from(document.querySelectorAll('.tab'));
 
-    // ===== Tracking iframe (inject srcdoc safely) =====
+    // ===== Tracking iframe =====
     let __trackingLoaded = false;
     function ensureTrackingLoaded(){
       if(__trackingLoaded) return;
       const frame = document.getElementById('trackingFrame');
       const tpl = document.getElementById('trackingSrc');
       if(!frame || !tpl) return;
-      // Inject once to avoid GitHub/HTML attribute parsing issues with long srcdoc
-      frame.srcdoc = tpl.innerHTML;
+      // ✅ حمل صفحة التراكينج من الدومين الحقيقي (عشان تسجيل الدخول يشتغل طبيعي)
+      // ملاحظة: نترك <template id="trackingSrc"> كما هو بدون تغيير لتفادي أي تأثير جانبي.
+      frame.src = 'https://mzj-tracking.vercel.app/sales2.html';
       __trackingLoaded = true;
     }
 
