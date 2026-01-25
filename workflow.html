@@ -3,6 +3,7 @@
 
 
 
+
 <!DOCTYPE html>
 
 <html dir="rtl" lang="ar">
@@ -364,6 +365,9 @@ function hideFastModal(){
 
 /* Dashboard enhancements */
 .dashKpi.clickable{cursor:pointer;}
+/* Dashboard card titles clickable */
+#dash_trk_title, #dash_req_title{cursor:pointer;}
+
 #dashDataModal .modalBox, #reqModal .modalBox, #detailsModal .modalBox{width:min(96vw, 1400px);}
 #dashDataModal .tableWrap, #reqModal .tableWrap, #detailsModal .tableWrap{max-height:60vh;}
 
@@ -658,6 +662,14 @@ html, body {
 <div class="cardTitleRow"><h3 id="dash_trk_title">تتبع إجراءات البيع (Tracking)</h3><div class="dashTitleTotal"><span>الإجمالي</span><span class="dashTotalBadge"><b id="dash_trk_total">—</b></span></div></div>
 <div class="body">
 
+<div class="toolbar" style="margin:0">
+  <div class="field" style="flex:1;min-width:240px">
+    <label>بحث في طلبات التتبع</label>
+    <input id="dash_trk_search" placeholder="رقم الطلب / اسم العميل / VIN / الجوال"/>
+  </div>
+  <button class="btn secondary" id="dash_trk_search_btn" type="button">بحث</button>
+  <button class="btn secondary" id="dash_trk_show_all" type="button">عرض الكل</button>
+</div>
 
 <div class="dashBtns" style="margin-top:10px">
 <button class="btn secondary" id="dash_trk_new">طلبات لم تبدأ (—)</button>
@@ -3646,9 +3658,9 @@ function startInventoryLive(){
 
     
     function openReqStageModal(stage){
-      const arr0 = dashReq.filter(r=>reqStage(r)==stage);
+      const arr0 = (stage===0) ? (dashReq.slice()) : dashReq.filter(r=>reqStage(r)==stage);
       const titles = {1:'تم استلام الطلب',2:'تم ارسال السيارة',3:'تم استلام السيارة',4:'تم الانتهاء'};
-      const title = (titles[stage] || 'طلبات');
+      const title = (stage===0) ? 'كل طلبات النقل' : (titles[stage] || 'طلبات');
 
       const uid = 'req_' + Date.now();
       const searchId = uid + '_q';
@@ -5100,15 +5112,77 @@ function bindDashboardActions(){
         }
       }
 
-      async function openTrackingModal(type){
+      async function openTrackingModal(type, presetQuery){
         try{
           const rowsAll = await fetchTrackingOrders(600);
-          const rows = rowsAll.filter(r=> classifyTrackingRow(r)===type);
 
-          const title = (type==='new') ? 'طلبات لم تبدأ' : (type==='done' ? 'طلبات مكتملة' : 'طلبات تحت الإجراء');
+          // type: new | inprog | done | all
+          let rows = rowsAll.slice();
+          if(type && type!=='all'){
+            rows = rows.filter(r=> classifyTrackingRow(r)===type);
+          }
+
+          const title =
+            (!type || type==='all') ? 'كل طلبات التتبع' :
+            (type==='new') ? 'طلبات لم تبدأ' :
+            (type==='done') ? 'طلبات مكتملة' :
+            'طلبات تحت الإجراء';
+
+          const uid = 'trk_' + Date.now();
+          const qId = uid + '_q';
+          const bId = uid + '_b';
+
+          function rowBag(r){
+            return [
+              r.orderNo, r.customer, r.phone, r.branch, r.vin, r.status, r.id
+            ].map(x=>((x??'')+'').toLowerCase()).join(' | ');
+          }
+
+          function render(list, q){
+            q = ((q||'')+'').toLowerCase().trim();
+            const filtered = !q ? list : list.filter(r=> rowBag(r).includes(q));
+            const tbody = document.getElementById(bId);
+            const meta = document.getElementById(uid+'_m');
+            if(meta) meta.textContent = `عدد النتائج: ${filtered.length}`;
+            if(!tbody) return;
+
+            tbody.innerHTML = filtered.length ? filtered.map(r=>{
+              const trackLink = r.vin ? buildTrackLink(r.vin) : '';
+              const safeLink = escapeHtml(trackLink||'');
+              return `
+                <tr>
+                  <td>${escapeHtml(r.orderNo||r.id||'')}</td>
+                  <td>${escapeHtml(r.customer||'')}</td>
+                  <td>${escapeHtml(r.phone||'')}</td>
+                  <td>${escapeHtml(r.branch||'')}</td>
+                  <td>${escapeHtml(r.vin||'')}</td>
+                  <td>${escapeHtml(r.status||'—')}</td>
+                  <td>${safeLink ? `<a href="${safeLink}" target="_blank" rel="noopener">فتح</a>` : '—'}</td>
+                  <td><button class="linkBtn" type="button" data-copy="${safeLink}">نسخ</button></td>
+                </tr>`;
+            }).join('') : `<tr><td colspan="8" style="text-align:center;padding:12px">لا توجد بيانات مطابقة.</td></tr>`;
+
+            // copy handlers
+            tbody.querySelectorAll('[data-copy]')?.forEach(btn=>{
+              btn.addEventListener('click', async ()=>{
+                const v = btn.getAttribute('data-copy') || '';
+                if(!v){ toast('لا يوجد رابط'); return; }
+                try{ await navigator.clipboard.writeText(v); toast('تم النسخ ✅'); }catch(_){ toast('تعذر النسخ'); }
+              });
+            });
+          }
 
           const html = `
-            <div class="small" style="margin-bottom:10px">المصدر: <b>orders</b> — ${escapeHtml(title)}</div>
+            <div class="small" style="margin-bottom:10px">المصدر: <b>orders</b> — ${escapeHtml(title)} <span class="small" id="${uid+'_m'}" style="margin-right:10px;color:#6b6b6b"></span></div>
+
+            <div class="toolbar" style="margin-bottom:10px">
+              <div class="field" style="flex:1;min-width:240px">
+                <label>بحث</label>
+                <input id="${qId}" placeholder="رقم الطلب / اسم العميل / VIN / الجوال"/>
+              </div>
+              <button class="btn secondary" type="button" id="${uid+'_clear'}">تفريغ</button>
+            </div>
+
             <div style="overflow:auto">
               <table class="table stickyHead">
                 <thead>
@@ -5123,61 +5197,27 @@ function bindDashboardActions(){
                     <th>نسخ</th>
                   </tr>
                 </thead>
-                <tbody>
-                  ${
-                    rows.length ? rows.map(r=>{
-                      const trackLink = r.vin ? buildTrackLink(r.vin) : '';
-                      const safeLink = escapeHtml(trackLink||'');
-                      return `
-                        <tr>
-                          <td>${escapeHtml(r.orderNo||'')}</td>
-                          <td>${escapeHtml(r.customer||'')}</td>
-                          <td>${escapeHtml(r.phone||'')}</td>
-                          <td>${escapeHtml(r.branch||'')}</td>
-                          <td>${escapeHtml(r.vin||'')}</td>
-                          <td>${escapeHtml((r.status||'').toString())}</td>
-                          <td>${trackLink ? `<a href="${safeLink}" target="_blank">فتح</a>` : '—'}</td>
-                          <td>${trackLink ? `<button class="btn secondary" data-copy="${safeLink}" data-link="${(trackLink||'').replace(/"/g,'&quot;')}" data-vin="${escapeHtml(r.vin||'')}">نسخ</button>` : '—'}</td>
-                        </tr>
-                      `;
-                    }).join('') : `<tr><td colspan="8" class="small">لا توجد بيانات.</td></tr>`
-                  }
-                </tbody>
+                <tbody id="${bId}"></tbody>
               </table>
             </div>
           `;
-          openDetailsModal(html, title);
 
-          document.querySelectorAll('#detailsBody [data-copy]').forEach(btn=>{
-            btn.addEventListener('click', async ()=>{
-              const link = btn.getAttribute('data-link') || btn.getAttribute('data-copy') || '';
-              const vin  = (btn.getAttribute('data-vin') || '').trim();
-              // 1) Copy to clipboard
-              try{ await navigator.clipboard.writeText(link); toast('تم نسخ الرابط'); }
-              catch(e){ /* ignore clipboard errors */ }
+          openDetailsModal(html, 'Tracking');
 
-              // 2) Save into Inventory car data by VIN
-              if(!vin || !link) return;
-              try{
-                await db.collection('cars').doc(vin).set({ tracking: link, trackingLink: link }, { merge: true });
-
-                // update in-memory cache (best effort)
-                try{
-                  const i = (invAll||[]).findIndex(x=>String(x.vin||'').trim()===vin);
-                  if(i>=0){
-                    invAll[i].tracking = link;
-                    invAll[i].trackingLink = link;
-                  }
-                }catch(_){}
-
-                if(typeof renderInventory==='function') renderInventory();
-                toast('تم حفظ رابط التتبع في المخزون ✅');
-              }catch(e){
-                console.error(e);
-                toast('تعذر حفظ رابط التتبع في المخزون');
-              }
-            });
+          // initial render
+          const qEl = document.getElementById(qId);
+          if(qEl){
+            qEl.value = (presetQuery||'').toString();
+            qEl.addEventListener('input', ()=> render(rows, qEl.value));
+            qEl.addEventListener('keydown', (e)=>{ if(e.key==='Enter') render(rows, qEl.value); });
+          }
+          document.getElementById(uid+'_clear')?.addEventListener('click', ()=>{
+            if(qEl){ qEl.value=''; }
+            render(rows, '');
           });
+
+          render(rows, presetQuery||'');
+
         }catch(e){
           console.error(e);
           const msg = (e && (e.message || e.code)) ? (e.message || e.code) : '';
@@ -5189,6 +5229,28 @@ function bindDashboardActions(){
       document.getElementById('dash_trk_inprog')?.addEventListener('click', ()=> openTrackingModal('inprog'));
 
       document.getElementById('dash_trk_done')?.addEventListener('click', ()=> openTrackingModal('done'));
+
+      // Click on card title/total opens ALL
+      document.getElementById('dash_trk_title')?.addEventListener('click', ()=> openTrackingModal('all'));
+      document.getElementById('dash_trk_total')?.addEventListener('click', ()=> openTrackingModal('all'));
+
+      // Search box inside the Tracking card (Dashboard)
+      const dashTrkSearch = document.getElementById('dash_trk_search');
+      const dashTrkSearchBtn = document.getElementById('dash_trk_search_btn');
+      document.getElementById('dash_trk_show_all')?.addEventListener('click', ()=> openTrackingModal('all', dashTrkSearch?.value||''));
+      if(dashTrkSearchBtn){
+        dashTrkSearchBtn.addEventListener('click', ()=> openTrackingModal('all', dashTrkSearch?.value||''));
+      }
+      if(dashTrkSearch){
+        dashTrkSearch.addEventListener('keydown', (e)=>{
+          if(e.key==='Enter') openTrackingModal('all', dashTrkSearch.value||'');
+        });
+      }
+
+      // Requests card click -> show ALL requests
+      document.getElementById('dash_req_title')?.addEventListener('click', ()=> openReqStageModal(0));
+      document.getElementById('dash_req_total')?.addEventListener('click', ()=> openReqStageModal(0));
+      
 
       // refresh KPIs after inventory loaded
       setTimeout(()=>{ refreshTrackingKpis(); }, 1200);
