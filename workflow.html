@@ -5357,9 +5357,8 @@ function bindDashboardActions(){
 
 }
 
-    
-function loadDashboardOnce(){
-      // ✅ Dashboard loads ONCE when you open it (get) to reduce quota (not live)
+    function startDashboardLive(){
+      if(dashCarsUnsub) return;
       bindDashboardActions();
 
       // load saved filter into UI
@@ -5367,89 +5366,57 @@ function loadDashboardOnce(){
       if(saved) applyDashFilterToUI(saved);
       loadDashLocationsIntoSelect();
 
-      const meta = document.getElementById('dash_meta');
-      if(meta) meta.textContent = 'جاري التحميل...';
-
-      // reset arrays
-      dashCars = [];
-      dashCatalog = [];
-      dashReq = [];
-
-      // ensure ready promise exists
-      if(!dashCarsReady || !__dashCarsReadyResolve){
-        dashCarsReady = new Promise(res=>{ __dashCarsReadyResolve = res; });
-      }
-
-      Promise.all([
-        db.collection('cars').get(),
-        db.collection('catalog').where('active','==',true).get().catch(()=>null),
-        db.collection('requests').limit(300).get().catch(()=>null)
-      ]).then(([carsSnap, catSnap, reqSnap])=>{
-
-        // cars
-        try{
-          if(carsSnap){
-            carsSnap.forEach(doc=>{
-              const d = doc.data() || {};
-              dashCars.push({
-                vin: doc.id,
-                carName: d.carName || d.car || d.name || d.vehicle || '',
-                statement: d.statement || d.trim || d.desc || d.variant || '',
-                interiorColor: d.interiorColor || '',
-                exteriorColor: d.exteriorColor || '',
-                model: d.model || '',
-                agent: (d.agent || d.dealer || d.vendor || d.agency || d['الوكيل'] || ''),
-                location: d.location || '',
-                status: (d.status || d.state || d.statuses || d['الحالة'] || ''),
-                approvals: d.approvals || {financial:false, admin:false}
-              });
-            });
-          }
-        }catch(e){ console.warn('dash cars get', e); }
+      dashCarsUnsub = db.collection('cars').onSnapshot((snap)=>{
+        dashCars = [];
+        snap.forEach(doc=>{
+          const d = doc.data() || {};
+          dashCars.push({
+            vin: doc.id,
+            carName: d.carName || d.car || d.name || d.vehicle || '',
+            statement: d.statement || d.trim || d.desc || d.variant || '',
+            interiorColor: d.interiorColor || '',
+            exteriorColor: d.exteriorColor || '',
+            model: d.model || '',
+            agent: (d.agent || d.dealer || d.vendor || d.agency || d['الوكيل'] || ''),
+            location: d.location || '',
+            status: (d.status || d.state || d.statuses || d['الحالة'] || ''),
+            approvals: d.approvals || {financial:false, admin:false}
+          });
+        });
 
         // resolve dashCarsReady once
         if(__dashCarsReadyResolve){ __dashCarsReadyResolve(true); __dashCarsReadyResolve = null; }
-
-        // catalog
-        try{
-          if(catSnap){
-            catSnap.forEach(doc=>{
-              const d = doc.data() || {};
-              dashCatalog.push({...d, _raw:d, id:doc.id});
-            });
-          }
-        }catch(e){ console.warn('dash catalog get', e); }
-
-        // requests
-        try{
-          if(reqSnap){
-            dashReq = [];
-            reqSnap.forEach(doc=>{
-              const d = doc.data() || {};
-              dashReq.push({...d, id:doc.id});
-            });
-          }
-        }catch(e){ console.warn('dash req get', e); }
-
         loadDashLocationsIntoSelect();
         renderDashboard();
-        if(meta) meta.textContent = 'تم التحديث';
-      }).catch((err)=>{
-        console.error(err);
-        if(meta) meta.textContent = 'تعذر تحميل الداش بورد';
-        toast(err?.message || 'تعذر تحميل الداش بورد');
       });
+
+      // catalog
+      dashCatalogUnsub = db.collection('catalog').where('active','==',true).onSnapshot((snap)=>{
+        dashCatalog = [];
+        snap.forEach(doc=>{
+          const d = doc.data() || {};
+          dashCatalog.push({...d, _raw:d, id:doc.id});
+        });
+        renderDashboard();
+      }, (err)=>{
+        console.error(err);
+      });
+
+      // requests summary
+      dashReqUnsub = db.collection('requests').limit(300).onSnapshot((snap)=>{
+        dashReq = [];
+        snap.forEach(doc=>{
+          const d = doc.data() || {};
+          dashReq.push({id:doc.id, ...d});
+        });
+        renderRequestsCounts();
+      }, (err)=>{ console.error(err); });
     }
 
-    // Backward compatibility: keep name used elsewhere
-    function startDashboardLive(){ return loadDashboardOnce(); }
-
-
-function stopDashboardLive(){
-      // no-op (dashboard is not live)
-      dashCarsUnsub = null;
-      dashCatalogUnsub = null;
-      dashReqUnsub = null;
+    function stopDashboardLive(){
+      if(dashCarsUnsub){ dashCarsUnsub(); dashCarsUnsub=null; }
+      if(dashCatalogUnsub){ dashCatalogUnsub(); dashCatalogUnsub=null; }
+      if(dashReqUnsub){ dashReqUnsub(); dashReqUnsub=null; }
     }
 
     // Inventory filters
@@ -5546,7 +5513,7 @@ function stopDashboardLive(){
       document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active', v.id===viewId));
       if(viewId==='view-inventory') startInventoryLive();
       else stopInventoryLive();
-      if(viewId==='view-dashboard'){ loadDashboardOnce(); } else stopDashboardLive();
+      if(viewId==='view-dashboard'){ startDashboardLive(); startDashCardsLive(); } else stopDashboardLive();
       if(viewId==='view-tracking') ensureTrackingLoaded();
     }
     tabs.forEach(t=>t.addEventListener('click', ()=>openView(t.dataset.view)));
@@ -6685,9 +6652,10 @@ function scheduleSaveTransferNotes(){
             admin: (cur.admin===true)
           };
         }else{
-          // ✅ لو كانت السيارة كانت "مباع تحت التسليم" وتم تغييرها لأي حالة أخرى => امسح الموافقات
-          const prevSt = normStatus(d.status || d.state || '');
-          if(prevSt === 'مباع تحت التسليم'){
+          // ✅ الموافقات تفضل موجودة لو الحالة الجديدة "مباع تم التسليم"
+          // وأي حالة ثانية => امسح الموافقات (حتى لو كانت موجودة قبل كده)
+          const nextSt = normStatus(toStatus);
+          if(nextSt !== 'مباع تم التسليم'){
             update.approvals = firebase.firestore.FieldValue.delete();
             update.approvalsNotes = firebase.firestore.FieldValue.delete();
             update.approvalsAt = firebase.firestore.FieldValue.delete();
