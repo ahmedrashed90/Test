@@ -2,6 +2,7 @@
 
 
 
+
 <!DOCTYPE html>
 
 <html dir="rtl" lang="ar">
@@ -5356,8 +5357,9 @@ function bindDashboardActions(){
 
 }
 
-    function startDashboardLive(){
-      if(dashCarsUnsub) return;
+    
+function loadDashboardOnce(){
+      // ✅ Dashboard loads ONCE when you open it (get) to reduce quota (not live)
       bindDashboardActions();
 
       // load saved filter into UI
@@ -5365,57 +5367,89 @@ function bindDashboardActions(){
       if(saved) applyDashFilterToUI(saved);
       loadDashLocationsIntoSelect();
 
-      dashCarsUnsub = db.collection('cars').onSnapshot((snap)=>{
-        dashCars = [];
-        snap.forEach(doc=>{
-          const d = doc.data() || {};
-          dashCars.push({
-            vin: doc.id,
-            carName: d.carName || d.car || d.name || d.vehicle || '',
-            statement: d.statement || d.trim || d.desc || d.variant || '',
-            interiorColor: d.interiorColor || '',
-            exteriorColor: d.exteriorColor || '',
-            model: d.model || '',
-            agent: (d.agent || d.dealer || d.vendor || d.agency || d['الوكيل'] || ''),
-            location: d.location || '',
-            status: (d.status || d.state || d.statuses || d['الحالة'] || ''),
-            approvals: d.approvals || {financial:false, admin:false}
-          });
-        });
+      const meta = document.getElementById('dash_meta');
+      if(meta) meta.textContent = 'جاري التحميل...';
+
+      // reset arrays
+      dashCars = [];
+      dashCatalog = [];
+      dashReq = [];
+
+      // ensure ready promise exists
+      if(!dashCarsReady || !__dashCarsReadyResolve){
+        dashCarsReady = new Promise(res=>{ __dashCarsReadyResolve = res; });
+      }
+
+      Promise.all([
+        db.collection('cars').get(),
+        db.collection('catalog').where('active','==',true).get().catch(()=>null),
+        db.collection('requests').limit(300).get().catch(()=>null)
+      ]).then(([carsSnap, catSnap, reqSnap])=>{
+
+        // cars
+        try{
+          if(carsSnap){
+            carsSnap.forEach(doc=>{
+              const d = doc.data() || {};
+              dashCars.push({
+                vin: doc.id,
+                carName: d.carName || d.car || d.name || d.vehicle || '',
+                statement: d.statement || d.trim || d.desc || d.variant || '',
+                interiorColor: d.interiorColor || '',
+                exteriorColor: d.exteriorColor || '',
+                model: d.model || '',
+                agent: (d.agent || d.dealer || d.vendor || d.agency || d['الوكيل'] || ''),
+                location: d.location || '',
+                status: (d.status || d.state || d.statuses || d['الحالة'] || ''),
+                approvals: d.approvals || {financial:false, admin:false}
+              });
+            });
+          }
+        }catch(e){ console.warn('dash cars get', e); }
 
         // resolve dashCarsReady once
         if(__dashCarsReadyResolve){ __dashCarsReadyResolve(true); __dashCarsReadyResolve = null; }
+
+        // catalog
+        try{
+          if(catSnap){
+            catSnap.forEach(doc=>{
+              const d = doc.data() || {};
+              dashCatalog.push({...d, _raw:d, id:doc.id});
+            });
+          }
+        }catch(e){ console.warn('dash catalog get', e); }
+
+        // requests
+        try{
+          if(reqSnap){
+            dashReq = [];
+            reqSnap.forEach(doc=>{
+              const d = doc.data() || {};
+              dashReq.push({...d, id:doc.id});
+            });
+          }
+        }catch(e){ console.warn('dash req get', e); }
+
         loadDashLocationsIntoSelect();
         renderDashboard();
-      });
-
-      // catalog
-      dashCatalogUnsub = db.collection('catalog').where('active','==',true).onSnapshot((snap)=>{
-        dashCatalog = [];
-        snap.forEach(doc=>{
-          const d = doc.data() || {};
-          dashCatalog.push({...d, _raw:d, id:doc.id});
-        });
-        renderDashboard();
-      }, (err)=>{
+        if(meta) meta.textContent = 'تم التحديث';
+      }).catch((err)=>{
         console.error(err);
+        if(meta) meta.textContent = 'تعذر تحميل الداش بورد';
+        toast(err?.message || 'تعذر تحميل الداش بورد');
       });
-
-      // requests summary
-      dashReqUnsub = db.collection('requests').limit(300).onSnapshot((snap)=>{
-        dashReq = [];
-        snap.forEach(doc=>{
-          const d = doc.data() || {};
-          dashReq.push({id:doc.id, ...d});
-        });
-        renderRequestsCounts();
-      }, (err)=>{ console.error(err); });
     }
 
-    function stopDashboardLive(){
-      if(dashCarsUnsub){ dashCarsUnsub(); dashCarsUnsub=null; }
-      if(dashCatalogUnsub){ dashCatalogUnsub(); dashCatalogUnsub=null; }
-      if(dashReqUnsub){ dashReqUnsub(); dashReqUnsub=null; }
+    // Backward compatibility: keep name used elsewhere
+    function startDashboardLive(){ return loadDashboardOnce(); }
+
+
+function stopDashboardLive(){
+      // no-op (dashboard is not live)
+      dashCarsUnsub = null;
+      dashCatalogUnsub = null;
+      dashReqUnsub = null;
     }
 
     // Inventory filters
@@ -5512,7 +5546,7 @@ function bindDashboardActions(){
       document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active', v.id===viewId));
       if(viewId==='view-inventory') startInventoryLive();
       else stopInventoryLive();
-      if(viewId==='view-dashboard'){ startDashboardLive(); startDashCardsLive(); } else stopDashboardLive();
+      if(viewId==='view-dashboard'){ loadDashboardOnce(); } else stopDashboardLive();
       if(viewId==='view-tracking') ensureTrackingLoaded();
     }
     tabs.forEach(t=>t.addEventListener('click', ()=>openView(t.dataset.view)));
