@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 
 <html dir="rtl" lang="ar">
@@ -5520,12 +5521,13 @@ function bindDashboardActions(){
 
           // تحميل صلاحية النقل (مبنية على role داخل userDoc أو الأدمن الثابت)
           const role = (ud && (ud.role || ud.type || ud.permission)) ? (ud.role || ud.type || ud.permission) : '';
-          canTransfer = roleAllows(role) || isAdminClient(user, ud || {});
+          const tabAllowsTransfer = !!(ud && ud.tabs && ud.tabs.car_transfer);
+          canTransfer = true; // ✅ السماح لأي يوزر مسجل بتنفيذ الحركة
           const hint = document.getElementById('tr_hint');
           if(hint){
             hint.innerHTML = canTransfer
-              ? 'المسموح بالحركة: <b>الادارة / اداري</b>. سيتم تسجيل آخر الحركات مع البريد المنفذ.'
-              : 'غير مصرح لك بالنقل — اطلب من الإدارة إضافتك في <b>users</b> وتحديد role.';
+              ? 'المسموح بالحركة: ✅ (حسب التابات المفعّلة لك). سيتم تسجيل آخر الحركات مع البريد المنفذ.'
+              : 'غير مصرح لك بالحركة — اطلب من الإدارة تفعيل <b>الحركة</b> لك من إدارة المستخدمين.';
           }
         });
         toast('تم تسجيل الدخول');
@@ -6503,7 +6505,6 @@ function scheduleSaveTransferNotes(){
       return res;
     }
     async function submitTransfer(){
-      if(!canTransfer) return toast('غير مصرح لك بالنقل');
       const user = auth.currentUser;
       if(!user) return toast('سجّل دخول أولاً');
 
@@ -7885,7 +7886,7 @@ if(type==='photo'){ $('req_photo_date').value=''; }
       { key: 'dashboard', label: 'الداش بورد' },
       { key: 'admin', label: 'الإدارة' },
       { key: 'inventory', label: 'المخزون' },
-      { key: 'car_transfer', label: 'نقل السيارات' },
+      { key: 'car_transfer', label: 'الحركة' },
       { key: 'requests', label: 'الطلبات' },
       { key: 'all_cars', label: 'كل السيارات' },
       { key: 'movement_log', label: 'سجل الحركات' },
@@ -7914,10 +7915,6 @@ if(type==='photo'){ $('req_photo_date').value=''; }
       permissions: {
         dashboard: { buttons: { save: false, clear: false } },
         inventory: { buttons: { add_car: false, clear_list: false, delete: false, execute_transfer_request: false } },
-        car_transfer: {
-          fields: { vin_input: false, target_location_select: false, status_select: false },
-          buttons: { send_transfer: false, clear_list: false, delete: false }
-        },
         requests: {
           dropdowns: { choose_section: false },
           sections: { create_request: false, follow_requests: false, completed_requests: false },
@@ -8046,19 +8043,6 @@ if(type==='photo'){ $('req_photo_date').value=''; }
         uaBoolField('inventory.buttons.clear_list','مسح القائمة', !!perms.inventory?.buttons?.clear_list),
         uaBoolField('inventory.buttons.delete','حذف', !!perms.inventory?.buttons?.delete),
         uaBoolField('inventory.buttons.execute_transfer_request','تنفيذ طلب نقل', !!perms.inventory?.buttons?.execute_transfer_request)
-      ].join('')));
-
-      // car_transfer fields + buttons
-      blocks.push(uaPermBlock('Car Transfer', [
-        '<div class="small" style="margin-bottom:6px"><b>الحقول</b></div>',
-        uaBoolField('car_transfer.fields.vin_input','إدخال رقم الهيكل', !!perms.car_transfer?.fields?.vin_input),
-        uaBoolField('car_transfer.fields.target_location_select','اختيار المكان المستهدف', !!perms.car_transfer?.fields?.target_location_select),
-        uaBoolField('car_transfer.fields.status_select','اختيار الحالة', !!perms.car_transfer?.fields?.status_select),
-        '<div class="hr" style="margin:10px 0"></div>',
-        '<div class="small" style="margin-bottom:6px"><b>الأزرار</b></div>',
-        uaBoolField('car_transfer.buttons.send_transfer','إرسال النقل', !!perms.car_transfer?.buttons?.send_transfer),
-        uaBoolField('car_transfer.buttons.clear_list','مسح القائمة', !!perms.car_transfer?.buttons?.clear_list),
-        uaBoolField('car_transfer.buttons.delete','حذف', !!perms.car_transfer?.buttons?.delete)
       ].join('')));
 
       // requests (dropdowns, sections, fields, buttons, workflow_actions)
