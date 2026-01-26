@@ -7,6 +7,7 @@
 
 
 
+
 <!DOCTYPE html>
 
 <html dir="rtl" lang="ar">
@@ -5085,7 +5086,28 @@ function bindDashboardActions(){
         return getCarTrackingLinkByVin(v) || (trackingBaseUrl + encodeURIComponent(v));
       }
 
-      async function refreshTrackingKpis(){
+      
+
+      // حفظ رابط التتبع داخل cars عند نسخ الرابط من كارت Tracking
+      async function saveTrackingLinkToCar(vin, link){
+        const v = (vin||'').toString().trim();
+        const l = (link||'').toString().trim();
+        if(!v || !l) return false;
+        try{
+          await db.collection('cars').doc(v).set({
+            Tracking: l,          // المطلوب (بحرف T كبير)
+            tracking: l,          // توافق مع استخدامات قديمة
+            trackingLink: l,      // توافق مع عرض "Tracking" في تبويب قاعدة البيانات
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+            updatedBy: (auth?.currentUser?.email || '')
+          }, { merge: true });
+          return true;
+        }catch(e){
+          console.warn('saveTrackingLinkToCar error', e);
+          return false;
+        }
+      }
+async function refreshTrackingKpis(){
         try{
           const rows = await fetchTrackingOrders(600);
           let nNew=0, nIn=0, nDone=0;
@@ -5171,16 +5193,29 @@ function bindDashboardActions(){
                   <td>${escapeHtml(r.vin||'')}</td>
                   <td>${escapeHtml(r.status||'—')}</td>
                   <td>${safeLink ? `<a href="${safeLink}" target="_blank" rel="noopener">فتح</a>` : '—'}</td>
-                  <td><button class="linkBtn" type="button" data-copy="${safeLink}">نسخ</button></td>
+                  <td><button class="linkBtn" type="button" data-copy="${safeLink}" data-vin="${escapeHtml(r.vin||'')}">نسخ</button></td>
                 </tr>`;
             }).join('') : `<tr><td colspan="8" style="text-align:center;padding:12px">لا توجد بيانات مطابقة.</td></tr>`;
 
-            // copy handlers
+            // copy handlers (copy + save into cars.Tracking)
             tbody.querySelectorAll('[data-copy]')?.forEach(btn=>{
               btn.addEventListener('click', async ()=>{
-                const v = btn.getAttribute('data-copy') || '';
+                const v = (btn.getAttribute('data-copy') || '').toString().trim();
+                const vin = (btn.getAttribute('data-vin') || '').toString().trim();
                 if(!v){ toast('لا يوجد رابط'); return; }
-                try{ await navigator.clipboard.writeText(v); toast('تم النسخ ✅'); }catch(_){ toast('تعذر النسخ'); }
+                try{
+                  await navigator.clipboard.writeText(v);
+                  // احفظه داخل قاعدة البيانات (cars) في حقل Tracking
+                  if(vin){
+                    const ok = await saveTrackingLinkToCar(vin, v);
+                    toast(ok ? 'تم النسخ ✅ وتم الحفظ في قاعدة البيانات' : 'تم النسخ ✅ (تعذر الحفظ)');
+                  }else{
+                    toast('تم النسخ ✅');
+                  }
+                }catch(e){
+                  console.error(e);
+                  toast('تعذر النسخ');
+                }
               });
             });
           }
