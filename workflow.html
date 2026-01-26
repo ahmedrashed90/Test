@@ -8,6 +8,7 @@
 
 
 
+
 <!DOCTYPE html>
 
 <html dir="rtl" lang="ar">
@@ -4489,7 +4490,7 @@ function openMissingBranchesModal(title, rows){
       const totalActual = totalActualCars.length;
 
       // ✅ المتاح للبيع (حسب تعريفك): الإجمالي الفعلي لكل الفروع بدون الوكالة
-      const availCars  = totalActualCars.filter(c=>((c.location||'').toString().trim()!=='الوكالة'));
+      const availCars  = totalActualCars.filter(c=>((c.location||'').toString().trim()!=='الوكالة') && !isCarArchived(c));
 
       // ✅ الوكالة (ضمن الإجمالي الفعلي)
       const agencyCars = totalActualCars.filter(c=>((c.location||'').toString().trim()==='الوكالة'));
