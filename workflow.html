@@ -4486,7 +4486,7 @@ function openMissingBranchesModal(title, rows){
       const agencyAll     = dashCars.filter(c=>((c.location||'').toString().trim()==='الوكالة'));
 
       // ✅ الإجمالي الفعلي = إجمالي السيارات بدون (مباع تحت التسليم) - (مباع تم التسليم)
-      const totalActualCars = dashCars.filter(c=>!['مباع تحت التسليم','مباع تم التسليم'].includes(normStatus(c.status)));
+      const totalActualCars = dashCars.filter(c=>!['مباع تحت التسليم','مباع تم التسليم'].includes(normStatus(c.status)) && !isCarArchived(c));
       const totalActual = totalActualCars.length;
 
       // ✅ المتاح للبيع (حسب تعريفك): الإجمالي الفعلي لكل الفروع بدون الوكالة
