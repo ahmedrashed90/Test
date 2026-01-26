@@ -4,6 +4,7 @@
 
 
 
+
 <!DOCTYPE html>
 
 <html dir="rtl" lang="ar">
@@ -6004,6 +6005,20 @@ function bindDashboardActions(){
       return s;
     }
 
+    function parseYesNoBool(v){
+      const raw = (v===null || v===undefined) ? '' : v;
+      const s = raw.toString().trim().toLowerCase();
+      if(!s) return null;
+      // yes
+      if(['نعم','صح','true','1','yes','y','✓','✔','✅'].includes(s)) return true;
+      // no
+      if(['لا','غلط','false','0','no','n','✗','✕','x','❌'].includes(s)) return false;
+      // Arabic variants
+      if(s.includes('نعم')) return true;
+      if(s.includes('لا')) return false;
+      return null;
+    }
+
     function excelRowToCar(row, headerMap){
       const vin = (getCell(row, headerMap, 'الهيكل') || getCell(row, headerMap, 'الهيكل (VIN)') || getCell(row, headerMap, '(VIN)') || '').toString().trim();
       if(!vin) return null;
@@ -6015,11 +6030,54 @@ function bindDashboardActions(){
       const exteriorColor = (getCell(row, headerMap, 'اللون الخارجي') || getCell(row, headerMap, 'خارجي') || '').toString().trim();
       const model = (getCell(row, headerMap, 'الموديل') || getCell(row, headerMap, 'موديل') || '').toString().trim();
       const plate = (getCell(row, headerMap, 'اللوحة') || '').toString().trim();
+      const batchName = (getCell(row, headerMap, 'اسم الدفعة بالتاريخ') || getCell(row, headerMap, 'اسم الدفعة') || getCell(row, headerMap, 'اسم الدفعة بالتاريخ ') || '').toString().trim();
       const location = (getCell(row, headerMap, 'المكان الحالي') || getCell(row, headerMap, 'المكان') || '').toString().trim();
       const status = normalizeStatus(getCell(row, headerMap, 'الحالة') || getCell(row, headerMap, 'Status') || '');
-      const notesLocation = (getCell(row, headerMap, 'ملاحظات المكان') || '').toString().trim();
-      const notesMissing = (getCell(row, headerMap, 'نواقص') || getCell(row, headerMap, 'النواقص') || '').toString().trim();
-      const tracking = (getCell(row, headerMap, 'Tracking') || getCell(row, headerMap, 'التتبع') || '').toString().trim();
+      // Export sheet uses these names:
+      // - "ملاحظات في السيارة" -> notesLocation
+      // - "حجز - نواقص - تحديد مكان" -> notesMissing
+      const notesLocation = (getCell(row, headerMap, 'ملاحظات في السيارة') || getCell(row, headerMap, 'ملاحظات المكان') || '').toString().trim();
+      const notesMissing = (getCell(row, headerMap, 'حجز - نواقص - تحديد مكان') || getCell(row, headerMap, 'نواقص') || getCell(row, headerMap, 'النواقص') || '').toString().trim();
+      const carNotes = (getCell(row, headerMap, 'ملاحظات السيارات (تُفتح عند الحالة: بها ملاحظات)') || getCell(row, headerMap, 'ملاحظات السيارات') || '').toString().trim();
+      const tracking = (getCell(row, headerMap, 'التتبع Tracking') || getCell(row, headerMap, 'Tracking') || getCell(row, headerMap, 'التتبع') || '').toString().trim();
+
+      // Checklist (Agency)
+      const checklist = {};
+      let hasChecklist = false;
+      const ckMap = [
+        {key:'sensors', names:['حساس','حساسات']},
+        {key:'camera',  names:['كاميرا']},
+        {key:'ac',      names:['مكيف']},
+        {key:'recorder',names:['مسجل']},
+        {key:'screen',  names:['شاشة']},
+        {key:'remote',  names:['ريموت']},
+        {key:'farshat', names:['فرشات']},
+        {key:'tafaia',  names:['طفاية']},
+        {key:'shanta',  names:['شنطة سلامة','شنطة']},
+        {key:'spare',   names:['اسبير','إسبير','اسبـير']}
+      ];
+      ckMap.forEach(it=>{
+        let foundName = null;
+        for(const nm of it.names){
+          if(headerMap[nm]!==undefined){ foundName = nm; break; }
+        }
+        if(!foundName) return;
+        hasChecklist = true;
+        const val = parseYesNoBool(getCell(row, headerMap, foundName));
+        checklist[it.key] = (val===null) ? true : !!val; // default: نعم
+      });
+
+      // Approvals
+      const approvals = {};
+      let hasApprovals = false;
+      if(headerMap['الموافقة المالية']!==undefined){
+        hasApprovals = true;
+        approvals.financial = !!(parseYesNoBool(getCell(row, headerMap, 'الموافقة المالية')));
+      }
+      if(headerMap['الموافقة الادارية']!==undefined){
+        hasApprovals = true;
+        approvals.admin = !!(parseYesNoBool(getCell(row, headerMap, 'الموافقة الادارية')));
+      }
 
       return {
         vin,
@@ -6030,11 +6088,15 @@ function bindDashboardActions(){
         exteriorColor,
         model,
         plate,
+        batchName,
         location,
         status,
         notesLocation,
         notesMissing,
+        carNotes,
         tracking,
+        ...(hasChecklist ? { checklist } : {}),
+        ...(hasApprovals ? { approvals } : {}),
         updatedAt: new Date(),
         updatedBy: (auth?.currentUser?.email || '')
       };
