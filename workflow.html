@@ -5,6 +5,7 @@
 
 
 
+
 <!DOCTYPE html>
 
 <html dir="rtl" lang="ar">
@@ -8004,8 +8005,9 @@ function reqStatusLabel(r){
     }
 
     function canDeleteReq(r){
-      // مسموح بالحذف إذا: لا توجد خطوات (أو فقط step1At)
-      return !r.step2At && !r.step3At && !r.step4At;
+      // ✅ الحذف مسموح لحد المرحلة 2 (تم ارسال السيارة)
+      // يعني يتعطل مباشرة بعد المرحلة 3 (تم استلام السيارة) أو 4 (تم الانتهاء)
+      return !r.step3At && !r.step4At;
     }
 
     // ----- Create Request VIN table -----
