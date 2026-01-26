@@ -6,6 +6,7 @@
 
 
 
+
 <!DOCTYPE html>
 
 <html dir="rtl" lang="ar">
@@ -1001,6 +1002,16 @@ html, body {
     <h3 style="margin-bottom:10px">التشييك + اللون الداخلي (للـوكالة فقط)</h3>
     <div class="body">
       <div class="row" style="gap:12px;flex-wrap:wrap">
+        
+      <div style="flex:1;min-width:240px">
+        <label>اختر رقم الهيكل للتشييك</label>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <select id="tr_agency_vin_select" style="flex:1;min-width:240px">
+            <option value="">اختر رقم الهيكل</option>
+          </select>
+        </div>
+      </div>
+
         <div style="flex:1;min-width:240px">
           <label>اللون الداخلي</label>
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
@@ -6438,11 +6449,173 @@ function bindDashboardActions(){
 
 // --- Auto-save (حجز/نواقص/تحديد مكان) ملاحظات Tab الحركة إلى cars/{VIN} ---
 let __trActiveVin = '';
+let __trActiveRow = null;
 let __trSaveTimer = null;
 
-function setTransferActiveVin(v){
-  __trActiveVin = (v||'').toString().trim();
+// ✅ Agency inputs per VIN (التشييك + اللون الداخلي) داخل Tab الحركة
+let __trAgencyByVin = {}; // { [vin]: { interiorColor: string, checklist: { [key]: boolean } } }
+
+function __trIsAgencyBoxVisible(){
+  const box = document.getElementById('tr_agency_box');
+  return !!(box && !box.classList.contains('hidden'));
 }
+
+function __captureAgencyUIToVin(vin){
+  try{
+    vin = (vin||'').toString().trim();
+    if(!vin) return;
+    if(!__trIsAgencyBoxVisible()) return;
+
+    const interiorColor = (document.getElementById('tr_int_color')?.value || '').toString().trim();
+    const checklist = {};
+    document.querySelectorAll('#tr_checklist_grid [data-tr-check]').forEach(seg=>{
+      const k = (seg.getAttribute('data-tr-check')||'').toString().trim();
+      if(!k) return;
+      const v = (seg.getAttribute('data-value')||seg.dataset.value||'true') === 'true';
+      checklist[k] = v;
+    });
+
+    __trAgencyByVin[vin] = { interiorColor, checklist };
+  }catch(_e){}
+}
+
+function __applyAgencyUIFromData(data){
+  try{
+    if(!data) return;
+
+    const sel = document.getElementById('tr_int_color');
+    if(sel){
+      const v = (data.interiorColor||'').toString().trim();
+      if(v){
+        // لو اللون مش موجود بالقائمة نضيفه مؤقتاً حتى يظهر للعميل
+        const exists = Array.from(sel.options||[]).some(o=>(o.value||'')===v);
+        if(!exists){
+          const o = document.createElement('option');
+          o.value = v; o.textContent = v;
+          sel.appendChild(o);
+        }
+        sel.value = v;
+      }else{
+        sel.value = '';
+      }
+    }
+
+    const ck = data.checklist || {};
+    document.querySelectorAll('#tr_checklist_grid [data-tr-check]').forEach(seg=>{
+      const k = (seg.getAttribute('data-tr-check')||'').toString().trim();
+      if(!k) return;
+      const want = (ck[k]===false) ? false : true; // default نعم
+      seg.setAttribute('data-value', want ? 'true' : 'false');
+      seg.dataset.value = want ? 'true' : 'false';
+      const yes = seg.querySelector('[data-val="true"]');
+      const no  = seg.querySelector('[data-val="false"]');
+      if(yes) yes.classList.toggle('active', want===true);
+      if(no)  no.classList.toggle('active', want===false);
+    });
+  }catch(_e){}
+}
+
+function __loadAgencyUIFromVin(vin){
+  try{
+    vin = (vin||'').toString().trim();
+    if(!vin) return;
+    if(!__trIsAgencyBoxVisible()) return;
+    const data = __trAgencyByVin[vin];
+    if(!data) return;
+    __applyAgencyUIFromData(data);
+  }catch(_e){}
+}
+
+function setTransferActiveVin(v, rowEl){
+  // احفظ بيانات الوكالة للهيكل السابق قبل التبديل
+  __captureAgencyUIToVin(__trActiveVin);
+
+  __trActiveVin = (v||'').toString().trim();
+  __trActiveRow = rowEl || null;
+
+  // لو بيانات هذا الهيكل موجودة بالفعل اعرضها
+  __loadAgencyUIFromVin(__trActiveVin);
+  try{ __syncAgencySelectorWithActiveVin(); }catch(_e){}
+}
+
+
+// ===== Agency VIN selector (تحديد الهيكل للتشييك) =====
+function __getAgencyVinsFromTable(){
+  const tb = document.querySelector('#tr_vinTable tbody');
+  if(!tb) return [];
+  const vins = [];
+  tb.querySelectorAll('tr').forEach(tr=>{
+    const vin = (tr.querySelector('input[data-vin-input]')?.value || '').toString().trim();
+    const loc = (tr.querySelector('[data-cell="loc"]')?.textContent || '').toString().trim();
+    if(vin && loc === 'الوكالة') vins.push(vin);
+  });
+  return Array.from(new Set(vins));
+}
+
+function refreshTransferAgencyVinSelector(){
+  const sel = document.getElementById('tr_agency_vin_select');
+  if(!sel) return;
+
+  const vins = __getAgencyVinsFromTable();
+  const current = (sel.value || '').toString().trim();
+
+  // rebuild options
+  sel.innerHTML = '<option value="">اختر رقم الهيكل</option>';
+  for(const v of vins){
+    const opt = document.createElement('option');
+    opt.value = v;
+    opt.textContent = v;
+    sel.appendChild(opt);
+  }
+
+  // keep selection
+  const target = (__trActiveVin && vins.includes(__trActiveVin)) ? __trActiveVin : (vins.includes(current) ? current : (vins[0] || ''));
+  if(target){
+    sel.value = target;
+  }else{
+    sel.value = '';
+  }
+}
+
+function __syncAgencySelectorWithActiveVin(){
+  const sel = document.getElementById('tr_agency_vin_select');
+  if(!sel) return;
+  if(__trActiveVin && sel.value !== __trActiveVin){
+    // ensure option exists
+    if(!Array.from(sel.options||[]).some(o=>o.value===__trActiveVin)){
+      refreshTransferAgencyVinSelector();
+    }
+    sel.value = __trActiveVin;
+  }
+}
+
+// change handler (once)
+document.addEventListener('change', (e)=>{
+  const t = e.target;
+  if(!t || t.id !== 'tr_agency_vin_select') return;
+  const vin = (t.value || '').toString().trim();
+  if(!vin) return;
+
+  // احفظ الهيكل السابق قبل التبديل
+  __captureAgencyUIToVin(__trActiveVin);
+
+  // فعل السطر المقابل لو موجود
+  const tb = document.querySelector('#tr_vinTable tbody');
+  let row = null;
+  if(tb){
+    tb.querySelectorAll('tr').forEach(tr=>{
+      const v = (tr.querySelector('input[data-vin-input]')?.value || '').toString().trim();
+      if(v === vin) row = tr;
+    });
+  }
+  setTransferActiveVin(vin, row);
+
+  // اعرض بوكس الوكالة + حمّل بيانات الهيكل المختار
+  setTransferAgencyBoxVisible(true);
+  try{ fillTransferInteriorColors(); }catch(_e){}
+  __loadAgencyUIFromVin(vin);
+});
+
 
 async function saveTransferNotesToCar(vin){
   try{
@@ -6556,7 +6729,8 @@ function scheduleSaveTransferNotes(){
         cells.st.textContent  = '';
         cells.ap.textContent  = '';
         tr.dataset.vin = '';
-        try{ setTransferAgencyBoxVisible(false); }catch(_){ }
+        try{ setTransferAgencyBoxVisible(false);
+        try{ refreshTransferAgencyVinSelector(); }catch(_e){} }catch(_){ }
         return;
       }
 
@@ -6570,7 +6744,8 @@ function scheduleSaveTransferNotes(){
           cells.ap.textContent  = '—';
           tr.dataset.vin = vin;
           tr.dataset.missing = '1';
-          try{ setTransferAgencyBoxVisible(false); }catch(_){ }
+          try{ setTransferAgencyBoxVisible(false);
+        try{ refreshTransferAgencyVinSelector(); }catch(_e){} }catch(_){ }
         }else{
           const d = snap.data()||{};
           cells.car.textContent = d.carName || '';
@@ -6603,17 +6778,26 @@ function scheduleSaveTransferNotes(){
             if(noteEl) noteEl.value = nLoc;
             if(missEl) missEl.value = nMis;
 
-            setTransferActiveVin(tr.dataset.vin || vin);
+            const vinKey = (tr.dataset.vin || vin);
+
+            setTransferActiveVin(vinKey, tr);
 
             // ✅ Agency-only UI: show checklist + interior color when current location is الوكالة
             const isAgency = (norm(d.location||'') === 'الوكالة');
             setTransferAgencyBoxVisible(isAgency);
+        try{ refreshTransferAgencyVinSelector(); __syncAgencySelectorWithActiveVin(); }catch(_e){}
+            try{ refreshTransferAgencyVinSelector(); __syncAgencySelectorWithActiveVin(); }catch(_e){}
             if(isAgency){
               fillTransferInteriorColors();
-              hydrateTransferAgencyFromCar(d);
+              // لكل هيكل لوحده: لو فيه بيانات محفوظة رجّعها، وإلا حمّل من السيارة وخزّن
+              if(__trAgencyByVin && __trAgencyByVin[vinKey]){
+                __loadAgencyUIFromVin(vinKey);
+              }else{
+                hydrateTransferAgencyFromCar(d);
+                try{ __captureAgencyUIToVin(vinKey); }catch(_e){}
+              }
             }
-
-            // show notes box if needed (status notes OR location notes OR note exists)
+// show notes box if needed (status notes OR location notes OR note exists)
             const box = document.getElementById('tr_note_box');
             if(box){
               const need = (stNorm === 'بها ملاحظات') || isNotesLocation(d.location || '') || !!nLoc;
@@ -6642,6 +6826,23 @@ function scheduleSaveTransferNotes(){
       tb.appendChild(tr);
 
       const inp = tr.querySelector('input[data-vin-input]');
+
+      // ✅ اختيار صف نشط لتعديل (التشييك + اللون الداخلي) لكل هيكل لوحده
+      tr.addEventListener('click', (e)=>{
+        if(e.target && e.target.closest && e.target.closest('[data-del-row]')) return;
+        const v = (inp?.value || '').toString().trim();
+        if(!v) return;
+        setTransferActiveVin(v, tr);
+
+        const locTxt = (tr.querySelector('[data-cell="loc"]')?.textContent || '').toString().trim();
+        const isAgency = (locTxt === 'الوكالة');
+        setTransferAgencyBoxVisible(isAgency);
+        if(isAgency){
+          fillTransferInteriorColors();
+          __loadAgencyUIFromVin(v);
+        }
+      });
+
       let t=null;
       inp.addEventListener('input', ()=>{
         const v = inp.value.trim();
@@ -6761,11 +6962,13 @@ function scheduleSaveTransferNotes(){
 
         // ✅ لو المكان الحالي كان الوكالة: احفظ (التشييك + اللون الداخلي) على نفس السيارة
         if(norm(fromLoc) === 'الوكالة' && agencyData){
-          if(agencyData.interiorColor){
-            update.interiorColor = agencyData.interiorColor;
+          const vinKey = (d.vin || d.VIN || '').toString().trim();
+          const a = (vinKey && agencyData[vinKey]) ? agencyData[vinKey] : null;
+          if(a && a.interiorColor){
+            update.interiorColor = a.interiorColor;
           }
-          if(agencyData.checklist){
-            update.checklist = agencyData.checklist;
+          if(a && a.checklist){
+            update.checklist = a.checklist;
           }
         }
 
@@ -6832,6 +7035,7 @@ function scheduleSaveTransferNotes(){
       const icSel = document.getElementById('tr_int_color'); if(icSel) icSel.value='';
       TR_CHECK_ITEMS.forEach(it=>{ setTransferChecklistValue(it.key, true); });
       setTransferAgencyBoxVisible(false);
+        try{ refreshTransferAgencyVinSelector(); }catch(_e){}
       $('tr_note_box').classList.add('hidden');
       toast('تم إنشاء طلب النقل وتحديث السيارات');
 
@@ -6921,6 +7125,7 @@ const trMissEl = document.getElementById('tr_notesMissing');
           if(!btn) return;
           const v = (btn.getAttribute('data-val')||'true') === 'true';
           setTransferChecklistSeg(seg, v);
+          try{ __captureAgencyUIToVin(__trActiveVin); }catch(_e){}
         });
       });
     }
@@ -6979,14 +7184,17 @@ const trMissEl = document.getElementById('tr_notesMissing');
     }
 
     function readTransferAgencyInputs(){
-      const box = document.getElementById('tr_agency_box');
-      if(!box || box.classList.contains('hidden')) return null;
-      const interiorColor = (document.getElementById('tr_int_color')?.value || '').toString().trim();
-      const checklist = {};
-      TR_CHECK_ITEMS.forEach(it=>{
-        checklist[it.key] = getTransferChecklistValue(it.key);
-      });
-      return { interiorColor, checklist };
+      // ✅ تأكد نحفظ آخر تعديل للهيكل الحالي قبل التنفيذ
+      try{ __captureAgencyUIToVin(__trActiveVin); }catch(_e){}
+      const out = {};
+      try{
+        const src = (__trAgencyByVin && typeof __trAgencyByVin==='object') ? __trAgencyByVin : {};
+        Object.keys(src).forEach(v=>{
+          if(!v) return;
+          out[v] = src[v] || {};
+        });
+      }catch(_e){}
+      return Object.keys(out).length ? out : null;
     }
 
     async function addInteriorColorFromTransfer(){
@@ -7023,6 +7231,7 @@ const trMissEl = document.getElementById('tr_notesMissing');
     // one-time init for UI
     renderTransferChecklistUI();
     fillTransferInteriorColors();
+    document.getElementById('tr_int_color')?.addEventListener('change', ()=>{ try{ __captureAgencyUIToVin(__trActiveVin); }catch(_e){} });
     document.getElementById('tr_add_int_color')?.addEventListener('click', addInteriorColorFromTransfer);
     document.getElementById('tr_save_int_color')?.addEventListener('click', saveInteriorColorFromTransfer);
     document.getElementById('tr_cancel_int_color')?.addEventListener('click', cancelInteriorColorFromTransfer);
@@ -7076,6 +7285,7 @@ const trMissEl = document.getElementById('tr_notesMissing');
           if(!btn) return;
           const v = (btn.getAttribute('data-val')||'true') === 'true';
           setTransferChecklistSeg(seg, v);
+          try{ __captureAgencyUIToVin(__trActiveVin); }catch(_e){}
         });
       });
     }
@@ -7134,14 +7344,17 @@ const trMissEl = document.getElementById('tr_notesMissing');
     }
 
     function readTransferAgencyInputs(){
-      const box = document.getElementById('tr_agency_box');
-      if(!box || box.classList.contains('hidden')) return null;
-      const interiorColor = (document.getElementById('tr_int_color')?.value || '').toString().trim();
-      const checklist = {};
-      TR_CHECK_ITEMS.forEach(it=>{
-        checklist[it.key] = getTransferChecklistValue(it.key);
-      });
-      return { interiorColor, checklist };
+      // ✅ تأكد نحفظ آخر تعديل للهيكل الحالي قبل التنفيذ
+      try{ __captureAgencyUIToVin(__trActiveVin); }catch(_e){}
+      const out = {};
+      try{
+        const src = (__trAgencyByVin && typeof __trAgencyByVin==='object') ? __trAgencyByVin : {};
+        Object.keys(src).forEach(v=>{
+          if(!v) return;
+          out[v] = src[v] || {};
+        });
+      }catch(_e){}
+      return Object.keys(out).length ? out : null;
     }
 
     async function addInteriorColorFromTransfer(){
@@ -7178,6 +7391,7 @@ const trMissEl = document.getElementById('tr_notesMissing');
     // one-time init for UI
     renderTransferChecklistUI();
     fillTransferInteriorColors();
+    document.getElementById('tr_int_color')?.addEventListener('change', ()=>{ try{ __captureAgencyUIToVin(__trActiveVin); }catch(_e){} });
     document.getElementById('tr_add_int_color')?.addEventListener('click', addInteriorColorFromTransfer);
     document.getElementById('tr_save_int_color')?.addEventListener('click', saveInteriorColorFromTransfer);
     document.getElementById('tr_cancel_int_color')?.addEventListener('click', cancelInteriorColorFromTransfer);
@@ -7513,6 +7727,7 @@ const trMissEl = document.getElementById('tr_notesMissing');
           if(!btn) return;
           const v = (btn.getAttribute('data-val')||'true') === 'true';
           setTransferChecklistSeg(seg, v);
+          try{ __captureAgencyUIToVin(__trActiveVin); }catch(_e){}
         });
       });
     }
@@ -7571,14 +7786,17 @@ const trMissEl = document.getElementById('tr_notesMissing');
     }
 
     function readTransferAgencyInputs(){
-      const box = document.getElementById('tr_agency_box');
-      if(!box || box.classList.contains('hidden')) return null;
-      const interiorColor = (document.getElementById('tr_int_color')?.value || '').toString().trim();
-      const checklist = {};
-      TR_CHECK_ITEMS.forEach(it=>{
-        checklist[it.key] = getTransferChecklistValue(it.key);
-      });
-      return { interiorColor, checklist };
+      // ✅ تأكد نحفظ آخر تعديل للهيكل الحالي قبل التنفيذ
+      try{ __captureAgencyUIToVin(__trActiveVin); }catch(_e){}
+      const out = {};
+      try{
+        const src = (__trAgencyByVin && typeof __trAgencyByVin==='object') ? __trAgencyByVin : {};
+        Object.keys(src).forEach(v=>{
+          if(!v) return;
+          out[v] = src[v] || {};
+        });
+      }catch(_e){}
+      return Object.keys(out).length ? out : null;
     }
 
     async function addInteriorColorFromTransfer(){
@@ -7615,6 +7833,7 @@ const trMissEl = document.getElementById('tr_notesMissing');
     // one-time init for UI
     renderTransferChecklistUI();
     fillTransferInteriorColors();
+    document.getElementById('tr_int_color')?.addEventListener('change', ()=>{ try{ __captureAgencyUIToVin(__trActiveVin); }catch(_e){} });
     document.getElementById('tr_add_int_color')?.addEventListener('click', addInteriorColorFromTransfer);
     document.getElementById('tr_save_int_color')?.addEventListener('click', saveInteriorColorFromTransfer);
     document.getElementById('tr_cancel_int_color')?.addEventListener('click', cancelInteriorColorFromTransfer);
@@ -8045,7 +8264,8 @@ function reqStatusLabel(r){
           c.loc.textContent = '—';
           tr.dataset.vin = vin;
           tr.dataset.missing = '1';
-          try{ setTransferAgencyBoxVisible(false); }catch(_){ }
+          try{ setTransferAgencyBoxVisible(false);
+        try{ refreshTransferAgencyVinSelector(); }catch(_e){} }catch(_){ }
         }else{
           const d = snap.data()||{};
           c.car.textContent = d.carName || '';
