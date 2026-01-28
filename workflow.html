@@ -9,6 +9,7 @@
 
 
 
+
 <!DOCTYPE html>
 
 <html dir="rtl" lang="ar">
@@ -592,6 +593,7 @@ html, body {
 <div class="tab" data-view="view-allcars" role="tab">كل السيارات</div>
 <div class="tab" data-view="view-logs" role="tab">سجل الحركات</div>
 <div class="tab" data-view="view-tracking" role="tab">التراكينج</div>
+<div class="tab" data-view="view-media" role="tab">Media</div>
 <div class="tab" data-view="view-users" role="tab">إدارة المستخدمين</div>
 </div>
 <!-- الداش بورد -->
@@ -2258,6 +2260,14 @@ html, body {
 </body>
 </html>
 </template>
+</div>
+</div>
+
+
+<!-- Media -->
+<div class="view" id="view-media" role="tabpanel">
+<div class="card" style="padding:16px;">
+<iframe id="mediaFrame" loading="lazy" style="width:100%; height:calc(100vh - 260px); border:0; border-radius:12px; background:#fff;" title="Media"></iframe>
 </div>
 </div>
 
@@ -5619,6 +5629,39 @@ async function refreshTrackingKpis(){
       __trackingLoaded = true;
     }
 
+    // ===== Media iframe =====
+    let __mediaLoaded = false;
+
+    function __injectMediaEmbedCSS(frame){
+      try{
+        const doc = frame.contentDocument || (frame.contentWindow && frame.contentWindow.document);
+        if(!doc || !doc.head) return;
+        if(doc.getElementById('mzj_embed_hide_sidebar')) return;
+        const st = doc.createElement('style');
+        st.id = 'mzj_embed_hide_sidebar';
+        st.textContent = `
+          /* Embedded in Workflow Dashboard (Media Tab) */
+          .sidebar, .mzj-sidebar, #sidebar, .sideBar, .mzj-side, .rightbar, .mzj-rightbar{display:none !important;}
+          body{padding:0 !important; background:transparent !important;}
+          .wrap, .container, main, .content, .mzj-content{max-width:none !important; margin:0 !important; width:100% !important;}
+          body{overflow-x:hidden !important;}
+        `;
+        doc.head.appendChild(st);
+      }catch(e){
+        // cross-origin: ignore
+      }
+    }
+
+    function ensureMediaLoaded(){
+      if(__mediaLoaded) return;
+      const frame = document.getElementById('mediaFrame');
+      if(!frame) return;
+      // ✅ حمل صفحة الميديا من الدومين الحقيقي
+      frame.addEventListener('load', ()=>__injectMediaEmbedCSS(frame));
+      frame.src = 'https://mzj-workflow.vercel.app/media.html?embed=1';
+      __mediaLoaded = true;
+    }
+
     function openView(viewId){
       tabs.forEach(t=>t.classList.toggle('active', t.dataset.view===viewId));
       document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active', v.id===viewId));
@@ -5626,6 +5669,7 @@ async function refreshTrackingKpis(){
       else stopInventoryLive();
       if(viewId==='view-dashboard'){ startDashboardLive(); startDashCardsLive(); } else stopDashboardLive();
       if(viewId==='view-tracking') ensureTrackingLoaded();
+      if(viewId==='view-media') ensureMediaLoaded();
     }
     tabs.forEach(t=>t.addEventListener('click', ()=>openView(t.dataset.view)));
 
