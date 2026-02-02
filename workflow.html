@@ -10,6 +10,7 @@
 
 
 
+
 <!DOCTYPE html>
 
 <html dir="rtl" lang="ar">
@@ -1258,6 +1259,14 @@ html, body {
 <div style="min-width:160px">
 <div class="small">إلى تاريخ</div>
 <input class="input" id="lg_to" type="date">
+</input></div>
+<div style="min-width:140px">
+<div class="small">من ساعة</div>
+<input class="input" id="lg_from_time" type="time" value="00:00">
+</input></div>
+<div style="min-width:140px">
+<div class="small">إلى ساعة</div>
+<input class="input" id="lg_to_time" type="time" value="23:59">
 </input></div>
 <div style="min-width:160px">
 <div class="small">فلترة</div>
@@ -7982,6 +7991,8 @@ const trMissEl = document.getElementById('tr_notesMissing');
 
       const fromStr = document.getElementById('lg_from')?.value || '';
       const toStr = document.getElementById('lg_to')?.value || '';
+      const fromTimeStr = document.getElementById('lg_from_time')?.value || '';
+      const toTimeStr = document.getElementById('lg_to_time')?.value || '';
       const mode = document.getElementById('lg_filter')?.value || 'all';
       const qSearch = (document.getElementById('lg_search')?.value || '').trim();
 
@@ -7990,8 +8001,30 @@ const trMissEl = document.getElementById('tr_notesMissing');
 
       // افتراضي: آخر 7 أيام لو ما اختار تاريخ
       const now = new Date();
-      const fromDate = fromStr ? new Date(fromStr+'T00:00:00') : new Date(now.getTime()-7*24*60*60*1000);
-      const toDate = toStr ? new Date(toStr+'T23:59:59') : now;
+
+      // ✅ فلتر بالساعة (اختياري) — لو ما حددت ساعة يبقى 00:00 إلى 23:59
+      const timeOk = (t)=> (/^\d{2}:\d{2}$/.test((t||'').toString().trim()));
+      const fromTime = timeOk(fromTimeStr) ? fromTimeStr.trim() : '00:00';
+      const toTime   = timeOk(toTimeStr)   ? toTimeStr.trim()   : '23:59';
+
+      const baseFrom = fromStr ? new Date(fromStr+'T00:00:00') : new Date(now.getTime()-7*24*60*60*1000);
+      const baseTo   = toStr   ? new Date(toStr+'T23:59:59')   : new Date(now);
+
+      // لو المستخدم حدد ساعة فقط بدون تاريخ: نعتبر "اليوم" للـ To، و"آخر 7 أيام" للـ From
+      if(!toStr && timeOk(toTimeStr)){
+        baseTo.setTime(now.getTime());
+      }
+
+      // تطبيق الساعات على التاريخين
+      try{
+        const fh = parseInt(fromTime.slice(0,2),10), fm = parseInt(fromTime.slice(3,5),10);
+        const th = parseInt(toTime.slice(0,2),10),   tm = parseInt(toTime.slice(3,5),10);
+        baseFrom.setHours(isNaN(fh)?0:fh, isNaN(fm)?0:fm, 0, 0);
+        baseTo.setHours(isNaN(th)?23:th, isNaN(tm)?59:tm, 59, 999);
+      }catch(_){}
+
+      const fromDate = baseFrom;
+      const toDate = baseTo;
 
       let q = db.collection('logs')
         .where('at','>=', firebase.firestore.Timestamp.fromDate(fromDate))
