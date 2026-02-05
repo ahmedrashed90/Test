@@ -8379,6 +8379,51 @@ const trMissEl = document.getElementById('tr_notesMissing');
   }
 }
 
+/* ================= TRANSFER TAB (الحركة) = REQUESTS STYLE ON MOBILE ================= */
+@media (max-width: 768px){
+  /* نفس كارت طلبات النقل: كارت واحد بعرض الصفحة */
+  #view-transfer .grid{grid-template-columns:1fr !important;}
+  #view-transfer .card{width:100%;}
+  #view-transfer .body{padding:16px;}
+
+  /* أهم نقطة: عناصر الـ focusBar تتصفّ */
+  #view-transfer .focusBar .row{
+    grid-template-columns: 1fr !important;
+  }
+  #view-transfer #tr_notesMissing{
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+
+  /* أزرار إضافة/تفريغ زي الطلبات */
+  #view-transfer .toolbar .field{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  #view-transfer .toolbar .btn{
+    flex:1 1 auto;
+    width:100%;
+  }
+
+  /* الجدول داخل سكرول (بدون ما يكبر التاب) */
+  #view-transfer .tableWrap{
+    width:100%;
+    overflow-x:auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  #view-transfer table{min-width: 900px;}
+}
+
+/* ================= DASH MODAL CENTER FIX ================= */
+/* المودال في الداش بورد يبقى في نص الشاشة (خصوصاً الموبايل) */
+#dashDataModal.show{
+  align-items: center !important;
+}
+#dashDataModal .modal{
+  margin: 0 auto !important;
+}
+
 </style></head><body>
         <h2>سجل الحركات</h2>
         <table><thead><tr>${cols.map(c=>`<th>${esc(c)}</th>`).join('')}</tr></thead><tbody>`;
