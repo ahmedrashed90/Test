@@ -11,6 +11,7 @@
 
 
 
+
 <!DOCTYPE html>
 
 <html dir="rtl" lang="ar">
@@ -1287,6 +1288,14 @@ html, body {
 <div style="min-width:160px">
 <div class="small">إلى تاريخ</div>
 <input class="input" id="lg_to" type="date">
+</input></div>
+<div style="min-width:140px">
+  <div class="small">من ساعة</div>
+  <input class="input" id="lg_from_time" type="time" step="60">
+</input></div>
+<div style="min-width:140px">
+  <div class="small">إلى ساعة</div>
+  <input class="input" id="lg_to_time" type="time" step="60">
 </input></div>
 <div style="min-width:160px">
 <div class="small">فلترة</div>
@@ -8065,6 +8074,8 @@ const trMissEl = document.getElementById('tr_notesMissing');
 
       const fromStr = document.getElementById('lg_from')?.value || '';
       const toStr = document.getElementById('lg_to')?.value || '';
+      const fromTimeStr = document.getElementById('lg_from_time')?.value || '';
+      const toTimeStr = document.getElementById('lg_to_time')?.value || '';
       const mode = document.getElementById('lg_filter')?.value || 'all';
       const qSearch = (document.getElementById('lg_search')?.value || '').trim();
 
@@ -8102,6 +8113,38 @@ const trMissEl = document.getElementById('tr_notesMissing');
       if(mode==='car' && qSearch){
         const ss = qSearch.toLowerCase();
         logs = logs.filter(l=> (l.carName||'').toLowerCase().includes(ss));
+      }
+
+
+      // فلترة حسب الساعة (من/إلى) — فلترة محلية لتفادي Index مركب
+      function parseHM(v){
+        if(!v) return null;
+        const s = v.toString().trim();
+        if(!s) return null;
+        const parts = s.split(':');
+        const hh = parseInt(parts[0]||'0',10);
+        const mm = parseInt(parts[1]||'0',10);
+        if(Number.isNaN(hh) || Number.isNaN(mm)) return null;
+        return hh*60 + mm;
+      }
+      const fromMin = parseHM(fromTimeStr);
+      const toMin = parseHM(toTimeStr);
+      if(fromMin!==null || toMin!==null){
+        logs = logs.filter(l=>{
+          const dt = (l.at && l.at.toDate) ? l.at.toDate() : null;
+          if(!dt) return false;
+          const mins = dt.getHours()*60 + dt.getMinutes();
+          if(fromMin!==null && toMin!==null){
+            if(fromMin<=toMin){
+              return mins>=fromMin && mins<=toMin;
+            }
+            // لو من أكبر من إلى => مدى عبر منتصف الليل
+            return (mins>=fromMin) || (mins<=toMin);
+          }
+          if(fromMin!==null) return mins>=fromMin;
+          if(toMin!==null) return mins<=toMin;
+          return true;
+        });
       }
 
       // اجلب بيانات السيارات (Join) لإظهار التشيك + الموافقات + المكان الحالي + اللون الداخلي
