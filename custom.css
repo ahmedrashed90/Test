@@ -74,67 +74,29 @@ html, body { max-width: 100%; overflow-x: hidden; }
 
 /* =========================================================
    5) TAB: Transfer  (#view-transfer) "الحركة"
-   الهدف: نفس تجربة "طلبات النقل" *بدون* Zoom-out
-   - على الديسكتوب/الشاشات الكبيرة: جدول عادي
-   - على الموبايل: الجدول يفضل بعرض الشاشة (بدون سكرول أفقي إجباري)
+   الهدف: نفس تجربة "طلبات النقل" بدون أي Zoom-out
 ========================================================= */
 
-/* إلغاء أي 100vw + مارجن سالب (لو موجودين) */
+/* مهم: إلغاء 100vw + المارجن السالب لو موجودين في CSS الأصلي */
 #view-transfer .tableWrap{
   width: 100% !important;
   margin-left: 0 !important;
   margin-right: 0 !important;
   border-radius: 12px !important;
 }
-
-/* افتراضيًا: خلي الجدول طبيعي */
 #view-transfer .tableWrap table{
-  width: 100% !important;
-  min-width: 0 !important;
+  width: max-content !important;
+  min-width: 900px !important;
 }
 
 /* نموذج "إنشاء حركة": على الموبايل يبقى عمود واحد (زي طلبات النقل) */
 @media (max-width: 768px){
-  /* Layout */
   #view-transfer .grid{ grid-template-columns: 1fr !important; }
   #view-transfer .toolbar{ flex-direction: column !important; align-items: stretch !important; }
   #view-transfer .toolbar .btn{ width: 100% !important; }
 
-  /* أهم جزء: إظهار بيانات الجدول بدون الحاجة لزووم أو سكرول أفقي */
-  #view-transfer .tableWrap{
-    overflow-x: hidden !important;
-  }
-  #view-transfer table{
-    table-layout: fixed !important;
-    width: 100% !important;
-    min-width: 0 !important;
-  }
-  #view-transfer thead th,
-  #view-transfer tbody td{
-    white-space: normal !important;
-    word-break: break-word !important;
-    overflow-wrap: anywhere !important;
-  }
-  /* تقلل زحمة الأعمدة على الموبايل */
-  #view-transfer thead th,
-  #view-transfer tbody td{
-    padding: 8px 8px !important;
-    font-size: 12.5px !important;
-  }
-
-  /* أي حقل/تكست اريا داخل التاب ما يوسعش الجدول */
-  #view-transfer input,
-  #view-transfer select,
-  #view-transfer textarea{
-    max-width: 100% !important;
-    min-width: 0 !important;
-  }
-
-  /* لو في عناصر عليها min-width في toolbar */
-  #view-transfer .toolbar .field{ min-width: 0 !important; }
-
-  /* ملاحظات "حجز - نواقص - تحديد مكان" */
-  #view-transfer #tr_notesMissing{ width: 100% !important; min-width: 0 !important; }
+  #view-transfer .focusBar .row{ grid-template-columns: 1fr !important; }
+  #view-transfer #tr_notesMissing{ min-width: 0 !important; width: 100% !important; }
 }
 
 /* =========================================================
@@ -170,3 +132,89 @@ html, body { max-width: 100%; overflow-x: hidden; }
 /* #view-tracking { } */
 /* #view-media { } */
 /* #view-users { } */
+
+/* =========================================================
+   TRANSFER TAB (الحركة) - Mobile: table -> vertical cards
+   الهدف: لو عرض الجدول ضيق/بيكسر الكلام، نخليه بالطول بشكل كروت
+========================================================= */
+@media (max-width: 768px){
+
+  /* جدول إدخال/عرض الـ VINs في الحركة */
+  #view-transfer #tr_tableWrap{
+    max-height: none !important;
+    overflow: visible !important;
+    border: none !important;
+    background: transparent !important;
+  }
+
+  #view-transfer #tr_vinTable{
+    width: 100% !important;
+    min-width: 0 !important;
+    border-collapse: separate !important;
+    border-spacing: 0 10px !important;
+  }
+
+  #view-transfer #tr_vinTable thead{
+    display: none !important;
+  }
+
+  #view-transfer #tr_vinTable tbody tr{
+    display: block !important;
+    background: #fff !important;
+    border: 1px solid var(--line) !important;
+    border-radius: 14px !important;
+    box-shadow: 0 10px 24px rgba(0,0,0,.06) !important;
+    overflow: hidden !important;
+  }
+
+  #view-transfer #tr_vinTable tbody td{
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+    padding: 10px 12px !important;
+    border: 0 !important;
+    border-bottom: 1px solid var(--line) !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+  }
+
+  #view-transfer #tr_vinTable tbody td:last-child{
+    border-bottom: 0 !important;
+  }
+
+  /* Labels لكل عمود */
+  #view-transfer #tr_vinTable tbody td:nth-child(1)::before{ content:"الهيكل (VIN)"; }
+  #view-transfer #tr_vinTable tbody td:nth-child(2)::before{ content:"السيارة"; }
+  #view-transfer #tr_vinTable tbody td:nth-child(3)::before{ content:"المكان الحالي"; }
+  #view-transfer #tr_vinTable tbody td:nth-child(4)::before{ content:"الحالة"; }
+  #view-transfer #tr_vinTable tbody td:nth-child(5)::before{ content:"ملاحظات"; }
+  #view-transfer #tr_vinTable tbody td:nth-child(6)::before{ content:"الموافقات"; }
+  #view-transfer #tr_vinTable tbody td:nth-child(7)::before{ content:"حذف"; }
+
+  #view-transfer #tr_vinTable tbody td::before{
+    flex: 0 0 110px;
+    max-width: 110px;
+    font-size: 12px;
+    font-weight: 900;
+    color: var(--brown);
+    opacity: .85;
+    white-space: nowrap;
+  }
+
+  /* خانات الإدخال داخل الصف */
+  #view-transfer #tr_vinTable input,
+  #view-transfer #tr_vinTable select,
+  #view-transfer #tr_vinTable textarea{
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  /* زر الحذف يبقى طبيعي */
+  #view-transfer #tr_vinTable .btn,
+  #view-transfer #tr_vinTable .linkBtn{
+    width: 100% !important;
+    justify-content: center !important;
+  }
+}
