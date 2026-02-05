@@ -23,7 +23,7 @@
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
-<script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+<script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js">
 <script>
 function showFastModal(title){
   const m = document.getElementById('fastActionModal');
@@ -36,6 +36,8 @@ function hideFastModal(){
   const m = document.getElementById('fastActionModal');
   if(m) m.style.display = 'none';
 }
+</script>
+
 </script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -183,6 +185,29 @@ function hideFastModal(){
 /* نقل السيارات: خليه نفس شكل تاب الطلبات (كارت بعرض الصفحة + جدول داخل الكارت) */
 #view-transfer .grid{
   grid-template-columns: 1fr !important;
+}
+
+/* سجل الحركات (الحركة): نفس تنسيق طلبات النقل على الموبايل */
+#view-logs .tableWrap{
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  margin-right: calc(-50vw + 50%);
+  border-radius: 0;
+}
+#view-logs .tableWrap table{ width:100%; }
+#view-logs .grid{ grid-template-columns: 1fr !important; }
+#view-logs .card{ border-radius: 18px; }
+#view-logs .actions, 
+#view-logs .row-actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  justify-content:flex-start;
+}
+#view-logs .actions .btn, 
+#view-logs .row-actions .btn{
+  min-height: 42px;
+  border-radius: 14px;
 }
 
 #view-transfer .card{
@@ -480,6 +505,122 @@ function hideFastModal(){
 
 /* ===== Transfer checklist segmented choice ===== */
 .trSegBtn.active{background:var(--brown);border-color:var(--brown);color:#fff;}
+
+/* ==== Mobile Sidebar (added) ==== */
+@media (max-width: 900px){
+  /* hide the big tabbar grid (we'll move it into sidebar) */
+  .tabs > .tabbar{ display:none !important; }
+
+  /* make topbar compact + add space for button if injected */
+  .topbar{ position:sticky; top:0; z-index:50; }
+  .topbar .brand-title{ font-size:14px; }
+  .topbar .brand-sub{ font-size:12px; }
+
+  /* hamburger button */
+  .m-navbtn{
+    width:42px;height:42px;border-radius:12px;
+    border:1px solid var(--line);
+    background:#fff;
+    display:grid;place-items:center;
+    cursor:pointer;
+  }
+
+  /* sidebar */
+  .m-sidebar{
+    position:fixed; inset:0 auto 0 0; /* for RTL we will anchor to right via JS class */
+    width:min(86vw, 330px);
+    background:#fff;
+    border-left:1px solid var(--line);
+    box-shadow:0 20px 60px rgba(0,0,0,.25);
+    z-index:2000;
+    transform:translateX(110%);
+    transition:transform .18s ease;
+    display:flex; flex-direction:column;
+  }
+  .m-sidebar.rtl{ right:0; left:auto; border-left:none; border-right:1px solid var(--line); }
+  .m-sidebar.open{ transform:translateX(0); }
+
+  .m-sidebar__head{
+    padding:14px;
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    border-bottom:1px solid var(--line);
+  }
+  .m-sidebar__title{ font-weight:900; color:var(--brown); }
+  .m-sidebar__close{
+    width:40px;height:40px;border-radius:12px;
+    border:1px solid var(--line);
+    background:#fff; cursor:pointer;
+    display:grid;place-items:center;
+  }
+
+  .m-sidebar__body{ padding:12px; overflow:auto; }
+  .m-sidebar .tabbar{
+    display:grid !important;
+    grid-template-columns:repeat(2, minmax(0,1fr));
+    gap:10px;
+  }
+  .m-sidebar .tab{
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:12px 10px;
+    text-align:center;
+    font-weight:800;
+  }
+  .m-sidebar .tab.active{
+    background:rgba(188,143,116,.12);
+    border-color:rgba(188,143,116,.45);
+  }
+
+  .m-backdrop{
+    position:fixed; inset:0;
+    background:rgba(0,0,0,.35);
+    z-index:1999;
+    opacity:0; pointer-events:none;
+    transition:opacity .18s ease;
+  }
+  .m-backdrop.show{ opacity:1; pointer-events:auto; }
+
+  /* Dashboard KPI counts look like badges */
+  .dashKpi{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .dashKpi b{
+    min-width:44px;
+    padding:4px 10px;
+    border-radius:999px;
+    background:rgba(188,143,116,.14);
+    border:1px solid rgba(188,143,116,.35);
+    font-size:13px;
+    text-align:center;
+  }
+
+  /* Inventory table -> stacked cards without horizontal scroll */
+  #view-inventory .tableWrap{ overflow:visible !important; }
+  #inv_table{ width:100% !important; }
+  #inv_table thead{ display:none !important; }
+  #inv_table, #inv_table tbody, #inv_table tr, #inv_table td{ display:block; width:100%; }
+  #inv_table tr{
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:10px 10px;
+    margin:10px 0;
+    box-shadow:var(--shadow);
+  }
+  #inv_table td{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    padding:6px 0 !important;
+    border:0 !important;
+  }
+  #inv_table td::before{
+    content:attr(data-label);
+    color:var(--muted);
+    font-weight:700;
+    white-space:nowrap;
+  }
+}
+
 </style>
 <style>
     /* Dashboard modals wider */
@@ -610,6 +751,10 @@ html, body {
     justify-content:space-between;
     gap:10px;
   }
+
+  /* Robust open/close (not dependent on body class) */
+  .mSidebar.open{ transform:translateX(0) !important; }
+  .mSidebarBackdrop.show{ opacity:1 !important; pointer-events:auto !important; }
   .mSidebarBrand{
     font-weight:900;
     color:var(--brown, #3e2420);
@@ -665,20 +810,7 @@ html, body {
 }
 </style>
 </head>
-
 <body>
-<!-- ===== Mobile Sidebar UI ===== -->
-<button id="mSidebarToggle" class="mobile-menu-btn" type="button" aria-label="فتح القائمة">☰</button>
-
-<div class="mSidebar" id="mSidebar" aria-hidden="true">
-  <div class="mSidebarHead">
-    <div class="mSidebarBrand">Workflow</div>
-    <button class="mSidebarClose" id="mSidebarClose" type="button" aria-label="إغلاق القائمة">✕</button>
-  </div>
-  <div class="mSidebarTabs" id="mSidebarTabs"></div>
-</div>
-<div class="mSidebarBackdrop" id="mSidebarBackdrop" aria-hidden="true"></div>
-<!-- ===== /Mobile Sidebar UI ===== -->
 <div class="wrap">
 <div class="topbar">
 <div class="brand">
@@ -2070,6 +2202,18 @@ html, body {
   border-radius:12px;
   paddi
 
+<!-- ===== Mobile Sidebar UI (added) ===== -->
+<div class="mSidebar" id="mSidebar" aria-hidden="true">
+  <div class="mSidebarHead">
+    <div class="mSidebarBrand">Workflow</div>
+    <button class="mSidebarClose" id="mSidebarClose" type="button" aria-label="إغلاق القائمة">✕</button>
+  </div>
+  <div class="mSidebarTabs" id="mSidebarTabs"></div>
+</div>
+<div class="mSidebarBackdrop" id="mSidebarBackdrop"></div>
+<button class="mSidebarToggle" id="mSidebarToggle" type="button" aria-label="فتح القائمة">☰</button>
+<!-- ===== /Mobile Sidebar UI ===== -->
+
 ng:8px 12px;
   cursor:pointer;
   font-weight:800;
@@ -2467,6 +2611,137 @@ html, body {
     <div class="loader"></div>
   </div>
 </div>
+
+
+<script>
+(function(){
+  function qs(sel, root){ return (root||document).querySelector(sel); }
+  function qsa(sel, root){ return Array.from((root||document).querySelectorAll(sel)); }
+
+  // ===== Sidebar: move existing main tabbar into an off-canvas panel (mobile only) =====
+  function buildMobileSidebar(){
+    if(!window.matchMedia || !window.matchMedia("(max-width: 900px)").matches) return;
+    if(window.__MZJ_MOBILE_SIDEBAR_BUILT__) return;
+    window.__MZJ_MOBILE_SIDEBAR_BUILT__ = true;
+
+    var tabbar = qs('.tabs > .tabbar');
+    var topbar = qs('.topbar');
+    if(!tabbar || !topbar) return;
+
+    // Create backdrop + sidebar
+    var backdrop = document.createElement('div');
+    backdrop.className = 'm-backdrop';
+    backdrop.id = 'mBackdrop';
+
+    var sidebar = document.createElement('aside');
+    sidebar.className = 'm-sidebar rtl';
+    sidebar.id = 'mSidebar';
+    sidebar.setAttribute('aria-hidden','true');
+
+    var head = document.createElement('div');
+    head.className = 'm-sidebar__head';
+    head.innerHTML = '<div class="m-sidebar__title">القائمة</div><button class="m-sidebar__close" type="button" aria-label="إغلاق">✕</button>';
+
+    var body = document.createElement('div');
+    body.className = 'm-sidebar__body';
+
+    // Move the REAL tabbar node (no cloning) to keep all listeners/logic intact
+    body.appendChild(tabbar);
+
+    sidebar.appendChild(head);
+    sidebar.appendChild(body);
+
+    document.body.appendChild(backdrop);
+    document.body.appendChild(sidebar);
+
+    // Add hamburger button into topbar (right side)
+    var right = qs('.topbar .right') || topbar;
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'm-navbtn';
+    btn.id = 'mNavBtn';
+    btn.setAttribute('aria-label','فتح القائمة');
+    btn.textContent = '☰';
+    // Insert before auth pill
+    if(right.firstChild) right.insertBefore(btn, right.firstChild);
+    else right.appendChild(btn);
+
+    function open(){
+      sidebar.classList.add('open');
+      backdrop.classList.add('show');
+      sidebar.setAttribute('aria-hidden','false');
+      document.body.style.overflow = 'hidden';
+    }
+    function close(){
+      sidebar.classList.remove('open');
+      backdrop.classList.remove('show');
+      sidebar.setAttribute('aria-hidden','true');
+      document.body.style.overflow = '';
+    }
+
+    btn.addEventListener('click', open);
+    backdrop.addEventListener('click', close);
+    head.querySelector('.m-sidebar__close').addEventListener('click', close);
+
+    // Close sidebar when selecting a tab
+    qsa('.tab', tabbar).forEach(function(t){
+      t.addEventListener('click', function(){ setTimeout(close, 50); }, {passive:true});
+    });
+
+    // ESC closes
+    document.addEventListener('keydown', function(e){ if(e.key === 'Escape') close(); });
+  }
+
+  // ===== Inventory table: add data-label for stacked mobile view =====
+  function applyInventoryLabels(){
+    var table = document.getElementById('inv_table');
+    if(!table) return;
+    var headers = qsa('thead th', table).map(function(th){ return (th.textContent||'').trim(); });
+    if(!headers.length) return;
+    qsa('tbody tr', table).forEach(function(tr){
+      qsa('td', tr).forEach(function(td, i){
+        if(!td.getAttribute('data-label')){
+          td.setAttribute('data-label', headers[i] || ('حقل ' + (i+1)));
+        }
+      });
+    });
+  }
+
+  // Observe changes so labels keep working after refresh
+  function watchInventoryTable(){
+    var table = document.getElementById('inv_table');
+    if(!table) return;
+    var tbody = qs('tbody', table);
+    if(!tbody) return;
+    var obs = new MutationObserver(function(){ applyInventoryLabels(); });
+    obs.observe(tbody, {childList:true, subtree:true});
+  }
+
+  // ===== Dashboard counts: force update after data ready =====
+  function pokeDashCounts(){
+    try{
+      if(typeof window.__cs_updateCounts === 'function'){
+        window.__cs_updateCounts();
+      }
+    }catch(e){}
+  }
+
+  function onReady(){
+    buildMobileSidebar();
+    applyInventoryLabels();
+    watchInventoryTable();
+
+    // run counts a few times (data may load async)
+    pokeDashCounts();
+    setTimeout(pokeDashCounts, 600);
+    setTimeout(pokeDashCounts, 1600);
+    setTimeout(pokeDashCounts, 3000);
+  }
+
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', onReady);
+  else onReady();
+})();
+</script>
 
 </body>
 </html>
@@ -9734,7 +10009,7 @@ if(type==='photo'){ $('req_photo_date').value=''; }
   function qs(sel){ return document.querySelector(sel); }
 
   function bindSidebar(){
-    var toggle = qs('#mSidebarToggle') || qs('#mobileMenuBtn');
+    var toggle = qs('#mSidebarToggle');
     var closeBtn = qs('#mSidebarClose');
     var backdrop = qs('#mSidebarBackdrop');
     var sidebar = qs('#mSidebar');
@@ -9749,21 +10024,42 @@ if(type==='photo'){ $('req_photo_date').value=''; }
     }
 
     function open(){
+      // do not rely on body class only (some code may overwrite body.className)
       document.body.classList.add('mSidebarOpen');
+      sidebar.classList.add('open');
+      if(backdrop) backdrop.classList.add('show');
       sidebar.setAttribute('aria-hidden','false');
+      // lock scroll on mobile
+      document.documentElement.style.overflow = 'hidden';
+      document.body.style.overflow = 'hidden';
     }
     function close(){
       document.body.classList.remove('mSidebarOpen');
+      sidebar.classList.remove('open');
+      if(backdrop) backdrop.classList.remove('show');
       sidebar.setAttribute('aria-hidden','true');
+      document.documentElement.style.overflow = '';
+      document.body.style.overflow = '';
+    }
+    function toggleIt(){
+      if(sidebar.classList.contains('open')) close();
+      else open();
     }
 
-    toggle.addEventListener('click', function(){
-      if(document.body.classList.contains('mSidebarOpen')) close();
-      else open();
+    // Toggle open/close
+    toggle.addEventListener('click', function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      toggleIt();
     });
 
-    if(closeBtn) closeBtn.addEventListener('click', close);
-    if(backdrop) backdrop.addEventListener('click', close);
+    if(closeBtn) closeBtn.addEventListener('click', function(e){ e.preventDefault(); close(); });
+    if(backdrop) backdrop.addEventListener('click', function(e){ e.preventDefault(); close(); });
+
+    // ESC closes
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Escape') close();
+    });
 
     // Close after selecting a tab (mobile UX)
     document.addEventListener('click', function(e){
