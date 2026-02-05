@@ -1,115 +1,134 @@
 /* =========================================================
-   CUSTOM UI CONTROL FILE
-   Project: Workflow
-   Purpose: التحكم الكامل في تنسيق التابات والجداول بدون لمس المنطق
+   Custom CSS for: مجموعة محمد بن ذعار العجمي للسيارات (Workflow)
+   Purpose:
+   - Keep ALL future UI tweaks هنا فقط
+   - كل تبويب له Section مستقل
+   - Responsive تلقائي حسب حجم الشاشة (موبايل/تابلت/ديسكتوب)
+   Notes:
+   - هذا الملف "Overrides" فقط: لا يغير المنطق أو Firebase أو JS
+   - اترك CSS الأصلي داخل HTML كما هو، وهذا الملف يأتي بعده ليغلبه
 ========================================================= */
 
-/* ========== GLOBAL SAFETY ========== */
-html, body {
-  max-width: 100%;
-  overflow-x: hidden;
+/* =============== 0) Global safety + helpers =============== */
+
+/* يمنع أي تمدد أفقي مزعج على الموبايل */
+html, body { max-width: 100%; overflow-x: hidden; }
+
+/* مساعدات */
+:root{
+  /* Breakpoints (تقدر تغيرها) */
+  --bp-tablet: 980px;
+  --bp-mobile: 680px;
+  --bp-small: 520px;
 }
 
-.tableWrap {
+/* =============== 1) Global tables behavior =============== */
+/* القاعدة العامة: الجداول على الشاشات الصغيرة تتحول لسكرول أفقي داخل الـ tableWrap */
+.tableWrap{
   overflow: auto;
   -webkit-overflow-scrolling: touch;
 }
 
-/* الجداول على الموبايل */
-@media (max-width:768px){
-  .tableWrap { overflow-x: auto; }
-  .tableWrap table { width: max-content; min-width: 900px; }
-  thead th, tbody td { white-space: nowrap; }
+/* على الموبايل: لا نضغط الأعمدة.. نخليها داخل سكرول */
+@media (max-width: 768px){
+  .tableWrap{ overflow-x: auto; }
+  .tableWrap table{ width: max-content; min-width: 900px; }
+  thead th, tbody td{ white-space: nowrap; }
 }
 
-/* ========== DASHBOARD ========== */
-#dashDataModal.show {
+/* =============== 2) Tabs: common layout =============== */
+/* أي View على الموبايل يكون padding مناسب */
+@media (max-width: 768px){
+  .wrap{ padding: 12px; }
+  .tabbar{ gap: 6px; }
+  .tab{ padding: 9px 10px; font-size: 13px; }
+}
+
+/* =========================================================
+   3) TAB: Dashboard  (#view-dashboard)
+========================================================= */
+/* مودال الداش بورد يتوسّط في الشاشة بدل ما يبقى فوق */
+#dashDataModal.show{
   align-items: center !important;
 }
-#dashDataModal .modal {
+#dashDataModal .modal{
   margin: 0 auto !important;
 }
 
-/* ========== INVENTORY TAB ========== */
-@media (max-width:768px){
-  #view-inventory {
-    margin: 0 !important;
-  }
-  #view-inventory .tableWrap {
-    width: 100% !important;
-  }
+/* على الموبايل: مودال الداش بورد يبقى أقصر شوية وscroll واضح */
+@media (max-width: 768px){
+  #dashDataModal .modal{ width: 96vw !important; max-width: 96vw !important; }
+  #dashDataModal .modalBody{ max-height: 72vh !important; overflow: auto !important; }
 }
 
-/* ========== TRANSFER TAB (الحركة) ========== */
-/* إلغاء أي عرض كامل يسبب Zoom-out */
+/* =========================================================
+   4) TAB: Inventory  (#view-inventory)
+   (سيبه Full-width زي ما أنت عامل، لكن نضبط الموبايل)
+========================================================= */
+@media (max-width: 768px){
+  /* خليه سكرول داخلي بدل ما يعمل Zoom-out */
+  #view-inventory{ margin-left: 0 !important; margin-right: 0 !important; }
+  #view-inventory .tableWrap{ width: 100% !important; }
+  #view-inventory .tableWrap table{ width: max-content !important; min-width: 1100px; }
+}
+
+/* =========================================================
+   5) TAB: Transfer  (#view-transfer) "الحركة"
+   الهدف: نفس تجربة "طلبات النقل" بدون أي Zoom-out
+========================================================= */
+
+/* مهم: إلغاء 100vw + المارجن السالب لو موجودين في CSS الأصلي */
 #view-transfer .tableWrap{
   width: 100% !important;
-  margin: 0 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
   border-radius: 12px !important;
-  overflow-x: auto !important;
 }
-
 #view-transfer .tableWrap table{
   width: max-content !important;
   min-width: 900px !important;
 }
 
-/* فورم إنشاء الحركة على الموبايل زي طلبات النقل */
-@media (max-width:768px){
-  #view-transfer .grid {
-    grid-template-columns: 1fr !important;
-  }
+/* نموذج "إنشاء حركة": على الموبايل يبقى عمود واحد (زي طلبات النقل) */
+@media (max-width: 768px){
+  #view-transfer .grid{ grid-template-columns: 1fr !important; }
+  #view-transfer .toolbar{ flex-direction: column !important; align-items: stretch !important; }
+  #view-transfer .toolbar .btn{ width: 100% !important; }
 
-  #view-transfer .toolbar {
-    flex-direction: column !important;
-    align-items: stretch !important;
-  }
+  #view-transfer .focusBar .row{ grid-template-columns: 1fr !important; }
+  #view-transfer #tr_notesMissing{ min-width: 0 !important; width: 100% !important; }
+}
 
-  #view-transfer .toolbar .btn {
+/* =========================================================
+   6) TAB: Requests  (#view-requests) "طلبات النقل"
+========================================================= */
+/* مثال: لو عايز تكبر الجدول أو تقلل ارتفاعه */
+#view-requests .tableWrap{ border-radius: 12px; }
+@media (max-width: 768px){
+  #view-requests .tableWrap table{ width: max-content; min-width: 900px; }
+}
+
+/* =========================================================
+   7) TAB: Logs (#view-logs) "سجل الحركات"
+========================================================= */
+@media (max-width: 768px){
+  /* الفلاتر تبقى تحت بعض */
+  #view-logs .body > div:first-child{ flex-direction: column !important; align-items: stretch !important; }
+  #view-logs .body > div:first-child > div,
+  #view-logs .body > div:first-child > button,
+  #view-logs .body > div:first-child > select{
     width: 100% !important;
-  }
-
-  #view-transfer .focusBar .row {
-    grid-template-columns: 1fr !important;
-  }
-
-  #tr_notesMissing {
     min-width: 0 !important;
-    width: 100% !important;
   }
+
+  /* جدول السجل */
+  #lg_table{ width: max-content; min-width: 1400px; }
 }
 
-/* إصلاح ظهور البيانات بعد كتابة VIN */
-@media (max-width:768px){
-  #view-transfer table {
-    width: 100% !important;
-    table-layout: fixed !important;
-  }
-
-  #view-transfer thead th,
-  #view-transfer tbody td {
-    white-space: normal !important;
-    word-break: break-word !important;
-  }
-}
-
-/* ========== REQUESTS TAB ========== */
-@media (max-width:768px){
-  #view-requests .tableWrap table {
-    width: max-content;
-    min-width: 900px;
-  }
-}
-
-/* ========== LOGS TAB ========== */
-@media (max-width:768px){
-  #view-logs .body > div:first-child {
-    flex-direction: column !important;
-    align-items: stretch !important;
-  }
-
-  #lg_table {
-    width: max-content;
-    min-width: 1400px;
-  }
-}
+/* =========================================================
+   8) TAB: Tracking / Media / Users
+   (مكان جاهز لأي تعديلات مستقبلية)
+========================================================= */
+/* #view-tracking { } */
+/* #view-media { } */
+/* #view-users { } */
