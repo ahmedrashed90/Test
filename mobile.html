@@ -551,6 +551,7 @@ html, body {
 }
 
 </style>
+<link rel="stylesheet" href="custom.css">
 </head>
 <body>
 <div class="wrap">
@@ -8289,43 +8290,6 @@ const trMissEl = document.getElementById('tr_notesMissing');
   margin-top:-6px;
   margin-bottom:8px;
 }
-
-
-
-
-/* ================= FINAL: Transfer (الحركة) exactly like Requests (طلبات النقل) ================= */
-/* إلغاء ستايل الـ 100vw + المارجن السالب اللي بيعمل Zoom-out/عرض زائد */
-#view-transfer{
-  margin-left: 0 !important;
-  margin-right: 0 !important;
-}
-#view-transfer .tableWrap{
-  width: 100% !important;
-  max-width: 100% !important;
-  margin-left: 0 !important;
-  margin-right: 0 !important;
-  border-radius: 12px !important;
-  overflow-x: auto !important;
-  -webkit-overflow-scrolling: touch;
-}
-#view-transfer .tableWrap table{
-  width: max-content !important;
-  min-width: 900px !important; /* نفس فكرة طلبات النقل: سكرول بدل ما يكبر الصفحة */
-}
-
-/* على الشاشات الصغيرة: خلي نموذج "إنشاء حركة" كله عمودي زي طلبات النقل */
-@media (max-width: 768px){
-  #view-transfer .focusBar .row{ grid-template-columns: 1fr !important; }
-  #view-transfer #tr_notesMissing{ min-width: 0 !important; width: 100% !important; }
-
-  /* الأزرار تحت بعض */
-  #view-transfer .toolbar{ flex-direction: column !important; align-items: stretch !important; }
-  #view-transfer .toolbar .btn{ width: 100% !important; }
-}
-
-/* حماية عامة ضد أي overflow أفقي */
-html, body, .wrap{ overflow-x: hidden; }
-
 
 </style></head><body>
         <h2>سجل الحركات</h2>
