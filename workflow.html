@@ -11,6 +11,7 @@
 
 
 
+
 <!DOCTYPE html>
 
 <html dir="rtl" lang="ar">
@@ -251,7 +252,13 @@ function hideFastModal(){
     .dashGrid{display:grid;grid-template-columns:repeat(3, minmax(0,1fr));gap:14px;margin-top:14px}
     .dashCard .body{display:grid;gap:10px}
     .dashKpis{display:grid;grid-template-columns:repeat(2, minmax(0,1fr));gap:10px}
-    .dashKpi{background:#fff;border:1px solid #f0e6dc;border-radius:12px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+    
+/* Car Shortages card layout (only) */
+.dashKpis.csKpis{grid-template-columns:repeat(3, minmax(0,1fr));}
+@media (max-width: 900px){
+  .dashKpis.csKpis{grid-template-columns:repeat(2, minmax(0,1fr));}
+}
+.dashKpi{background:#fff;border:1px solid #f0e6dc;border-radius:12px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px}
     .dashKpi span{color:var(--muted);font-size:13px;font-weight:700}
     .dashKpi b{font-size:18px;color:var(--brown)}
     .dashBtns{display:flex;gap:8px;flex-wrap:wrap}
@@ -666,6 +673,28 @@ html, body {
 <div class="small" style="margin-top:10px">الأرشفة تتم من تاب قاعدة البيانات بعد اكتمال الطلب.</div>
 </div>
 </div>
+
+<div class="card dashCard">
+  <div class="cardTitleRow">
+    <h3 id="dash_cs_title">نواقص السيارات</h3>
+    <div class="dashTitleTotal">
+      <span>الإجمالي</span>
+      <span class="dashTotalBadge"><b id="dash_cs_total">—</b></span>
+    </div>
+  </div>
+  <div class="body">
+    <div class="dashKpis csKpis">
+      <div class="dashKpi clickable" id="cs_btn_moltaqa"><span>الملتقى</span><b id="cs_cnt_moltaqa">—</b></div>
+      <div class="dashKpi clickable" id="cs_btn_salah"><span>الصالة</span><b id="cs_cnt_salah">—</b></div>
+      <div class="dashKpi clickable" id="cs_btn_qadisiyah"><span>القادسية</span><b id="cs_cnt_qadisiyah">—</b></div>
+    </div>
+    <div class="small" style="margin-top:10px">
+      يتم الحساب على مستوى <b>تركيبات</b> (السيارة + البيان + الموديل + اللون الخارجي + اللون الداخلي). 
+      لا يتم احتساب: حساسّات/كاميرا/شاشة/مسجل/ريموت/فرشات/طفاية/شنطة سلامة/اسبير.
+    </div>
+  </div>
+</div>
+
 <div class="card dashCard">
 <div class="cardTitleRow"><h3 id="dash_trk_title">تتبع إجراءات البيع (Tracking)</h3><div class="dashTitleTotal"><span>الإجمالي</span><span class="dashTotalBadge"><b id="dash_trk_total">—</b></span></div></div>
 <div class="body">
@@ -1261,12 +1290,12 @@ html, body {
 <input class="input" id="lg_to" type="date">
 </input></div>
 <div style="min-width:140px">
-<div class="small">من ساعة</div>
-<input class="input" id="lg_from_time" type="time" value="00:00">
+  <div class="small">من ساعة</div>
+  <input class="input" id="lg_from_time" type="time" step="60">
 </input></div>
 <div style="min-width:140px">
-<div class="small">إلى ساعة</div>
-<input class="input" id="lg_to_time" type="time" value="23:59">
+  <div class="small">إلى ساعة</div>
+  <input class="input" id="lg_to_time" type="time" step="60">
 </input></div>
 <div style="min-width:160px">
 <div class="small">فلترة</div>
@@ -1473,6 +1502,50 @@ html, body {
 </div>
 </div>
 
+</div>
+
+
+<!-- Car Shortages Modal -->
+<div class="modalBackdrop" id="carShortageModal">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modalHead">
+      <div class="titleWrap">
+        <h4 id="carShortageTitle">نواقص السيارات</h4>
+        <div class="subMeta" id="carShortageSubMeta">—</div>
+      </div>
+      <button class="btn secondary" id="carShortageClose">إغلاق</button>
+    </div>
+    <div class="modalBody" style="padding:0">
+      <div class="mbToolbar">
+        <div class="field">
+          <label>بحث</label>
+          <input autocomplete="off" id="carShortageSearch" placeholder="ابحث بـ السيارة / البيان / الألوان / الموديل"></input>
+        </div>
+        <div class="mbActions">
+          <div class="mbPill"><span>النتائج:</span> <span class="num" id="carShortageCount">0</span></div>
+          <button class="btn" id="carShortageExport">تصدير Excel</button>
+        </div>
+      </div>
+
+      <div class="mbTableWrap">
+        <div id="carShortageTableWrap" style="overflow:auto;max-height:60vh;border:1px solid var(--line);border-radius:12px;background:#fff;margin:14px;"><table class="table">
+          <thead>
+            <tr>
+              <th style="position:sticky;top:0;background:#fff;z-index:1">السيارة</th>
+              <th style="position:sticky;top:0;background:#fff;z-index:1">البيان</th>
+              <th style="position:sticky;top:0;background:#fff;z-index:1">الموديل</th>
+              <th style="position:sticky;top:0;background:#fff;z-index:1">اللون الخارجي</th>
+              <th style="position:sticky;top:0;background:#fff;z-index:1">اللون الداخلي</th>
+              <th style="position:sticky;top:0;background:#fff;z-index:1">الإجمالي الفعلي</th>
+            </tr>
+          </thead>
+          <tbody id="carShortageBody"></tbody>
+        </table></div>
+      </div>
+
+      <div class="muted" id="carShortageMeta" style="padding:0 14px 14px"></div>
+    </div>
+  </div>
 </div>
 
 <!-- Dashboard Missing Branches Config Modal -->
@@ -4294,11 +4367,14 @@ list.forEach(st=>{
         }
 
         __missingBranchesList = Array.from(new Set(arr)).sort((a,b)=>a.localeCompare(b,'ar'));
+        try{ window.__missingBranchesList = __missingBranchesList; }catch(e){}
       }catch(e){
         console.warn('loadMissingBranchesList error', e);
         __missingBranchesList = [];
+        try{ window.__missingBranchesList = __missingBranchesList; }catch(e){}
       }
     }
+        try{ window.__missingBranchesList = __missingBranchesList; }catch(e){}
 
     function renderMissingBranchesChecks(){
       const host = document.getElementById('dash_missing_branches');
@@ -4432,6 +4508,9 @@ list.forEach(st=>{
         return false;
       }
     }
+
+    // expose readiness helper for other scripts (e.g. نواقص السيارات)
+    try{ window.__ensureDashCarsReady = __ensureDashCarsReady; }catch(e){}
 
     async function openMissingBranchesForBranch(branchName){
       const br = (branchName||'').toString();
@@ -5515,6 +5594,10 @@ async function refreshTrackingKpis(){
         });
 
         // resolve dashCarsReady once
+
+        // expose dashCars for other dashboard cards (e.g. نواقص السيارات)
+        try{ window.dashCars = dashCars; }catch(e){}
+
         if(__dashCarsReadyResolve){ __dashCarsReadyResolve(true); __dashCarsReadyResolve = null; }
         loadDashLocationsIntoSelect();
         renderDashboard();
@@ -8001,30 +8084,8 @@ const trMissEl = document.getElementById('tr_notesMissing');
 
       // افتراضي: آخر 7 أيام لو ما اختار تاريخ
       const now = new Date();
-
-      // ✅ فلتر بالساعة (اختياري) — لو ما حددت ساعة يبقى 00:00 إلى 23:59
-      const timeOk = (t)=> (/^\d{2}:\d{2}$/.test((t||'').toString().trim()));
-      const fromTime = timeOk(fromTimeStr) ? fromTimeStr.trim() : '00:00';
-      const toTime   = timeOk(toTimeStr)   ? toTimeStr.trim()   : '23:59';
-
-      const baseFrom = fromStr ? new Date(fromStr+'T00:00:00') : new Date(now.getTime()-7*24*60*60*1000);
-      const baseTo   = toStr   ? new Date(toStr+'T23:59:59')   : new Date(now);
-
-      // لو المستخدم حدد ساعة فقط بدون تاريخ: نعتبر "اليوم" للـ To، و"آخر 7 أيام" للـ From
-      if(!toStr && timeOk(toTimeStr)){
-        baseTo.setTime(now.getTime());
-      }
-
-      // تطبيق الساعات على التاريخين
-      try{
-        const fh = parseInt(fromTime.slice(0,2),10), fm = parseInt(fromTime.slice(3,5),10);
-        const th = parseInt(toTime.slice(0,2),10),   tm = parseInt(toTime.slice(3,5),10);
-        baseFrom.setHours(isNaN(fh)?0:fh, isNaN(fm)?0:fm, 0, 0);
-        baseTo.setHours(isNaN(th)?23:th, isNaN(tm)?59:tm, 59, 999);
-      }catch(_){}
-
-      const fromDate = baseFrom;
-      const toDate = baseTo;
+      const fromDate = fromStr ? new Date(fromStr+'T00:00:00') : new Date(now.getTime()-7*24*60*60*1000);
+      const toDate = toStr ? new Date(toStr+'T23:59:59') : now;
 
       let q = db.collection('logs')
         .where('at','>=', firebase.firestore.Timestamp.fromDate(fromDate))
@@ -8052,6 +8113,38 @@ const trMissEl = document.getElementById('tr_notesMissing');
       if(mode==='car' && qSearch){
         const ss = qSearch.toLowerCase();
         logs = logs.filter(l=> (l.carName||'').toLowerCase().includes(ss));
+      }
+
+
+      // فلترة حسب الساعة (من/إلى) — فلترة محلية لتفادي Index مركب
+      function parseHM(v){
+        if(!v) return null;
+        const s = v.toString().trim();
+        if(!s) return null;
+        const parts = s.split(':');
+        const hh = parseInt(parts[0]||'0',10);
+        const mm = parseInt(parts[1]||'0',10);
+        if(Number.isNaN(hh) || Number.isNaN(mm)) return null;
+        return hh*60 + mm;
+      }
+      const fromMin = parseHM(fromTimeStr);
+      const toMin = parseHM(toTimeStr);
+      if(fromMin!==null || toMin!==null){
+        logs = logs.filter(l=>{
+          const dt = (l.at && l.at.toDate) ? l.at.toDate() : null;
+          if(!dt) return false;
+          const mins = dt.getHours()*60 + dt.getMinutes();
+          if(fromMin!==null && toMin!==null){
+            if(fromMin<=toMin){
+              return mins>=fromMin && mins<=toMin;
+            }
+            // لو من أكبر من إلى => مدى عبر منتصف الليل
+            return (mins>=fromMin) || (mins<=toMin);
+          }
+          if(fromMin!==null) return mins>=fromMin;
+          if(toMin!==null) return mins<=toMin;
+          return true;
+        });
       }
 
       // اجلب بيانات السيارات (Join) لإظهار التشيك + الموافقات + المكان الحالي + اللون الداخلي
@@ -9249,6 +9342,262 @@ if(type==='photo'){ $('req_photo_date').value=''; }
     };
 
 </script>
+
+<script>
+// ===== Dashboard Card: Car Shortages (نواقص السيارات) =====
+(function(){
+  function __cs_norm(v){ return (v||'').toString().trim(); }
+
+  // Grouping key: (السيارة + البيان + الموديل + اللون الخارجي + اللون الداخلي)
+  function __cs_key(c){
+    return [
+      __cs_norm(c.carName),
+      __cs_norm(c.statement),
+      __cs_norm(c.model),
+      __cs_norm(c.exteriorColor),
+      __cs_norm(c.interiorColor)
+    ].join('||');
+  }
+
+  function __cs_isActual(st){
+    const s = __cs_norm(st);
+    return (s==='متاح للبيع' || s==='محجوز' || s==='حجز' || s==='بها ملاحظات');
+  }
+
+  function __cs_isExcludedStatement(statement){
+    const s = (__cs_norm(statement)).toLowerCase();
+    if(!s) return false;
+    const bad = [
+      'حساس','حساسات',
+      'كاميرا',
+      'شاشة',
+      'مسجل',
+      'ريموت',
+      'فرشات',
+      'طفاية',
+      'شنطة سلامة','شنطة السلامة',
+      'اسبير','إسبير','اسبـير'
+    ];
+    return bad.some(x => s.includes(x.toLowerCase()));
+  }
+
+  function buildCarShortageRowsForBranch(branch){
+    const br = __cs_norm(branch);
+    if(!br) return [];
+
+    // Allowed locations = (المستودع + الفروع) بدون الوكالة
+    let allowed = Array.isArray(window.__missingBranchesList) ? window.__missingBranchesList.slice() : [];
+    if(!allowed.length){
+      allowed = ['الملتقى','القادسية','الصالة','المستودع'];
+    }
+    const allowedSet = new Set(allowed.map(__cs_norm).filter(x=>x && x!=='الوكالة'));
+
+    const totals = new Map();       // key -> total across allowed locations
+    const branchCounts = new Map(); // key -> count in this branch
+
+    (window.dashCars||[]).forEach(c=>{
+      if(!__cs_isActual(c.status)) return;
+
+      // استبعاد البنود غير السيارات
+      if(__cs_isExcludedStatement(c.statement)) return;
+
+      const loc = __cs_norm(c.location);
+      if(!allowedSet.has(loc)) return;
+
+      const key = __cs_key(c);
+      if(!key) return;
+
+      totals.set(key, (totals.get(key)||0) + 1);
+      if(loc===br) branchCounts.set(key, (branchCounts.get(key)||0) + 1);
+    });
+
+    const rows = [];
+    totals.forEach((totalCount, key)=>{
+      const bCount = branchCounts.get(key) || 0;
+      if(bCount===0 && totalCount>0){
+        const parts = key.split('||');
+        rows.push({
+          carName: parts[0]||'',
+          statement: parts[1]||'',
+          model: parts[2]||'',
+          exteriorColor: parts[3]||'',
+          interiorColor: parts[4]||'',
+          totalCount: totalCount
+        });
+      }
+    });
+
+    rows.sort((a,b)=>{
+      const A = (a.carName+a.model+a.exteriorColor+a.interiorColor+a.statement).toString();
+      const B = (b.carName+b.model+b.exteriorColor+b.interiorColor+b.statement).toString();
+      return A.localeCompare(B,'ar');
+    });
+    return rows;
+  }
+
+  function __cs_setText(id, val){
+    const el = document.getElementById(id);
+    if(el) el.textContent = (val===null || typeof val==='undefined') ? '—' : String(val);
+  }
+
+  function __cs_updateCounts(){
+    try{
+      const m = buildCarShortageRowsForBranch('الملتقى').length;
+      const s = buildCarShortageRowsForBranch('الصالة').length;
+      const q = buildCarShortageRowsForBranch('القادسية').length;
+
+      __cs_setText('cs_cnt_moltaqa', m);
+      __cs_setText('cs_cnt_salah', s);
+      __cs_setText('cs_cnt_qadisiyah', q);
+      __cs_setText('dash_cs_total', (m+s+q));
+    }catch(e){}
+  }
+
+  // Modal rendering
+  let __cs_lastRows = [];
+  function __cs_renderRows(rows){
+    const tb = document.getElementById('carShortageBody');
+    if(!tb) return;
+    tb.innerHTML = '';
+    rows.forEach(r=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${escapeHtml(r.carName||'')}</td>
+        <td>${escapeHtml(r.statement||'')}</td>
+        <td>${escapeHtml(r.model||'')}</td>
+        <td>${escapeHtml(r.exteriorColor||'')}</td>
+        <td>${escapeHtml(r.interiorColor||'')}</td>
+        <td><b>${escapeHtml(String(r.totalCount||0))}</b></td>
+      `;
+      tb.appendChild(tr);
+    });
+    const cnt = document.getElementById('carShortageCount');
+    if(cnt) cnt.textContent = String(rows.length);
+  }
+
+  function openCarShortageModal(branch){
+    const br = __cs_norm(branch);
+    const modal = document.getElementById('carShortageModal');
+    if(!modal) return;
+
+    const title = document.getElementById('carShortageTitle');
+    const sub = document.getElementById('carShortageSubMeta');
+    const meta = document.getElementById('carShortageMeta');
+    if(title) title.textContent = 'نواقص السيارات - ' + br;
+    if(sub) sub.textContent = 'التركيبات التي إجماليها الفعلي > 0 وكمية الفرع = 0';
+    if(meta) meta.textContent = '—';
+
+    const rows = buildCarShortageRowsForBranch(br);
+    __cs_lastRows = rows.slice();
+    __cs_renderRows(rows);
+
+    modal.classList.add('show');
+  }
+
+  // Search inside modal
+  function __cs_applySearch(){
+    const q = __cs_norm((document.getElementById('carShortageSearch')||{}).value).toLowerCase();
+    const rows = !q ? __cs_lastRows : __cs_lastRows.filter(r=>{
+      const blob = (r.carName+' '+r.statement+' '+r.model+' '+r.exteriorColor+' '+r.interiorColor).toLowerCase();
+      return blob.includes(q);
+    });
+    __cs_renderRows(rows);
+  }
+
+  // Export Excel
+  function __cs_export(){
+    try{
+      const rows = __cs_lastRows || [];
+      const data = rows.map(r=>({
+        'السيارة': r.carName,
+        'البيان': r.statement,
+        'الموديل': r.model,
+        'اللون الخارجي': r.exteriorColor,
+        'اللون الداخلي': r.interiorColor,
+        'الإجمالي الفعلي': r.totalCount
+      }));
+      const ws = XLSX.utils.json_to_sheet(data);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'نواقص السيارات');
+      XLSX.writeFile(wb, 'نواقص_السيارات.xlsx');
+    }catch(e){}
+  }
+
+  // Bind buttons once DOM is ready
+  function __cs_bind(){
+    const btnM = document.getElementById('cs_btn_moltaqa');
+    const btnS = document.getElementById('cs_btn_salah');
+    const btnQ = document.getElementById('cs_btn_qadisiyah');
+
+    if(btnM && !btnM.__csBound){ btnM.__csBound=true; btnM.addEventListener('click', ()=>openCarShortageModal('الملتقى')); }
+    if(btnS && !btnS.__csBound){ btnS.__csBound=true; btnS.addEventListener('click', ()=>openCarShortageModal('الصالة')); }
+    if(btnQ && !btnQ.__csBound){ btnQ.__csBound=true; btnQ.addEventListener('click', ()=>openCarShortageModal('القادسية')); }
+
+    const close = document.getElementById('carShortageClose');
+    if(close && !close.__csBound){
+      close.__csBound=true;
+      close.addEventListener('click', ()=>{ document.getElementById('carShortageModal')?.classList.remove('show'); });
+    }
+    const backdrop = document.getElementById('carShortageModal');
+    if(backdrop && !backdrop.__csBound){
+      backdrop.__csBound=true;
+      backdrop.addEventListener('click', (e)=>{ if(e.target===backdrop) backdrop.classList.remove('show'); });
+    }
+    const search = document.getElementById('carShortageSearch');
+    if(search && !search.__csBound){
+      search.__csBound=true;
+      search.addEventListener('input', __cs_applySearch);
+    }
+    const ex = document.getElementById('carShortageExport');
+    if(ex && !ex.__csBound){
+      ex.__csBound=true;
+      ex.addEventListener('click', __cs_export);
+    }
+  }
+
+  // Update counts whenever dashboard data refreshes
+  // We hook into existing dashboard refresh by polling lightly until dashCars ready then once per second for 5 seconds.
+  async function __cs_init(){
+    __cs_bind();
+    try{
+      if(typeof window.__ensureDashCarsReady === 'function'){
+        await window.__ensureDashCarsReady();
+      }
+    }catch(e){}
+    __cs_updateCounts();
+
+    // also refresh after filters apply (button already exists)
+    const showBtn = document.getElementById('dash_filter_show');
+    if(showBtn && !showBtn.__csBound){
+      showBtn.__csBound=true;
+      showBtn.addEventListener('click', ()=>setTimeout(__cs_updateCounts, 450));
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', __cs_init);
+  // expose opener for possible reuse
+  window.openCarShortageModal = openCarShortageModal;
+})();
+</script>
+
+
+
+<script>
+(function(){
+  // Make the table area show about ~20 rows while keeping scroll inside modal
+  function tuneCarShortageWrap(){
+    const wrap = document.getElementById('carShortageTableWrap');
+    if(!wrap) return;
+    // 20 rows * ~26px + header ~42px ≈ 560px (cap by viewport via 60vh anyway)
+    wrap.style.maxHeight = '560px';
+  }
+  document.addEventListener('click', function(e){
+    const btn = e.target.closest && e.target.closest('#cs_btn_moltaqa, #cs_btn_salah, #cs_btn_qadisiyah');
+    if(!btn) return;
+    setTimeout(tuneCarShortageWrap, 50);
+  }, true);
+})();
+</script>
+
 </body>
 </html>
-
