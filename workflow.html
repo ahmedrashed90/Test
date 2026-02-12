@@ -8884,9 +8884,9 @@ if(type==='photo'){ $('req_photo_date').value=''; }
         const map = new Map();
         snap.forEach(doc=>{
           const d = doc.data() || {};
-          // استبعاد السيارات المباعه (تحت التسليم / تم التسليم)
+          // استبعاد (مباع تحت التسليم / مباع تم التسليم / مؤرشف)
           const st = normStatus(d.status || d.state || d.statuses || d['الحالة'] || '');
-          if(st==='مباع تحت التسليم' || st==='مباع تم التسليم') return;
+          if(st==='مباع تحت التسليم' || st==='مباع تم التسليم' || st==='مؤرشف') return;
           const carName = (d.carName || d['سيارة'] || '').toString().trim();
           const statement = (d.statement || d['البيان'] || '').toString().trim();
           const model = (d.model || d['موديل'] || '').toString().trim();
