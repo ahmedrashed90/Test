@@ -1,0 +1,214 @@
+/* ===============================
+   Ramadan Theme (External CSS)
+   Targets existing classes/vars in your file
+   =============================== */
+
+/* 1) Override the existing design tokens */
+:root{
+  /* Keep your identity but make it Ramadan-rich */
+  --brown:#2B1A17;        /* deep brown */
+  --beige:#C07A4A;        /* bronze/gold */
+  --cream:#FFF7EE;        /* warm cream */
+  --bg:#0F1218;           /* night sky background */
+  --card:#121722;         /* deep card */
+  --text:#F6F1EA;         /* light text */
+  --muted:rgba(246,241,234,.72);
+  --line:rgba(192,122,74,.22);
+  --shadow:0 18px 46px rgba(0,0,0,.45);
+  --r:14px;
+
+  /* Ramadan accents */
+  --ramadan-glow: 0 0 0 6px rgba(192,122,74,.14), 0 12px 30px rgba(192,122,74,.12);
+  --ramadan-gold-1:#F7D9A6;
+  --ramadan-gold-2:#C07A4A;
+  --ramadan-night-1:#0F1218;
+  --ramadan-night-2:#121A2A;
+}
+
+/* 2) Global background: night + subtle pattern */
+html, body{
+  background: var(--bg) !important;
+  color: var(--text) !important;
+}
+
+/* Pattern layer */
+body{
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Soft stars + islamic geometry vibe */
+body::before{
+  content:"";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: .9;
+
+  background:
+    radial-gradient(1px 1px at 14% 22%, rgba(255,255,255,.45) 0 60%, transparent 61%),
+    radial-gradient(1px 1px at 74% 18%, rgba(255,255,255,.35) 0 60%, transparent 61%),
+    radial-gradient(1px 1px at 45% 66%, rgba(255,255,255,.30) 0 60%, transparent 61%),
+    radial-gradient(1px 1px at 85% 72%, rgba(255,255,255,.28) 0 60%, transparent 61%),
+    radial-gradient(1px 1px at 26% 78%, rgba(255,255,255,.25) 0 60%, transparent 61%),
+    radial-gradient(1200px 700px at 50% -10%, rgba(192,122,74,.18), transparent 55%),
+    radial-gradient(900px 520px at 10% 10%, rgba(247,217,166,.12), transparent 60%),
+    linear-gradient(180deg, var(--ramadan-night-2), var(--ramadan-night-1));
+}
+
+/* Crescent + lantern glow (pure CSS, no images) */
+body::after{
+  content:"";
+  position: fixed;
+  top: 18px;
+  left: 18px;  /* RTL site but this is decoration */
+  width: 220px;
+  height: 220px;
+  pointer-events: none;
+  z-index: 0;
+  opacity: .95;
+
+  /* Crescent: two circles, plus a glow */
+  background:
+    radial-gradient(circle at 55% 45%, rgba(247,217,166,.95) 0 28%, transparent 29%),
+    radial-gradient(circle at 62% 45%, rgba(15,18,24,1) 0 28%, transparent 29%),
+    radial-gradient(closest-side, rgba(192,122,74,.35), transparent 70%);
+  filter: drop-shadow(0 14px 26px rgba(192,122,74,.18));
+}
+
+/* Ensure app content above decorative layers */
+.wrap, .modalBackdrop, .toast{
+  position: relative;
+  z-index: 1;
+}
+
+/* 3) Cards/topbar/tabs: glassy Ramadan look */
+.topbar,
+.tabbar,
+.card,
+.modal{
+  background: rgba(18,23,34,.82) !important;
+  border: 1px solid var(--line) !important;
+  box-shadow: var(--shadow) !important;
+  backdrop-filter: blur(10px);
+}
+
+/* Header title styling */
+.title, .brand-title{
+  color: var(--ramadan-gold-1) !important;
+  letter-spacing: .2px;
+}
+
+/* The dot becomes glowing gold */
+.dot{
+  background: var(--ramadan-gold-2) !important;
+  box-shadow: var(--ramadan-glow) !important;
+}
+
+/* Pills */
+.pill{
+  background: rgba(247,217,166,.10) !important;
+  border-color: rgba(247,217,166,.22) !important;
+  color: var(--ramadan-gold-1) !important;
+}
+
+/* Tabs */
+.tab{
+  color: var(--ramadan-gold-1) !important;
+}
+.tab.active{
+  background: rgba(247,217,166,.10) !important;
+  border-color: rgba(247,217,166,.22) !important;
+}
+
+/* 4) Buttons: premium gold */
+.btn{
+  border: 1px solid rgba(192,122,74,.28) !important;
+}
+
+.btn.primary{
+  background: linear-gradient(135deg, rgba(247,217,166,.95), rgba(192,122,74,.92)) !important;
+  color: #1B120E !important;
+  box-shadow: 0 14px 30px rgba(192,122,74,.18) !important;
+}
+
+.btn.secondary{
+  background: rgba(247,217,166,.08) !important;
+  color: var(--ramadan-gold-1) !important;
+}
+
+.btn.danger{
+  background: linear-gradient(135deg, #D14B3D, #A72B21) !important;
+  border-color: rgba(255,255,255,.10) !important;
+}
+
+/* Hover polish */
+.btn:hover{
+  transform: translateY(-1px);
+  filter: brightness(1.03);
+}
+.btn:active{
+  transform: translateY(0);
+}
+
+/* 5) Inputs/tables */
+input, select, textarea{
+  background: rgba(255,255,255,.06) !important;
+  border: 1px solid rgba(247,217,166,.18) !important;
+  color: var(--text) !important;
+}
+input::placeholder, textarea::placeholder{
+  color: rgba(246,241,234,.55) !important;
+}
+
+.tableWrap{
+  background: rgba(255,255,255,.03) !important;
+  border-color: rgba(247,217,166,.14) !important;
+}
+
+thead th{
+  background: rgba(18,23,34,.92) !important;
+  border-bottom-color: rgba(247,217,166,.18) !important;
+  color: var(--ramadan-gold-1) !important;
+}
+
+/* Links/buttons inside tables */
+.linkBtn{
+  background: rgba(247,217,166,.10) !important;
+  border-color: rgba(247,217,166,.20) !important;
+  color: var(--ramadan-gold-1) !important;
+}
+
+/* Tags */
+.tag.ok{
+  background: rgba(28,155,75,.12) !important;
+  border-color: rgba(28,155,75,.28) !important;
+  color: #9AF0B5 !important;
+}
+.tag.no{
+  background: rgba(209,75,61,.12) !important;
+  border-color: rgba(209,75,61,.28) !important;
+  color: #FFC0B8 !important;
+}
+
+/* Modals head */
+.modalHead{
+  background: rgba(247,217,166,.10) !important;
+  border-bottom-color: rgba(247,217,166,.18) !important;
+}
+.modalHead h4{
+  color: var(--ramadan-gold-1) !important;
+}
+
+/* Toast */
+.toast{
+  background: rgba(18,23,34,.92) !important;
+  border: 1px solid rgba(247,217,166,.18) !important;
+}
+
+/* 6) Motion safety */
+@media (prefers-reduced-motion: reduce){
+  .btn{transition:none !important;}
+  .btn:hover{transform:none !important;}
+}
