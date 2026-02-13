@@ -1,28 +1,14 @@
-/* =========================================================
-   Ramadan Premium Minimal (LIGHT) — External CSS Only
-   - Professional: no garlands, no big decorations
-   - Subtle crescent watermark + warm festive accent
-   - Keeps layout untouched
-   ========================================================= */
+/* ======================================================
+   Ramadan Professional Background
+   Light • Elegant • Graphic Style
+   ====================================================== */
 
 :root{
-  /* Keep your identity */
   --bg:#F7F5F2;
   --card:#FFFFFF;
   --text:#1C1C1C;
-  --muted:rgba(28,28,28,.66);
-  --line:rgba(43,26,23,.12);
-  --shadow:0 14px 34px rgba(0,0,0,.08);
-
   --brown:#2B1A17;
   --bronze:#C07A4A;
-
-  /* Ramadan refined accents */
-  --ram-gold:#E9CF9A;                 /* soft gold */
-  --ram-ivory:#FFF9F0;                /* warm ivory */
-  --ram-green:#1F8A4C;                /* very subtle */
-  --ram-stroke:rgba(192,122,74,.22);  /* bronze stroke */
-  --ram-glow:0 10px 22px rgba(192,122,74,.12);
 }
 
 /* Base */
@@ -36,145 +22,82 @@ body{
   overflow-x: hidden;
 }
 
-/* ===== Subtle Ramadan vibe (VERY light) =====
-   - warm wash + tiny sparkle dots
-   - no heavy patterns
-*/
+/* ===== Main Background Layer ===== */
 body::before{
   content:"";
   position: fixed;
   inset: 0;
-  pointer-events: none;
   z-index: 0;
-  opacity: .9;
+  pointer-events: none;
+
   background:
-    radial-gradient(1000px 520px at 50% -10%, rgba(233,207,154,.22), transparent 60%),
-    radial-gradient(900px 520px at 10% 10%, rgba(192,122,74,.14), transparent 62%),
-    radial-gradient(2px 2px at 18% 24%, rgba(192,122,74,.14) 0 60%, transparent 61%),
-    radial-gradient(2px 2px at 74% 18%, rgba(31,138,76,.10) 0 60%, transparent 61%),
-    radial-gradient(2px 2px at 46% 70%, rgba(233,207,154,.14) 0 60%, transparent 61%),
-    linear-gradient(180deg, #FFFFFF, var(--bg));
+    /* Islamic subtle grid */
+    repeating-linear-gradient(
+      45deg,
+      rgba(192,122,74,.06) 0px,
+      rgba(192,122,74,.06) 1px,
+      transparent 1px,
+      transparent 32px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      rgba(192,122,74,.04) 0px,
+      rgba(192,122,74,.04) 1px,
+      transparent 1px,
+      transparent 36px
+    ),
+
+    /* Soft radial gold light top center */
+    radial-gradient(
+      900px 500px at 50% -10%,
+      rgba(233,207,154,.35),
+      transparent 60%
+    ),
+
+    linear-gradient(180deg,#ffffff,#F7F5F2);
 }
 
-/* Crescent watermark — bottom-left (subtle, premium) */
+/* ===== Crescent Watermark (Graphic Look) ===== */
 body::after{
   content:"";
   position: fixed;
-  left: 18px;
-  bottom: 18px;
-  width: 240px;
-  height: 240px;
-  pointer-events: none;
+  right: -120px;
+  bottom: -80px;
+  width: 500px;
+  height: 500px;
   z-index: 0;
-  opacity: .22; /* subtle */
+  pointer-events: none;
+  opacity: .18;
 
   background:
-    radial-gradient(circle at 52% 46%, rgba(192,122,74,.95) 0 26%, transparent 27%),
-    radial-gradient(circle at 60% 46%, rgba(247,245,242,1) 0 26%, transparent 27%),
-    radial-gradient(closest-side, rgba(233,207,154,.55), transparent 70%);
-  filter: blur(.2px);
+    radial-gradient(circle at 55% 45%, rgba(192,122,74,1) 0 40%, transparent 41%),
+    radial-gradient(circle at 68% 45%, #F7F5F2 0 40%, transparent 41%);
 }
 
-/* Ensure UI above decorations */
-.wrap, .topbar, .tabbar, .card, .modal, .modalBackdrop, .toast{
+/* Make content above background */
+.wrap, .topbar, .tabbar, .card, .modal, .toast{
   position: relative;
-  z-index: 1;
+  z-index: 2;
 }
 
-/* ===== Components: premium light ===== */
-.topbar,
-.tabbar,
+/* ===== Card polish ===== */
 .card,
 .modal{
-  background: rgba(255,255,255,.94) !important;
-  border: 1px solid var(--line) !important;
-  box-shadow: var(--shadow) !important;
-  backdrop-filter: blur(10px);
+  background: rgba(255,255,255,.92) !important;
+  border: 1px solid rgba(43,26,23,.10) !important;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 20px 40px rgba(0,0,0,.05);
 }
 
-/* Title emphasis */
-.title, .brand-title{
-  color: var(--brown) !important;
-}
-
-/* Accent dot */
-.dot{
-  background: var(--bronze) !important;
-  box-shadow: var(--ram-glow) !important;
-}
-
-/* Pills */
-.pill{
-  background: rgba(233,207,154,.18) !important;
-  border-color: var(--ram-stroke) !important;
-  color: var(--brown) !important;
-}
-
-/* Tabs */
-.tab{ color: var(--brown) !important; }
-.tab.active{
-  background: rgba(233,207,154,.18) !important;
-  border-color: var(--ram-stroke) !important;
-}
-
-/* Buttons */
-.btn{
-  border: 1px solid rgba(192,122,74,.26) !important;
-}
-
+/* Buttons Premium Bronze */
 .btn.primary{
-  background: linear-gradient(135deg, rgba(233,207,154,.96), rgba(192,122,74,.92)) !important;
-  color: #1B120E !important;
-  box-shadow: 0 12px 22px rgba(192,122,74,.14) !important;
+  background: linear-gradient(135deg,#E9CF9A,#C07A4A) !important;
+  color:#1B120E !important;
+  box-shadow: 0 10px 22px rgba(192,122,74,.18);
 }
 
 .btn.secondary{
   background: rgba(192,122,74,.08) !important;
   color: var(--brown) !important;
+  border:1px solid rgba(192,122,74,.22);
 }
-
-/* Inputs */
-input, select, textarea{
-  background: rgba(255,255,255,.97) !important;
-  border: 1px solid rgba(43,26,23,.14) !important;
-  color: var(--text) !important;
-}
-input::placeholder, textarea::placeholder{
-  color: rgba(28,28,28,.45) !important;
-}
-
-/* Tables */
-.tableWrap{
-  background: rgba(255,255,255,.78) !important;
-  border-color: rgba(43,26,23,.10) !important;
-}
-thead th{
-  background: rgba(255,255,255,.94) !important;
-  border-bottom-color: rgba(192,122,74,.18) !important;
-  color: var(--brown) !important;
-}
-
-.linkBtn{
-  background: rgba(233,207,154,.18) !important;
-  border-color: var(--ram-stroke) !important;
-  color: var(--brown) !important;
-}
-
-/* Tags */
-.tag.ok{
-  background: rgba(31,138,76,.10) !important;
-  border-color: rgba(31,138,76,.20) !important;
-  color: #176A3B !important;
-}
-.tag.no{
-  background: rgba(224,106,93,.10) !important;
-  border-color: rgba(224,106,93,.20) !important;
-  color: #A73A2F !important;
-}
-
-/* Modal header */
-.modalHead{
-  background: rgba(233,207,154,.18) !important;
-  border-bottom-color: rgba(192,122,74,.18) !important;
-}
-.modalHead h4{ color: var(--brown) !important; }
