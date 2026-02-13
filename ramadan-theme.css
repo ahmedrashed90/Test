@@ -1,6 +1,6 @@
 /* ==========================================================
-   RAMADAN PREMIUM LIGHT — MOCKUP CRESCENT
-   Calm Islamic Geometry + Metallic Crescent
+   RAMADAN PREMIUM LIGHT — VECTOR CRESCENT
+   Calm Islamic Geometry + Clean Flat Crescent
    ========================================================== */
 
 :root{
@@ -34,34 +34,31 @@ body::before{
 
   background:
     radial-gradient(1200px 650px at 50% -10%, rgba(233,207,154,.30), transparent 62%),
-    radial-gradient(900px 520px at 12% 14%, rgba(192,122,74,.20), transparent 64%),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260' viewBox='0 0 260 260'%3E%3Cg fill='none'%3E%3Cpath d='M130 18 L176 64 L130 110 L84 64 Z' stroke='%23C07A4A' stroke-width='2' opacity='0.6'/%3E%3Cpath d='M130 110 L176 156 L130 202 L84 156 Z' stroke='%232B1A17' stroke-width='2' opacity='0.2'/%3E%3C/g%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240' viewBox='0 0 240 240'%3E%3Cg fill='none'%3E%3Cpath d='M120 20 L160 60 L120 100 L80 60 Z' stroke='%23C07A4A' stroke-width='2' opacity='0.5'/%3E%3C/g%3E%3C/svg%3E"),
     linear-gradient(180deg,#ffffff,#F7F5F2);
 
-  background-repeat:no-repeat,no-repeat,repeat,no-repeat;
-  background-size:auto,auto,240px 240px,auto;
+  background-repeat:no-repeat,repeat,no-repeat;
+  background-size:auto,220px 220px,auto;
 }
 
-/* ===== Metallic Crescent ===== */
+/* ===== Vector Crescent ===== */
 body::after{
   content:"";
   position:fixed;
-  right:-110px;
-  bottom:-110px;
-  width:980px;
-  height:980px;
+  right:-140px;
+  bottom:-140px;
+  width:900px;
+  height:900px;
   pointer-events:none;
   z-index:0;
-  opacity:.45;
+  opacity:.32;
 
   background:
-    radial-gradient(closest-side at 46% 52%, rgba(192,122,74,.30), transparent 72%),
-    radial-gradient(220px 180px at 34% 28%, rgba(255,255,255,.92), transparent 65%),
-    radial-gradient(320px 280px at 50% 50%, rgba(233,207,154,.85), transparent 68%),
-    radial-gradient(circle at 52% 50%, rgba(192,122,74,1) 0 34%, transparent 35%),
-    radial-gradient(circle at 64% 50%, rgba(247,245,242,1) 0 34%, transparent 35%);
+    radial-gradient(circle at 52% 50%, rgba(192,122,74,.95) 0 33%, transparent 33.8%),
+    radial-gradient(circle at 63% 50%, rgba(247,245,242,1) 0 33%, transparent 33.8%),
+    radial-gradient(closest-side at 52% 50%, rgba(192,122,74,.20), transparent 74%);
 
-  filter:drop-shadow(0 28px 52px rgba(192,122,74,.24));
+  filter:drop-shadow(0 22px 40px rgba(192,122,74,.18));
 }
 
 /* ===== UI ===== */
