@@ -1,6 +1,6 @@
 /* ==========================================================
-   RAMADAN PREMIUM (LIGHT) — VISIBLE + PROFESSIONAL
-   External CSS only • no HTML edits
+   RAMADAN PREMIUM LIGHT (NO TEXT)
+   Calm colors • Professional Islamic geometry • External CSS
    ========================================================== */
 
 :root{
@@ -10,14 +10,14 @@
   --bg:#F7F5F2;
   --card:#FFFFFF;
   --text:#1C1C1C;
+  --muted:rgba(28,28,28,.64);
   --line:rgba(43,26,23,.12);
   --shadow:0 14px 34px rgba(0,0,0,.08);
   --radius:14px;
 
-  /* ===== Visibility Controls (عدّلهم بسهولة) ===== */
-  --ram-pattern: .55;     /* 0.0 -> 1.0 قوة النقشة */
-  --ram-phrases: .16;     /* 0.0 -> 1.0 قوة العبارات */
-  --ram-crescent: .35;    /* 0.0 -> 1.0 قوة الهلال */
+  /* Visibility (هادية لكن باينة) */
+  --pat: .42;        /* قوة النقشة */
+  --cres: .22;       /* قوة الهلال */
 }
 
 /* Base */
@@ -25,7 +25,7 @@ html,body{ background:var(--bg)!important; color:var(--text)!important; }
 body{ position:relative; overflow-x:hidden; }
 
 /* ==========================================================
-   1) Background pattern (clear Islamic geometry)
+   1) Background: calm premium + Islamic geometry (no text)
    ========================================================== */
 body::before{
   content:"";
@@ -35,115 +35,85 @@ body::before{
   z-index:0;
 
   background:
-    /* warm premium glow */
-    radial-gradient(1200px 640px at 50% -10%, rgba(233,207,154,.55), transparent 60%),
-    radial-gradient(900px 520px at 10% 15%, rgba(192,122,74,.38), transparent 62%),
+    /* soft warm wash */
+    radial-gradient(1200px 650px at 50% -10%, rgba(233,207,154,.30), transparent 62%),
+    radial-gradient(900px 520px at 12% 14%, rgba(192,122,74,.18), transparent 64%),
 
-    /* Islamic geometry tile (more visible) */
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240' viewBox='0 0 240 240'%3E%3Cg fill='none'%3E%3Cpath d='M120 10 L160 50 L120 90 L80 50 Z' stroke='%23C07A4A' stroke-width='2'/%3E%3Cpath d='M120 90 L160 130 L120 170 L80 130 Z' stroke='%231F8A4C' stroke-width='2' opacity='0.9'/%3E%3Cpath d='M120 170 L160 210 L120 250 L80 210 Z' stroke='%23C07A4A' stroke-width='2'/%3E%3Ccircle cx='120' cy='50' r='18' stroke='%232B1A17' stroke-width='2' opacity='0.55'/%3E%3Ccircle cx='120' cy='130' r='18' stroke='%232B1A17' stroke-width='2' opacity='0.55'/%3E%3C/g%3E%3C/svg%3E"),
+    /* professional islamic tile (subtle) */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260' viewBox='0 0 260 260'%3E%3Cg fill='none'%3E%3Cpath d='M130 18 L176 64 L130 110 L84 64 Z' stroke='%23C07A4A' stroke-width='2' opacity='0.55'/%3E%3Cpath d='M130 110 L176 156 L130 202 L84 156 Z' stroke='%232B1A17' stroke-width='2' opacity='0.20'/%3E%3Cpath d='M130 202 L176 248 L130 294 L84 248 Z' stroke='%23C07A4A' stroke-width='2' opacity='0.50'/%3E%3Ccircle cx='130' cy='64' r='18' stroke='%232B1A17' stroke-width='2' opacity='0.18'/%3E%3Ccircle cx='130' cy='156' r='18' stroke='%232B1A17' stroke-width='2' opacity='0.14'/%3E%3C/g%3E%3C/svg%3E"),
 
     /* base */
-    linear-gradient(180deg,#ffffff,#F7F5F2);
+    linear-gradient(180deg,#FFFFFF,#F7F5F2);
 
   background-repeat:no-repeat,no-repeat,repeat,no-repeat;
-  background-size:auto,auto,220px 220px,auto;
+  background-size:auto,auto,240px 240px,auto;
 
-  opacity: var(--ram-pattern);
+  opacity: var(--pat);
 }
 
 /* ==========================================================
-   2) Crescent (big metallic watermark - visible)
+   2) Crescent watermark (very subtle, no text)
    ========================================================== */
 body::after{
   content:"";
   position:fixed;
-  right:-160px;
-  bottom:-160px;
-  width:780px;
-  height:780px;
+  right:-180px;
+  bottom:-180px;
+  width:760px;
+  height:760px;
   pointer-events:none;
   z-index:0;
 
   background:
-    radial-gradient(circle at 40% 35%, rgba(255,248,235,.95) 0 35%, transparent 36%),
-    radial-gradient(circle at 46% 42%, rgba(233,207,154,.92) 0 34%, transparent 35%),
-    radial-gradient(circle at 55% 50%, rgba(192,122,74,.85) 0 33%, transparent 34%),
+    /* metallic feel */
+    radial-gradient(circle at 38% 34%, rgba(255,248,235,.95) 0 34%, transparent 35%),
+    radial-gradient(circle at 46% 42%, rgba(233,207,154,.85) 0 33%, transparent 34%),
+    radial-gradient(circle at 55% 52%, rgba(192,122,74,.70) 0 32%, transparent 33%),
 
-    /* crescent cutout */
-    radial-gradient(circle at 52% 50%, rgba(192,122,74,1) 0 32%, transparent 33%),
-    radial-gradient(circle at 61% 50%, rgba(247,245,242,1) 0 32%, transparent 33%),
+    /* crescent */
+    radial-gradient(circle at 52% 50%, rgba(192,122,74,1) 0 31%, transparent 32%),
+    radial-gradient(circle at 61% 50%, rgba(247,245,242,1) 0 31%, transparent 32%),
 
     /* halo */
-    radial-gradient(closest-side, rgba(192,122,74,.22), transparent 70%);
+    radial-gradient(closest-side, rgba(192,122,74,.18), transparent 72%);
 
-  opacity: var(--ram-crescent);
-  filter: drop-shadow(0 18px 30px rgba(192,122,74,.18));
+  opacity: var(--cres);
+  filter: drop-shadow(0 18px 30px rgba(192,122,74,.14));
 }
 
-/* ==========================================================
-   3) Islamic phrases layer (big, readable but subtle)
-   ========================================================== */
-.wrap::before{
-  content:
-    "رمضان كريم   •   تقبل الله منا ومنكم   •   اللهم بلغنا رمضان   •   مبارك عليكم الشهر\n"
-    "شهر الرحمة والمغفرة   •   اللهم اغفر لنا وارحمنا   •   اللهم اجعلنا من عتقائك من النار";
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  z-index:0;
-
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  text-align:center;
-
-  font-family: "DIN Next Arabic","Cairo",system-ui,sans-serif;
-  font-weight: 800;
-  font-size: clamp(26px, 3vw, 54px);
-  line-height: 1.9;
-  letter-spacing: .5px;
-  white-space: pre-wrap;
-
-  color: rgba(43,26,23,1);
-  opacity: var(--ram-phrases);
-
-  transform: rotate(-12deg);
-  filter: blur(.1px);
-}
-
-/* Make UI above everything */
+/* Keep UI above background */
 .wrap, .topbar, .tabbar, .card, .modal, .modalBackdrop, .toast{
   position:relative;
   z-index:1;
 }
 
 /* ==========================================================
-   4) Premium UI polish
+   3) Premium UI (light, calm)
    ========================================================== */
 .topbar,
 .tabbar,
 .card,
 .modal{
-  background: rgba(255,255,255,.92) !important;
+  background: rgba(255,255,255,.93) !important;
   border: 1px solid var(--line) !important;
   border-radius: var(--radius) !important;
   box-shadow: var(--shadow) !important;
   backdrop-filter: blur(8px);
 }
 
-/* Accent */
 .title, .brand-title{ color: var(--brown) !important; }
+
 .dot{
   background: var(--bronze) !important;
-  box-shadow: 0 12px 26px rgba(192,122,74,.16) !important;
+  box-shadow: 0 12px 26px rgba(192,122,74,.14) !important;
 }
 
 /* Buttons */
-.btn{ border:1px solid rgba(192,122,74,.26)!important; }
+.btn{ border:1px solid rgba(192,122,74,.22)!important; }
 .btn.primary{
-  background: linear-gradient(135deg, rgba(255,248,235,.95), rgba(192,122,74,.92)) !important;
+  background: linear-gradient(135deg, rgba(255,248,235,.95), rgba(192,122,74,.90)) !important;
   color:#1B120E !important;
-  box-shadow: 0 12px 22px rgba(192,122,74,.14) !important;
+  box-shadow: 0 12px 22px rgba(192,122,74,.12) !important;
 }
 .btn.secondary{
   background: rgba(192,122,74,.08) !important;
@@ -156,4 +126,15 @@ input,select,textarea{
   border: 1px solid rgba(43,26,23,.14) !important;
   color: var(--text) !important;
 }
-input::placeholder,textarea::placeholder{ color: rgba(28,28,28,.45) !important; }
+input::placeholder,textarea::placeholder{ color: rgba(28,28,28,.42) !important; }
+
+/* Tables */
+.tableWrap{
+  background: rgba(255,255,255,.78) !important;
+  border-color: rgba(43,26,23,.10) !important;
+}
+thead th{
+  background: rgba(255,255,255,.94) !important;
+  border-bottom-color: rgba(192,122,74,.18) !important;
+  color: var(--brown) !important;
+}
