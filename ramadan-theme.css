@@ -1,11 +1,10 @@
 /* ======================================================
-   Ramadan Professional Background
-   Light • Elegant • Graphic Style
+   Ramadan Typography Background
+   Islamic Phrases • Elegant • Professional
    ====================================================== */
 
 :root{
   --bg:#F7F5F2;
-  --card:#FFFFFF;
   --text:#1C1C1C;
   --brown:#2B1A17;
   --bronze:#C07A4A;
@@ -22,8 +21,35 @@ body{
   overflow-x: hidden;
 }
 
-/* ===== Main Background Layer ===== */
+/* ===== Repeated Islamic Phrases Layer ===== */
 body::before{
+  content:
+  "رمضان كريم   •   تقبل الله منا ومنكم   •   اللهم بلغنا رمضان   •   مبارك عليكم الشهر   •   اللهم اغفر لنا   •   شهر الرحمة   •   شهر المغفرة   •   شهر العتق من النار   •   ";
+
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+
+  font-family: "DIN Next Arabic", "Cairo", sans-serif;
+  font-size: 42px;
+  font-weight: 700;
+  line-height: 2.2;
+  letter-spacing: 1px;
+  white-space: pre-wrap;
+
+  color: rgba(192,122,74,.07); /* خفيفة جدا */
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+
+  transform: rotate(-15deg);
+}
+
+/* ===== Soft Gold Light Wash ===== */
+body::after{
   content:"";
   position: fixed;
   inset: 0;
@@ -31,73 +57,27 @@ body::before{
   pointer-events: none;
 
   background:
-    /* Islamic subtle grid */
-    repeating-linear-gradient(
-      45deg,
-      rgba(192,122,74,.06) 0px,
-      rgba(192,122,74,.06) 1px,
-      transparent 1px,
-      transparent 32px
-    ),
-    repeating-linear-gradient(
-      -45deg,
-      rgba(192,122,74,.04) 0px,
-      rgba(192,122,74,.04) 1px,
-      transparent 1px,
-      transparent 36px
-    ),
-
-    /* Soft radial gold light top center */
-    radial-gradient(
-      900px 500px at 50% -10%,
-      rgba(233,207,154,.35),
-      transparent 60%
-    ),
-
+    radial-gradient(900px 500px at 50% -10%, rgba(233,207,154,.30), transparent 60%),
     linear-gradient(180deg,#ffffff,#F7F5F2);
 }
 
-/* ===== Crescent Watermark (Graphic Look) ===== */
-body::after{
-  content:"";
-  position: fixed;
-  right: -120px;
-  bottom: -80px;
-  width: 500px;
-  height: 500px;
-  z-index: 0;
-  pointer-events: none;
-  opacity: .18;
-
-  background:
-    radial-gradient(circle at 55% 45%, rgba(192,122,74,1) 0 40%, transparent 41%),
-    radial-gradient(circle at 68% 45%, #F7F5F2 0 40%, transparent 41%);
-}
-
-/* Make content above background */
+/* Keep UI above background */
 .wrap, .topbar, .tabbar, .card, .modal, .toast{
   position: relative;
   z-index: 2;
 }
 
-/* ===== Card polish ===== */
+/* Cards premium polish */
 .card,
 .modal{
-  background: rgba(255,255,255,.92) !important;
+  background: rgba(255,255,255,.94) !important;
   border: 1px solid rgba(43,26,23,.10) !important;
-  backdrop-filter: blur(6px);
   box-shadow: 0 20px 40px rgba(0,0,0,.05);
 }
 
-/* Buttons Premium Bronze */
+/* Buttons Bronze */
 .btn.primary{
   background: linear-gradient(135deg,#E9CF9A,#C07A4A) !important;
   color:#1B120E !important;
   box-shadow: 0 10px 22px rgba(192,122,74,.18);
-}
-
-.btn.secondary{
-  background: rgba(192,122,74,.08) !important;
-  color: var(--brown) !important;
-  border:1px solid rgba(192,122,74,.22);
 }
