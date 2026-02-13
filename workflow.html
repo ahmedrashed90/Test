@@ -13,6 +13,7 @@
 
 
 
+
 <!DOCTYPE html>
 
 <html dir="rtl" lang="ar">
@@ -1258,6 +1259,33 @@ html, body {
 <div class="small">التجميع حسب (السيارة + البيان + الموديل) مع إجمالي العدد.</div>
 <button class="btn secondary" id="btnExportAllCars">تصدير Excel</button>
 </div>
+
+<!-- Filters -->
+<div class="toolbar" style="margin:0 0 10px 0">
+  <div class="field" style="flex:1;min-width:260px">
+    <label>بحث</label>
+    <input id="allCarsSearch" placeholder="اكتب أي شيء (سيارة / بيان / موديل)"/>
+  </div>
+  <div class="field" style="min-width:220px">
+    <label>السيارة</label>
+    <select id="allCarsFilterCar">
+      <option value="">الكل</option>
+    </select>
+  </div>
+  <div class="field" style="min-width:220px">
+    <label>البيان</label>
+    <select id="allCarsFilterStatement">
+      <option value="">الكل</option>
+    </select>
+  </div>
+  <div class="field" style="min-width:200px">
+    <label>العدد (أكبر من أو يساوي)</label>
+    <input id="allCarsMinCount" type="number" min="0" placeholder="0"/>
+  </div>
+</div>
+
+<div class="small" id="allCarsResultMeta" style="margin:-4px 0 8px 0">عدد النتائج: —</div>
+
 <div class="tableWrap" style="padding:0">
 <table id="allCarsTable">
 <thead>
@@ -8867,26 +8895,132 @@ if(type==='photo'){ $('req_photo_date').value=''; }
     }
 
     
+    
     /****************************************************
-     * كل السيارات (تجميع + تصدير)
+     * كل السيارات (تجميع + تصدير + فلاتر)
      ****************************************************/
     let _allCarsUnsub = null;
-    let _allCarsRows = [];
+    let _allCarsAllRows = [];   // كل الصفوف بعد التجميع (بدون فلترة)
+    let _allCarsRows = [];      // الصفوف بعد الفلاتر (المعروضة + التصدير)
+    let _allCarsSnapSize = 0;
+
+    function _allCarsGetEls(){
+      return {
+        tbody: document.querySelector('#allCarsTable tbody'),
+        meta:  document.getElementById('allCarsMeta'),
+        res:   document.getElementById('allCarsResultMeta'),
+        q:     document.getElementById('allCarsSearch'),
+        car:   document.getElementById('allCarsFilterCar'),
+        st:    document.getElementById('allCarsFilterStatement'),
+        min:   document.getElementById('allCarsMinCount'),
+      };
+    }
+
+    function _allCarsFillSelect(sel, values){
+      if(!sel) return;
+      const keep = sel.value || '';
+      const opts = ['<option value="">الكل</option>']
+        .concat(values.map(v=>`<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`))
+        .join('');
+      sel.innerHTML = opts;
+      // حاول ترجع القيمة القديمة لو لسه موجودة
+      sel.value = values.includes(keep) ? keep : '';
+    }
+
+    function _allCarsInitFilters(){
+      const els = _allCarsGetEls();
+      if(!els.q || !els.car || !els.st || !els.min) return;
+
+      // تعبئة الدروب داون مرة بعد التحميل
+      const cars = Array.from(new Set(_allCarsAllRows.map(r=>r.carName||'').filter(Boolean))).sort((a,b)=>a.localeCompare(b));
+      const sts  = Array.from(new Set(_allCarsAllRows.map(r=>r.statement||'').filter(Boolean))).sort((a,b)=>a.localeCompare(b));
+      _allCarsFillSelect(els.car, cars);
+      _allCarsFillSelect(els.st, sts);
+
+      // ربط الأحداث مرة واحدة فقط
+      if(!els.q.__bound){
+        const onChange = ()=>applyAllCarsFilters();
+        els.q.addEventListener('input', onChange);
+        els.car.addEventListener('change', onChange);
+        els.st.addEventListener('change', onChange);
+        els.min.addEventListener('input', onChange);
+        els.q.__bound = true;
+      }
+    }
+
+    function _allCarsRowMatchesQuery(r, q){
+      if(!q) return true;
+      const hay = [
+        r.carName || '',
+        r.statement || '',
+        r.model || '',
+        String(r.count ?? ''),
+      ].join(' | ').toLowerCase();
+      return hay.includes(q);
+    }
+
+    function applyAllCarsFilters(){
+      const els = _allCarsGetEls();
+      if(!els.tbody) return;
+
+      const q = (els.q?.value || '').toString().trim().toLowerCase();
+      const car = (els.car?.value || '').toString().trim();
+      const st  = (els.st?.value || '').toString().trim();
+      const min = parseInt((els.min?.value || '').toString().trim(), 10);
+      const minCount = Number.isFinite(min) ? min : null;
+
+      _allCarsRows = _allCarsAllRows.filter(r=>{
+        if(car && (r.carName||'') !== car) return false;
+        if(st  && (r.statement||'') !== st) return false;
+        if(minCount !== null && (Number(r.count)||0) < minCount) return false;
+        if(!_allCarsRowMatchesQuery(r, q)) return false;
+        return true;
+      });
+
+      // رندر الجدول
+      els.tbody.innerHTML = '';
+      _allCarsRows.forEach((r,i)=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${i+1}</td>
+          <td>${escapeHtml(r.carName||'—')}</td>
+          <td>${escapeHtml(r.statement||'—')}</td>
+          <td>${escapeHtml(r.model||'—')}</td>
+          <td style="font-weight:700">${r.count}</td>
+        `;
+        els.tbody.appendChild(tr);
+      });
+
+      // عدد النتائج فوق الجدول
+      if(els.res){
+        els.res.textContent = `عدد النتائج: ${_allCarsRows.length} من ${_allCarsAllRows.length}`;
+      }
+
+      // الميتا تحت الجدول (نفس القديم + إضافة المعروض)
+      if(els.meta){
+        els.meta.textContent =
+          `إجمالي السجلات في المخزون: ${_allCarsSnapSize} | إجمالي الصفوف بعد التجميع: ${_allCarsAllRows.length} | المعروض الآن: ${_allCarsRows.length}`;
+      }
+    }
 
     function startAllCarsLive(){
       // ✅ All Cars now loads ONCE (get) to reduce quota
-      const tbody = document.querySelector('#allCarsTable tbody');
-      const meta  = document.getElementById('allCarsMeta');
-      if(!tbody) return;
+      const els = _allCarsGetEls();
+      if(!els.tbody) return;
 
-      meta.textContent = 'جاري التحميل...';
+      if(els.meta) els.meta.textContent = 'جاري التحميل...';
+      if(els.res)  els.res.textContent  = 'عدد النتائج: —';
+
       db.collection('cars').get().then((snap)=>{
+        _allCarsSnapSize = snap.size || 0;
+
         const map = new Map();
         snap.forEach(doc=>{
           const d = doc.data() || {};
           // استبعاد (مباع تحت التسليم / مباع تم التسليم / مؤرشف)
           const st = normStatus(d.status || d.state || d.statuses || d['الحالة'] || '');
           if(st==='مباع تحت التسليم' || st==='مباع تم التسليم' || st==='مؤرشف') return;
+
           const carName = (d.carName || d['سيارة'] || '').toString().trim();
           const statement = (d.statement || d['البيان'] || '').toString().trim();
           const model = (d.model || d['موديل'] || '').toString().trim();
@@ -8898,29 +9032,17 @@ if(type==='photo'){ $('req_photo_date').value=''; }
           map.get(key).count += 1;
         });
 
-        _allCarsRows = Array.from(map.values())
+        _allCarsAllRows = Array.from(map.values())
           .sort((a,b)=>{
             return (a.carName||'').localeCompare(b.carName||'') ||
                    (a.model||'').localeCompare(b.model||'') ||
                    (a.statement||'').localeCompare(b.statement||'');
           });
 
-        tbody.innerHTML = '';
-        _allCarsRows.forEach((r,i)=>{
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>${i+1}</td>
-            <td>${escapeHtml(r.carName||'—')}</td>
-            <td>${escapeHtml(r.statement||'—')}</td>
-            <td>${escapeHtml(r.model||'—')}</td>
-            <td style="font-weight:700">${r.count}</td>
-          `;
-          tbody.appendChild(tr);
-        });
-
-        meta.textContent = `إجمالي السجلات في المخزون: ${snap.size} | إجمالي الصفوف بعد التجميع: ${_allCarsRows.length}`;
+        _allCarsInitFilters();
+        applyAllCarsFilters();
       }).catch((err)=>{
-        meta.textContent = 'تعذر تحميل البيانات. راجع الصلاحيات.';
+        if(els.meta) els.meta.textContent = 'تعذر تحميل البيانات. راجع الصلاحيات.';
         console.error(err);
       });
     }
@@ -8949,8 +9071,7 @@ if(type==='photo'){ $('req_photo_date').value=''; }
       btnExportAllCars.addEventListener('click', exportAllCars);
     }
 
-
-    // Hook into main tabs: when opening requests tab ensure mode is applied
+// Hook into main tabs: when opening requests tab ensure mode is applied
     const __openViewBase = openView;
     openView = function(viewId){
       __openViewBase(viewId);
