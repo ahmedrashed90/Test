@@ -1,19 +1,39 @@
-/* ======================================================
-   Ramadan Typography Background
-   Islamic Phrases • Elegant • Professional
-   ====================================================== */
+/* ==========================================================
+   RAMADAN PREMIUM LIGHT THEME (External CSS Only)
+   - Professional background graphics (Islamic geometry)
+   - Metallic crescent watermark
+   - Islamic phrases watermark (very subtle)
+   - Keeps readability + premium UI polish
+   ========================================================== */
 
 :root{
-  --bg:#F7F5F2;
-  --text:#1C1C1C;
-  --brown:#2B1A17;
-  --bronze:#C07A4A;
+  /* Brand */
+  --mzj-brown:#2B1A17;
+  --mzj-bronze:#C07A4A;
+  --mzj-bg:#F7F5F2;
+  --mzj-card:#FFFFFF;
+  --mzj-text:#1C1C1C;
+  --mzj-muted:rgba(28,28,28,.64);
+  --mzj-line:rgba(43,26,23,.12);
+  --mzj-shadow:0 14px 34px rgba(0,0,0,.08);
+  --mzj-radius:14px;
+
+  /* Ramadan accents (premium light) */
+  --ram-ivory:#FFF9F0;
+  --ram-gold:#E9CF9A;
+  --ram-gold2:#F3E6C9;
+  --ram-green:#1F8A4C;
+
+  /* Background intensity controls */
+  --ram-pattern-opacity:.22;    /* islamic pattern strength */
+  --ram-phrase-opacity:.06;     /* phrases strength */
+  --ram-crescent-opacity:.18;   /* crescent strength */
 }
 
 /* Base */
 html, body{
-  background: var(--bg) !important;
-  color: var(--text) !important;
+  background: var(--mzj-bg) !important;
+  color: var(--mzj-text) !important;
 }
 
 body{
@@ -21,63 +41,179 @@ body{
   overflow-x: hidden;
 }
 
-/* ===== Repeated Islamic Phrases Layer ===== */
+/* ==========================================================
+   1) Professional background (SVG pattern + warm light)
+   ========================================================== */
 body::before{
-  content:
-  "رمضان كريم   •   تقبل الله منا ومنكم   •   اللهم بلغنا رمضان   •   مبارك عليكم الشهر   •   اللهم اغفر لنا   •   شهر الرحمة   •   شهر المغفرة   •   شهر العتق من النار   •   ";
-
+  content:"";
   position: fixed;
   inset: 0;
-  z-index: 0;
   pointer-events: none;
+  z-index: 0;
 
-  font-family: "DIN Next Arabic", "Cairo", sans-serif;
-  font-size: 42px;
-  font-weight: 700;
-  line-height: 2.2;
-  letter-spacing: 1px;
-  white-space: pre-wrap;
+  /* Layer stack:
+     1) warm top glow
+     2) subtle vignette
+     3) islamic geometry (SVG tile)
+     4) base gradient
+  */
+  background:
+    radial-gradient(1100px 520px at 50% -10%, rgba(233,207,154,.40), transparent 62%),
+    radial-gradient(900px 520px at 12% 12%, rgba(192,122,74,.20), transparent 64%),
 
-  color: rgba(192,122,74,.07); /* خفيفة جدا */
+    /* Islamic geometry tile (professional, clean) */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='320' viewBox='0 0 320 320'%3E%3Cdefs%3E%3Cpattern id='p' width='80' height='80' patternUnits='userSpaceOnUse'%3E%3Cpath d='M40 0 L60 20 L40 40 L20 20 Z' fill='none' stroke='%23C07A4A' stroke-width='1' opacity='0.55'/%3E%3Cpath d='M40 40 L60 60 L40 80 L20 60 Z' fill='none' stroke='%231F8A4C' stroke-width='1' opacity='0.35'/%3E%3Ccircle cx='40' cy='20' r='10' fill='none' stroke='%232B1A17' stroke-width='1' opacity='0.22'/%3E%3Ccircle cx='40' cy='60' r='10' fill='none' stroke='%232B1A17' stroke-width='1' opacity='0.18'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='320' height='320' fill='url(%23p)'/%3E%3C/svg%3E"),
+    linear-gradient(180deg, #FFFFFF, var(--mzj-bg));
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
+  background-repeat: no-repeat, no-repeat, repeat, no-repeat;
+  background-size: auto, auto, 240px 240px, auto;
 
-  transform: rotate(-15deg);
+  /* Control pattern strength */
+  opacity: 1;
 }
 
-/* ===== Soft Gold Light Wash ===== */
+/* ==========================================================
+   2) Premium watermark layer (crescent + phrases)
+   ========================================================== */
 body::after{
   content:"";
   position: fixed;
   inset: 0;
-  z-index: 0;
   pointer-events: none;
+  z-index: 0;
 
   background:
-    radial-gradient(900px 500px at 50% -10%, rgba(233,207,154,.30), transparent 60%),
-    linear-gradient(180deg,#ffffff,#F7F5F2);
+    /* Metallic crescent watermark (bottom-right) */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='900' viewBox='0 0 900 900'%3E%3Cdefs%3E%3CradialGradient id='g' cx='38%25' cy='38%25' r='70%25'%3E%3Cstop offset='0%25' stop-color='%23F3E6C9' stop-opacity='0.95'/%3E%3Cstop offset='45%25' stop-color='%23E9CF9A' stop-opacity='0.85'/%3E%3Cstop offset='100%25' stop-color='%23C07A4A' stop-opacity='0.75'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='520' cy='520' r='210' fill='url(%23g)'/%3E%3Ccircle cx='590' cy='520' r='210' fill='%23F7F5F2'/%3E%3Cpath d='M520 300 C420 330 360 410 360 520 C360 650 465 760 600 760' fill='none' stroke='%23C07A4A' stroke-opacity='0.55' stroke-width='8'/%3E%3C/svg%3E"),
+
+    /* Islamic phrases watermark (center, rotated, very subtle) */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1400' height='900' viewBox='0 0 1400 900'%3E%3Cstyle%3Etext%7Bfont-family:Arial, sans-serif;font-weight:700;letter-spacing:1px%7D%3C/style%3E%3Cg opacity='0.55' transform='translate(120,120) rotate(-12)'%3E%3Ctext x='0' y='120' font-size='56' fill='%23C07A4A'%3E%D8%B1%D9%85%D8%B6%D8%A7%D9%86%20%D9%83%D8%B1%D9%8A%D9%85%20%20%E2%80%A2%20%20%D8%AA%D9%82%D8%A8%D9%84%20%D8%A7%D9%84%D9%84%D9%87%20%D9%85%D9%86%D8%A7%20%D9%88%D9%85%D9%86%D9%83%D9%85%3C/text%3E%3Ctext x='60' y='220' font-size='46' fill='%231F8A4C'%3E%D8%A7%D9%84%D9%84%D9%87%D9%85%20%D8%A8%D9%84%D8%BA%D9%86%D8%A7%20%D8%B1%D9%85%D8%B6%D8%A7%D9%86%20%20%E2%80%A2%20%20%D8%B4%D9%87%D8%B1%20%D8%A7%D9%84%D8%B1%D8%AD%D9%85%D8%A9%20%D9%88%D8%A7%D9%84%D9%85%D8%BA%D9%81%D8%B1%D8%A9%3C/text%3E%3Ctext x='120' y='320' font-size='44' fill='%232B1A17'%3E%D9%85%D8%A8%D8%A7%D8%B1%D9%83%20%D8%B9%D9%84%D9%8A%D9%83%D9%85%20%D8%A7%D9%84%D8%B4%D9%87%D8%B1%20%20%E2%80%A2%20%20%D8%A7%D9%84%D9%84%D9%87%D9%85%20%D8%A7%D8%BA%D9%81%D8%B1%20%D9%84%D9%86%D8%A7%20%D9%88%D8%A7%D8%B1%D8%AD%D9%85%D9%86%D8%A7%3C/text%3E%3C/g%3E%3C/svg%3E");
+
+  background-repeat: no-repeat, no-repeat;
+  background-position: right -140px bottom -160px, center center;
+  background-size: 760px 760px, 1400px 900px;
+
+  /* Fine-tune opacity independently */
+  opacity: 1;
+  filter: saturate(1.02);
 }
 
-/* Keep UI above background */
-.wrap, .topbar, .tabbar, .card, .modal, .toast{
+/* Control watermark intensities safely */
+@supports (mix-blend-mode: multiply){
+  body::after{
+    /* keeps it classy on light backgrounds */
+    mix-blend-mode: multiply;
+  }
+}
+
+/* Prevent content going behind fixed layers */
+.wrap, .topbar, .tabbar, .card, .modal, .modalBackdrop, .toast{
   position: relative;
-  z-index: 2;
+  z-index: 1;
 }
 
-/* Cards premium polish */
+/* ==========================================================
+   3) UI polish (premium consistent)
+   ========================================================== */
+.topbar,
+.tabbar,
 .card,
 .modal{
   background: rgba(255,255,255,.94) !important;
-  border: 1px solid rgba(43,26,23,.10) !important;
-  box-shadow: 0 20px 40px rgba(0,0,0,.05);
+  border: 1px solid var(--mzj-line) !important;
+  border-radius: var(--mzj-radius) !important;
+  box-shadow: var(--mzj-shadow) !important;
+  backdrop-filter: blur(10px);
 }
 
-/* Buttons Bronze */
-.btn.primary{
-  background: linear-gradient(135deg,#E9CF9A,#C07A4A) !important;
-  color:#1B120E !important;
-  box-shadow: 0 10px 22px rgba(192,122,74,.18);
+.title, .brand-title{
+  color: var(--mzj-brown) !important;
+  letter-spacing: .2px;
 }
+
+.dot{
+  background: var(--mzj-bronze) !important;
+  box-shadow: 0 12px 24px rgba(192,122,74,.16) !important;
+}
+
+/* Pills / badges */
+.pill{
+  background: rgba(233,207,154,.18) !important;
+  border-color: rgba(192,122,74,.22) !important;
+  color: var(--mzj-brown) !important;
+}
+
+/* Tabs */
+.tab{ color: var(--mzj-brown) !important; }
+.tab.active{
+  background: rgba(233,207,154,.18) !important;
+  border-color: rgba(192,122,74,.22) !important;
+}
+
+/* Buttons */
+.btn{ border: 1px solid rgba(192,122,74,.26) !important; }
+
+.btn.primary{
+  background: linear-gradient(135deg, var(--ram-gold2), var(--mzj-bronze)) !important;
+  color:#1B120E !important;
+  box-shadow: 0 12px 22px rgba(192,122,74,.14) !important;
+}
+
+.btn.secondary{
+  background: rgba(192,122,74,.08) !important;
+  color: var(--mzj-brown) !important;
+}
+
+.btn:hover{ filter: brightness(1.02); transform: translateY(-1px); }
+.btn:active{ transform: translateY(0); }
+
+@media (prefers-reduced-motion: reduce){
+  .btn{transition:none !important;}
+  .btn:hover{transform:none !important;}
+}
+
+/* Inputs */
+input, select, textarea{
+  background: rgba(255,255,255,.97) !important;
+  border: 1px solid rgba(43,26,23,.14) !important;
+  color: var(--mzj-text) !important;
+}
+input::placeholder, textarea::placeholder{
+  color: rgba(28,28,28,.45) !important;
+}
+
+/* Tables */
+.tableWrap{
+  background: rgba(255,255,255,.78) !important;
+  border-color: rgba(43,26,23,.10) !important;
+}
+thead th{
+  background: rgba(255,255,255,.94) !important;
+  border-bottom-color: rgba(192,122,74,.18) !important;
+  color: var(--mzj-brown) !important;
+}
+
+.linkBtn{
+  background: rgba(233,207,154,.18) !important;
+  border-color: rgba(192,122,74,.22) !important;
+  color: var(--mzj-brown) !important;
+}
+
+/* Status tags */
+.tag.ok{
+  background: rgba(31,138,76,.10) !important;
+  border-color: rgba(31,138,76,.20) !important;
+  color: #176A3B !important;
+}
+.tag.no{
+  background: rgba(224,106,93,.10) !important;
+  border-color: rgba(224,106,93,.20) !important;
+  color: #A73A2F !important;
+}
+
+/* Modal header */
+.modalHead{
+  background: rgba(233,207,154,.18) !important;
+  border-bottom-color: rgba(192,122,74,.18) !important;
+}
+.modalHead h4{ color: var(--mzj-brown) !important; }
