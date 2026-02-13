@@ -97,7 +97,7 @@ body::after{
 
 /* النص fixed في نفس ركن الهلال */
 .wrap::after{
-  content:"رمضان كريم";
+  content:"";
   position:fixed;
   right:110px;         /* اضبطها لو حبيت */
   bottom:120px;        /* اضبطها لو حبيت */
