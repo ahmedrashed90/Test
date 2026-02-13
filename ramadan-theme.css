@@ -1,122 +1,234 @@
-/* ===============================
-   Ramadan LIGHT Theme (External CSS)
-   No dark mode — warm cream + bronze
-   =============================== */
+/* =========================================================
+   Ramadan Premium LIGHT Theme (External CSS Only)
+   - Professional, celebratory, not dark
+   - Crescent + subtle Islamic pattern + top lantern garland
+   - Works without changing HTML (uses pseudo elements)
+   ========================================================= */
 
+/* ---------- 1) Brand + Ramadan Tokens ---------- */
 :root{
-  /* Base (Light) */
-  --bg:#F7F5F2;                 /* light background */
-  --card:#FFFFFF;               /* white cards */
-  --text:#1C1C1C;               /* dark text */
-  --muted:rgba(28,28,28,.66);
-  --line:rgba(43,26,23,.12);
-  --shadow:0 14px 34px rgba(0,0,0,.08);
+  /* Your identity */
+  --mzj-brown:#2B1A17;
+  --mzj-bronze:#C07A4A;
+  --mzj-bg:#F7F5F2;
+  --mzj-card:#FFFFFF;
+  --mzj-text:#1C1C1C;
+  --mzj-muted:rgba(28,28,28,.66);
+  --mzj-line:rgba(43,26,23,.12);
+  --mzj-shadow:0 14px 34px rgba(0,0,0,.08);
+  --mzj-radius:14px;
 
-  /* MZJ Identity */
-  --brown:#2B1A17;              /* primary */
-  --beige:#C07A4A;              /* bronze accent */
-  --cream:#FBF7F2;
+  /* Ramadan premium accents (light) */
+  --ram-gold-1:#F1D7A2;         /* soft gold */
+  --ram-gold-2:#C07A4A;         /* bronze */
+  --ram-green:#1F8A4C;          /* subtle green */
+  --ram-ivory:#FFF9F0;          /* warm ivory */
+  --ram-rose:#EAD7C7;           /* warm decorative */
+  --ram-glow: 0 0 0 6px rgba(192,122,74,.10), 0 12px 26px rgba(192,122,74,.10);
 
-  /* Ramadan accents */
-  --ramadan-gold-1:#E7C78A;     /* soft gold */
-  --ramadan-gold-2:#C07A4A;     /* bronze */
-  --ramadan-green:#1F8A4C;      /* subtle Ramadan green */
-  --ramadan-rose:#EAD7C7;       /* soft decor */
-  --ramadan-glow: 0 0 0 6px rgba(192,122,74,.10), 0 12px 26px rgba(192,122,74,.10);
+  /* Decoration controls */
+  --ram-garland-h:56px;         /* top decoration height */
 }
 
-/* Page background: light + subtle decor */
+/* ---------- 2) Base background (light premium) ---------- */
 html, body{
-  background: var(--bg) !important;
-  color: var(--text) !important;
+  background: var(--mzj-bg) !important;
+  color: var(--mzj-text) !important;
 }
 
-/* Soft pattern layer (no darkness) */
 body{
   position: relative;
   overflow-x: hidden;
 }
 
-/* Light Ramadan ornaments: crescents + confetti dots (very subtle) */
+/* Soft islamic pattern + warm light wash (VERY subtle) */
 body::before{
   content:"";
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 0;
-  opacity: .75;
-
+  opacity: .9;
   background:
-    radial-gradient(10px 10px at 10% 14%, rgba(192,122,74,.10) 0 45%, transparent 46%),
-    radial-gradient(8px 8px at 22% 28%, rgba(31,138,76,.10) 0 45%, transparent 46%),
-    radial-gradient(10px 10px at 82% 18%, rgba(231,199,138,.12) 0 45%, transparent 46%),
-    radial-gradient(7px 7px at 90% 36%, rgba(192,122,74,.08) 0 45%, transparent 46%),
-    radial-gradient(9px 9px at 78% 74%, rgba(31,138,76,.08) 0 45%, transparent 46%),
-    radial-gradient(1200px 700px at 50% -10%, rgba(231,199,138,.14), transparent 55%),
-    linear-gradient(180deg, #FFFFFF, var(--bg));
+    /* micro shimmer dots */
+    radial-gradient(2px 2px at 12% 18%, rgba(192,122,74,.10) 0 60%, transparent 61%),
+    radial-gradient(2px 2px at 78% 22%, rgba(31,138,76,.08) 0 60%, transparent 61%),
+    radial-gradient(2px 2px at 44% 72%, rgba(241,215,162,.10) 0 60%, transparent 61%),
+    radial-gradient(2px 2px at 88% 64%, rgba(192,122,74,.08) 0 60%, transparent 61%),
+
+    /* subtle geometric “tile” feel using repeating gradients */
+    repeating-linear-gradient(
+      45deg,
+      rgba(192,122,74,.05) 0 1px,
+      transparent 1px 18px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      rgba(31,138,76,.035) 0 1px,
+      transparent 1px 22px
+    ),
+
+    /* warm wash */
+    radial-gradient(1000px 520px at 50% -10%, rgba(241,215,162,.18), transparent 58%),
+    radial-gradient(900px 520px at 15% 10%, rgba(192,122,74,.12), transparent 62%),
+    linear-gradient(180deg, #FFFFFF, var(--mzj-bg));
 }
 
-/* Crescent badge (light) */
+/* Crescent badge (light, premium) */
 body::after{
   content:"";
   position: fixed;
-  top: 16px;
+  top: calc(var(--ram-garland-h) + 14px);
   left: 16px;
-  width: 220px;
-  height: 220px;
+  width: 190px;
+  height: 190px;
   pointer-events: none;
   z-index: 0;
-  opacity: .85;
+  opacity: .92;
 
   background:
-    radial-gradient(circle at 55% 45%, rgba(231,199,138,.95) 0 28%, transparent 29%),
+    /* crescent */
+    radial-gradient(circle at 55% 45%, rgba(241,215,162,.95) 0 28%, transparent 29%),
     radial-gradient(circle at 62% 45%, rgba(247,245,242,1) 0 28%, transparent 29%),
+
+    /* halo */
     radial-gradient(closest-side, rgba(192,122,74,.18), transparent 70%);
   filter: drop-shadow(0 10px 18px rgba(192,122,74,.14));
 }
 
-/* Make app content above decorations */
-.wrap, .modalBackdrop, .toast{
+/* Keep your app content above decor */
+.wrap, .modalBackdrop, .toast, .topbar, .tabbar, .card, .modal{
   position: relative;
   z-index: 1;
 }
 
-/* Cards/topbar/tabs: light premium */
+/* ---------- 3) Top Lantern Garland (no HTML edits) ---------- */
+/* This draws a clean festive strip at top (lantern icons are CSS-only) */
+body > *:first-child{
+  /* ensure first content doesn't hide under garland */
+  scroll-margin-top: calc(var(--ram-garland-h) + 12px);
+}
+
+body{
+  padding-top: var(--ram-garland-h);
+}
+
+/* The garland layer */
+body .ramadan-garland-fallback{display:none !important;} /* just in case */
+body::marker{content:"";}
+
+/* Create garland using fixed pseudo element on html (more stable) */
+html::before{
+  content:"";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--ram-garland-h);
+  z-index: 2;
+  pointer-events: none;
+
+  background:
+    /* thin rope */
+    linear-gradient(180deg,
+      rgba(255,255,255,.92) 0%,
+      rgba(255,255,255,.78) 55%,
+      rgba(255,255,255,.0) 100%
+    ),
+    /* rope line */
+    linear-gradient(90deg, transparent 0 6%, rgba(43,26,23,.22) 6% 94%, transparent 94% 100%);
+  box-shadow: 0 10px 24px rgba(0,0,0,.06);
+}
+
+/* Lanterns row (CSS shapes via gradients) */
+html::after{
+  content:"";
+  position: fixed;
+  top: 10px;
+  left: 0;
+  right: 0;
+  height: var(--ram-garland-h);
+  z-index: 3;
+  pointer-events: none;
+  opacity: .95;
+
+  /* Repeating “lantern” blobs */
+  background:
+    /* each lantern = 3 layers: cap, body, glow */
+    radial-gradient(12px 10px at 12% 28%, rgba(43,26,23,.22) 0 58%, transparent 59%),
+    radial-gradient(15px 20px at 12% 56%, rgba(241,215,162,.95) 0 60%, transparent 61%),
+    radial-gradient(28px 24px at 12% 56%, rgba(192,122,74,.16) 0 55%, transparent 56%),
+
+    radial-gradient(12px 10px at 28% 26%, rgba(43,26,23,.20) 0 58%, transparent 59%),
+    radial-gradient(15px 20px at 28% 54%, rgba(231,199,138,.92) 0 60%, transparent 61%),
+    radial-gradient(28px 24px at 28% 54%, rgba(31,138,76,.12) 0 55%, transparent 56%),
+
+    radial-gradient(12px 10px at 44% 30%, rgba(43,26,23,.20) 0 58%, transparent 59%),
+    radial-gradient(15px 20px at 44% 58%, rgba(241,215,162,.94) 0 60%, transparent 61%),
+    radial-gradient(28px 24px at 44% 58%, rgba(192,122,74,.14) 0 55%, transparent 56%),
+
+    radial-gradient(12px 10px at 60% 26%, rgba(43,26,23,.20) 0 58%, transparent 59%),
+    radial-gradient(15px 20px at 60% 54%, rgba(231,199,138,.92) 0 60%, transparent 61%),
+    radial-gradient(28px 24px at 60% 54%, rgba(31,138,76,.12) 0 55%, transparent 56%),
+
+    radial-gradient(12px 10px at 76% 30%, rgba(43,26,23,.20) 0 58%, transparent 59%),
+    radial-gradient(15px 20px at 76% 58%, rgba(241,215,162,.94) 0 60%, transparent 61%),
+    radial-gradient(28px 24px at 76% 58%, rgba(192,122,74,.14) 0 55%, transparent 56%),
+
+    radial-gradient(12px 10px at 90% 28%, rgba(43,26,23,.20) 0 58%, transparent 59%),
+    radial-gradient(15px 20px at 90% 56%, rgba(231,199,138,.92) 0 60%, transparent 61%),
+    radial-gradient(28px 24px at 90% 56%, rgba(31,138,76,.12) 0 55%, transparent 56%);
+
+  filter: drop-shadow(0 10px 16px rgba(192,122,74,.10));
+}
+
+/* Optional gentle sway (professional, not childish) */
+@media (prefers-reduced-motion: no-preference){
+  html::after{
+    transform-origin: 50% 0%;
+    animation: ramSway 6.5s ease-in-out infinite;
+  }
+  @keyframes ramSway{
+    0%,100%{ transform: translateY(0) rotate(0deg); opacity:.95; }
+    50%{ transform: translateY(1px) rotate(-.12deg); opacity:.98; }
+  }
+}
+
+/* ---------- 4) Components (premium light) ---------- */
 .topbar,
 .tabbar,
 .card,
 .modal{
-  background: rgba(255,255,255,.92) !important;
-  border: 1px solid var(--line) !important;
-  box-shadow: var(--shadow) !important;
+  background: rgba(255,255,255,.94) !important;
+  border: 1px solid var(--mzj-line) !important;
+  box-shadow: var(--mzj-shadow) !important;
   backdrop-filter: blur(10px);
+  border-radius: var(--mzj-radius);
 }
 
-/* Titles / highlights */
+/* Headings */
 .title, .brand-title{
-  color: var(--brown) !important;
+  color: var(--mzj-brown) !important;
   letter-spacing: .2px;
 }
 
-/* Small accent dot */
+/* Accent dot */
 .dot{
-  background: var(--ramadan-gold-2) !important;
-  box-shadow: var(--ramadan-glow) !important;
+  background: var(--mzj-bronze) !important;
+  box-shadow: var(--ram-glow) !important;
 }
 
-/* Pills */
+/* Pills / badges */
 .pill{
-  background: rgba(231,199,138,.14) !important;
+  background: rgba(241,215,162,.16) !important;
   border-color: rgba(192,122,74,.22) !important;
-  color: var(--brown) !important;
+  color: var(--mzj-brown) !important;
 }
 
 /* Tabs */
-.tab{
-  color: var(--brown) !important;
-}
+.tab{ color: var(--mzj-brown) !important; }
 .tab.active{
-  background: rgba(231,199,138,.16) !important;
+  background: rgba(241,215,162,.18) !important;
   border-color: rgba(192,122,74,.22) !important;
 }
 
@@ -124,29 +236,28 @@ body::after{
 .btn{
   border: 1px solid rgba(192,122,74,.26) !important;
 }
-
 .btn.primary{
-  background: linear-gradient(135deg, rgba(231,199,138,.95), rgba(192,122,74,.92)) !important;
+  background: linear-gradient(135deg, rgba(241,215,162,.96), rgba(192,122,74,.92)) !important;
   color: #1B120E !important;
   box-shadow: 0 12px 22px rgba(192,122,74,.14) !important;
 }
-
 .btn.secondary{
   background: rgba(192,122,74,.08) !important;
-  color: var(--brown) !important;
+  color: var(--mzj-brown) !important;
 }
+.btn:hover{ filter: brightness(1.02); transform: translateY(-1px); }
+.btn:active{ transform: translateY(0); }
 
-.btn.danger{
-  background: linear-gradient(135deg, #E06A5D, #C94B3E) !important;
-  border-color: rgba(0,0,0,.06) !important;
-  color: #fff !important;
+@media (prefers-reduced-motion: reduce){
+  .btn{transition:none !important;}
+  .btn:hover{transform:none !important;}
 }
 
 /* Inputs */
 input, select, textarea{
-  background: rgba(255,255,255,.96) !important;
+  background: rgba(255,255,255,.97) !important;
   border: 1px solid rgba(43,26,23,.14) !important;
-  color: var(--text) !important;
+  color: var(--mzj-text) !important;
 }
 input::placeholder, textarea::placeholder{
   color: rgba(28,28,28,.45) !important;
@@ -154,21 +265,18 @@ input::placeholder, textarea::placeholder{
 
 /* Tables */
 .tableWrap{
-  background: rgba(255,255,255,.75) !important;
+  background: rgba(255,255,255,.78) !important;
   border-color: rgba(43,26,23,.10) !important;
 }
-
 thead th{
-  background: rgba(255,255,255,.92) !important;
+  background: rgba(255,255,255,.94) !important;
   border-bottom-color: rgba(192,122,74,.18) !important;
-  color: var(--brown) !important;
+  color: var(--mzj-brown) !important;
 }
-
-/* Link-like buttons */
 .linkBtn{
-  background: rgba(231,199,138,.14) !important;
+  background: rgba(241,215,162,.16) !important;
   border-color: rgba(192,122,74,.22) !important;
-  color: var(--brown) !important;
+  color: var(--mzj-brown) !important;
 }
 
 /* Status tags */
@@ -185,20 +293,13 @@ thead th{
 
 /* Modal header */
 .modalHead{
-  background: rgba(231,199,138,.14) !important;
+  background: rgba(241,215,162,.16) !important;
   border-bottom-color: rgba(192,122,74,.18) !important;
 }
-.modalHead h4{
-  color: var(--brown) !important;
-}
+.modalHead h4{ color: var(--mzj-brown) !important; }
 
 /* Toast */
 .toast{
-  background: rgba(255,255,255,.92) !important;
+  background: rgba(255,255,255,.94) !important;
   border: 1px solid rgba(192,122,74,.18) !important;
-}
-
-/* Motion safety */
-@media (prefers-reduced-motion: reduce){
-  .btn{transition:none !important;}
 }
