@@ -1,178 +1,163 @@
-/* MZJ CRM Theme (Luxury / Bronze) */
-/* Palette (requested): primary #2B1A17, accent #C07A4A, bg #F7F5F2, text #1C1C1C, line #E5E2DD */
-
+/* MZJ STRONG THEME OVERRIDE (Very visible) */
 :root{
   --mzj-primary:#2B1A17;
   --mzj-accent:#C07A4A;
   --mzj-bg:#F7F5F2;
-  --mzj-surface:#FFFFFF;
   --mzj-text:#1C1C1C;
-  --mzj-muted:rgba(28,28,28,.62);
   --mzj-line:#E5E2DD;
-  --mzj-radius:14px;
-  --mzj-shadow:0 14px 34px rgba(0,0,0,.10);
-  --mzj-shadow-soft:0 10px 24px rgba(0,0,0,.08);
 
-  /* Map to the variables already used inside test.html */
-  --brown: var(--mzj-primary);
-  --beige: var(--mzj-accent);
-  --cream: #FFF7F0;
-  --bg: var(--mzj-bg);
-  --card: var(--mzj-surface);
-  --text: var(--mzj-text);
-  --muted: var(--mzj-muted);
-  --line: var(--mzj-line);
-  --shadow: var(--mzj-shadow-soft);
-  --r: var(--mzj-radius);
+  /* Make it pop */
+  --mzj-bg-2:#F3EFEA;
+  --mzj-shadow:0 18px 46px rgba(0,0,0,.14);
+  --mzj-shadow-soft:0 12px 28px rgba(0,0,0,.10);
+  --mzj-radius:18px;
 }
 
-/* --------------------------
-   IMPORTANT:
-   In your HTML, there is a huge inline <style> AFTER the <link rel="stylesheet" href="mzj-theme.css">.
-   Inline styles win, so we override with higher specificity + !important.
-   -------------------------- */
-
-html,body{
-  background:var(--mzj-bg) !important;
-  color:var(--mzj-text) !important;
-  font-family:"Tajawal", system-ui, -apple-system, "Segoe UI", Arial, sans-serif !important;
+/* Force background to be obvious */
+html, body{
+  background:
+    radial-gradient(1200px 700px at 85% -10%, rgba(192,122,74,.22), transparent 55%),
+    radial-gradient(900px 600px at 10% 15%, rgba(43,26,23,.10), transparent 55%),
+    linear-gradient(180deg, var(--mzj-bg), var(--mzj-bg-2)) !important;
+  color: var(--mzj-text) !important;
+  font-family: "Tajawal", "Cairo", system-ui, -apple-system, "Segoe UI", Arial, sans-serif !important;
 }
 
-body .wrap{max-width:1400px !important; padding:18px !important;}
+/* Slightly tighter layout + premium spacing */
+body .wrap{
+  max-width: 1450px !important;
+  padding: 18px !important;
+}
 
+/* Topbar becomes a premium card */
 body .topbar{
-  background:linear-gradient(180deg,#FFFFFF 0%, #FFFDFC 100%) !important;
-  border:1px solid var(--mzj-line) !important;
-  border-radius:var(--mzj-radius) !important;
-  box-shadow:var(--mzj-shadow) !important;
+  background: rgba(255,255,255,.88) !important;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(229,226,221,.9) !important;
+  border-radius: var(--mzj-radius) !important;
+  box-shadow: var(--mzj-shadow) !important;
 }
 
-/* Brand */
+/* Brand dot = bronze glow */
 body .dot{
-  background:var(--mzj-accent) !important;
-  box-shadow:0 0 0 8px rgba(192,122,74,.18) !important;
+  background: var(--mzj-accent) !important;
+  box-shadow:
+    0 0 0 10px rgba(192,122,74,.16),
+    0 12px 30px rgba(0,0,0,.12) !important;
 }
 
+/* Titles more premium */
 body .brand-title,
 body .title{
-  font-weight:900 !important;
-  letter-spacing:.2px !important;
-  color:var(--mzj-primary) !important;
-  font-size:18px !important;
+  color: var(--mzj-primary) !important;
+  font-weight: 1000 !important;
+  letter-spacing: .3px !important;
 }
-
 body .brand-sub,
 body .subtitle{
-  color:var(--mzj-muted) !important;
-  font-weight:700 !important;
-  font-size:12.5px !important;
+  color: rgba(28,28,28,.65) !important;
+  font-weight: 800 !important;
 }
 
-/* Pills */
+/* Pills more visible */
 body .pill{
-  border:1px solid var(--mzj-line) !important;
-  background:rgba(192,122,74,.10) !important;
-  color:var(--mzj-primary) !important;
-  font-weight:800 !important;
+  background: linear-gradient(180deg, rgba(192,122,74,.16), rgba(192,122,74,.08)) !important;
+  border: 1px solid rgba(192,122,74,.35) !important;
+  color: var(--mzj-primary) !important;
+  font-weight: 900 !important;
 }
 
-/* Buttons */
-body .btn{
-  border-radius:12px !important;
-  padding:10px 14px !important;
-  font-weight:900 !important;
-  box-shadow:none !important;
-}
-
-body .btn.primary{
-  background:linear-gradient(180deg, #2B1A17 0%, #1E1210 100%) !important;
-  color:#fff !important;
-}
-
-body .btn.secondary{
-  background:#fff !important;
-  border:1px solid var(--mzj-line) !important;
-  color:var(--mzj-primary) !important;
-}
-
-body .btn.danger{
-  background:#B42318 !important;
-  color:#fff !important;
-}
-
-body .btn:disabled{opacity:.55 !important; cursor:not-allowed !important;}
-
-body .btn:hover{filter:brightness(.98) !important;}
-body .btn.primary:hover{filter:brightness(1.03) !important;}
-
-/* Cards */
+/* Cards: stronger border + shadow + slight tint */
 body .card{
-  background:var(--mzj-surface) !important;
-  border:1px solid var(--mzj-line) !important;
-  border-radius:var(--mzj-radius) !important;
-  box-shadow:var(--mzj-shadow) !important;
+  background: rgba(255,255,255,.96) !important;
+  border: 1px solid rgba(229,226,221,.95) !important;
+  border-radius: var(--mzj-radius) !important;
+  box-shadow: var(--mzj-shadow-soft) !important;
+  overflow: hidden;
 }
-
 body .card h3{
-  color:var(--mzj-primary) !important;
-  border-bottom:1px solid var(--mzj-line) !important;
-  font-weight:900 !important;
+  border-bottom: 1px solid var(--mzj-line) !important;
+  font-weight: 1000 !important;
+  color: var(--mzj-primary) !important;
+  background: linear-gradient(90deg, rgba(192,122,74,.12), transparent 55%) !important;
 }
 
-/* Tabs */
+/* Tabs: bronze highlight clearly */
 body .tabbar{
-  background:#fff !important;
-  border:1px solid var(--mzj-line) !important;
-  border-radius:var(--mzj-radius) !important;
-  box-shadow:var(--mzj-shadow) !important;
+  background: rgba(255,255,255,.92) !important;
+  border: 1px solid rgba(229,226,221,.95) !important;
+  border-radius: var(--mzj-radius) !important;
+  box-shadow: var(--mzj-shadow-soft) !important;
 }
-
 body .tab{
-  border-radius:12px !important;
-  font-weight:900 !important;
-  color:var(--mzj-primary) !important;
+  border-radius: 14px !important;
+  font-weight: 1000 !important;
+  color: var(--mzj-primary) !important;
 }
-
 body .tab.active{
-  background:rgba(192,122,74,.10) !important;
-  border-color:rgba(192,122,74,.35) !important;
+  background: linear-gradient(180deg, rgba(192,122,74,.22), rgba(192,122,74,.10)) !important;
+  border-color: rgba(192,122,74,.45) !important;
+  box-shadow: 0 10px 22px rgba(0,0,0,.08) !important;
 }
 
-/* Inputs */
+/* Buttons: make primary clearly cinematic */
+body .btn{
+  border-radius: 14px !important;
+  padding: 10px 14px !important;
+  font-weight: 1000 !important;
+}
+body .btn.primary{
+  background: linear-gradient(180deg, #2B1A17 0%, #140C0B 100%) !important;
+  color:#fff !important;
+  box-shadow: 0 14px 26px rgba(0,0,0,.16) !important;
+}
+body .btn.secondary{
+  background: rgba(255,255,255,.9) !important;
+  border: 1px solid rgba(192,122,74,.35) !important;
+  color: var(--mzj-primary) !important;
+}
+body .btn.primary:hover{ filter: brightness(1.05) !important; }
+body .btn.secondary:hover{ background:#fff !important; }
+
+/* Inputs: clearer focus ring */
 body input, body select, body textarea{
-  border:1px solid var(--mzj-line) !important;
-  border-radius:12px !important;
-  background:#fff !important;
+  background: rgba(255,255,255,.95) !important;
+  border: 1px solid rgba(229,226,221,.95) !important;
+  border-radius: 14px !important;
 }
-
 body input:focus, body select:focus, body textarea:focus{
-  outline:none !important;
-  border-color:rgba(192,122,74,.55) !important;
-  box-shadow:0 0 0 4px rgba(192,122,74,.18) !important;
+  outline: none !important;
+  border-color: rgba(192,122,74,.60) !important;
+  box-shadow: 0 0 0 5px rgba(192,122,74,.20) !important;
 }
 
-/* Tables */
-body .tableWrap{
-  border:1px solid var(--mzj-line) !important;
-  border-radius:var(--mzj-radius) !important;
-}
-
+/* Table header and hover more visible */
 body thead th{
-  color:var(--mzj-primary) !important;
-  background:#fff !important;
-  border-bottom:1px solid var(--mzj-line) !important;
+  background: linear-gradient(180deg, rgba(255,255,255,.95), rgba(247,245,242,.95)) !important;
+  color: var(--mzj-primary) !important;
+  border-bottom: 1px solid var(--mzj-line) !important;
+  font-weight: 1000 !important;
+}
+body tbody tr:hover{
+  background: rgba(192,122,74,.08) !important;
 }
 
-/* Modals */
+/* Modals: premium header */
 body .modal{
-  border:1px solid var(--mzj-line) !important;
-  border-radius:18px !important;
-  box-shadow:0 24px 70px rgba(0,0,0,.22) !important;
+  border-radius: 22px !important;
+  border: 1px solid rgba(229,226,221,.95) !important;
+  box-shadow: 0 28px 80px rgba(0,0,0,.22) !important;
 }
-
 body .modalHead{
-  background:rgba(192,122,74,.10) !important;
-  border-bottom:1px solid var(--mzj-line) !important;
+  background: linear-gradient(90deg, rgba(192,122,74,.20), rgba(255,255,255,.92) 60%) !important;
+  border-bottom: 1px solid var(--mzj-line) !important;
 }
 
-body .small{color:var(--mzj-muted) !important;}
+/* Optional: make sidebar if exists look dark */
+body .sidebar{
+  background: linear-gradient(180deg, rgba(43,26,23,.98), rgba(20,12,11,.96)) !important;
+  color:#fff !important;
+  border-radius: var(--mzj-radius) !important;
+  box-shadow: var(--mzj-shadow) !important;
+  border: 1px solid rgba(192,122,74,.18) !important;
+}
