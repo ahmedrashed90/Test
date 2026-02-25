@@ -1,0 +1,122 @@
+
+/* ==========================================
+   MZJ ANIMATED PREMIUM BACKGROUND THEME
+   Strong animated gradient + luxury look
+   ========================================== */
+
+:root{
+  --primary:#2B1A17;
+  --accent:#C07A4A;
+  --text:#1C1C1C;
+}
+
+/* ===== Animated Background ===== */
+html,body{
+  min-height:100%;
+
+  background:
+    linear-gradient(
+      120deg,
+      #f7f5f2,
+      #efe8df,
+      #f7f5f2,
+      #eaded1,
+      #f7f5f2
+    );
+
+  background-size: 400% 400%;
+
+  animation: mzjGradientMove 18s ease infinite;
+
+  font-family:"Tajawal","Cairo",system-ui,-apple-system,"Segoe UI",Arial,sans-serif !important;
+  color:var(--text);
+}
+
+/* Smooth movement */
+@keyframes mzjGradientMove{
+  0%{background-position:0% 50%;}
+  50%{background-position:100% 50%;}
+  100%{background-position:0% 50%;}
+}
+
+/* ===== Floating luxury light effect ===== */
+body::before{
+  content:"";
+  position:fixed;
+  inset:-20%;
+
+  background:
+    radial-gradient(circle at 20% 30%, rgba(192,122,74,.25), transparent 40%),
+    radial-gradient(circle at 80% 60%, rgba(43,26,23,.18), transparent 45%);
+
+  animation: glowMove 22s linear infinite;
+
+  z-index:-1;
+  pointer-events:none;
+}
+
+@keyframes glowMove{
+  0%{transform:translateX(0) translateY(0);}
+  50%{transform:translateX(-4%) translateY(3%);}
+  100%{transform:translateX(0) translateY(0);}
+}
+
+/* ===== Glass Topbar ===== */
+.topbar{
+  background:rgba(255,255,255,.75)!important;
+  backdrop-filter:blur(14px);
+  border-radius:18px!important;
+  border:1px solid rgba(192,122,74,.25)!important;
+  box-shadow:0 24px 70px rgba(0,0,0,.14)!important;
+}
+
+/* ===== Cards ===== */
+.card{
+  background:rgba(255,255,255,.86)!important;
+  backdrop-filter:blur(10px);
+  border-radius:18px!important;
+  border:1px solid rgba(192,122,74,.25)!important;
+  box-shadow:0 14px 35px rgba(0,0,0,.10)!important;
+}
+
+/* ===== Tabs ===== */
+.tab.active{
+  background:linear-gradient(
+    180deg,
+    rgba(192,122,74,.30),
+    rgba(192,122,74,.14)
+  )!important;
+
+  border-color:rgba(192,122,74,.45)!important;
+}
+
+/* ===== Buttons ===== */
+.btn.primary{
+  background:linear-gradient(
+    180deg,
+    #2B1A17,
+    #140c0b
+  )!important;
+
+  color:white!important;
+
+  box-shadow:0 14px 30px rgba(0,0,0,.18)!important;
+}
+
+.btn.primary:hover{
+  filter:brightness(1.07);
+}
+
+/* ===== Logo Frame ===== */
+.dot{
+  background-image:url("logo.png")!important;
+  background-size:contain!important;
+  background-repeat:no-repeat!important;
+  background-position:center!important;
+
+  border-radius:16px!important;
+
+  box-shadow:
+  0 0 0 10px rgba(192,122,74,.15),
+  0 12px 28px rgba(0,0,0,.14)!important;
+}
