@@ -15,11 +15,12 @@
 
 
 
+
 <!DOCTYPE html>
 
 <html dir="rtl" lang="ar">
 <head>
-<link rel="stylesheet" href="ramadan-theme.css">
+<link rel="stylesheet" href="mzj-theme.css">
 <link rel="icon" type="image/x-icon" href="assets/favicon.png">
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
@@ -27,7 +28,7 @@
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
-<script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js">
+<script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
 <script>
 function showFastModal(title){
   const m = document.getElementById('fastActionModal');
@@ -554,6 +555,488 @@ html, body {
 }
 
 </style>
+
+<style id="mzj-ultimate-theme">
+/* =========================================================
+   MZJ CRM — ULTIMATE LEGEND THEME (Apple x Mercedes x Gulf)
+   - Massive visible UI change
+   - Light luxury animated background + cinematic overlays
+   - Glass topbar + premium tabbar + elevated cards
+   - Bronze micro-interactions + neon edges
+   - Auto logo from URL inside .dot
+   - No Firebase/Auth/JS logic touched (theme only)
+   ========================================================= */
+
+:root{
+  --p:#2B1A17;                 /* primary */
+  --a:#C07A4A;                 /* accent */
+  --bg0:#FFFFFF;
+  --bg1:#F7F5F2;
+  --bg2:#EFE9E2;
+  --t:#1C1C1C;
+  --m:rgba(28,28,28,.66);
+  --line:rgba(0,0,0,.08);
+  --line2:rgba(192,122,74,.28);
+
+  --glass:rgba(255,255,255,.72);
+  --glass2:rgba(255,255,255,.86);
+
+  --r:22px;
+  --r2:16px;
+
+  --sh:0 26px 90px rgba(0,0,0,.14);
+  --sh2:0 16px 44px rgba(0,0,0,.10);
+
+  --logo:url("https://i.postimg.cc/Kj0BSYRv/logo.png");
+}
+
+/* ---------- Global cinematic animated canvas ---------- */
+html,body{
+  min-height:100% !important;
+  direction:rtl !important;
+  color:var(--t) !important;
+  font-family:"Tajawal","Cairo",system-ui,-apple-system,"Segoe UI",Arial,sans-serif !important;
+
+  /* animated gradient base */
+  background:
+    linear-gradient(120deg, #ffffff, var(--bg1), #ffffff, var(--bg2), #ffffff) !important;
+  background-size: 420% 420% !important;
+  animation: mzjBG 14s ease-in-out infinite !important;
+}
+
+@keyframes mzjBG{
+  0%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+  100%{background-position:0% 50%}
+}
+
+/* moving bronze light + soft vignette */
+body::before{
+  content:"";
+  position:fixed;
+  inset:-25%;
+  background:
+    radial-gradient(circle at 18% 28%, rgba(192,122,74,.32), transparent 42%),
+    radial-gradient(circle at 82% 62%, rgba(43,26,23,.12), transparent 48%),
+    radial-gradient(circle at 50% 120%, rgba(0,0,0,.08), transparent 55%);
+  animation:mzjGlow 18s ease-in-out infinite;
+  z-index:-2;
+  pointer-events:none;
+  filter: blur(0px);
+}
+
+@keyframes mzjGlow{
+  0%{transform:translate(0,0) scale(1)}
+  50%{transform:translate(-3%,2%) scale(1.02)}
+  100%{transform:translate(0,0) scale(1)}
+}
+
+/* fine grain (very subtle) */
+body::after{
+  content:"";
+  position:fixed;
+  inset:0;
+  background-image: radial-gradient(rgba(0,0,0,.10) 1px, transparent 1px);
+  background-size: 3px 3px;
+  opacity:.05;
+  mix-blend-mode: soft-light;
+  animation:mzjGrain 3.6s steps(2) infinite;
+  z-index:-1;
+  pointer-events:none;
+}
+
+@keyframes mzjGrain{
+  0%{transform:translate3d(0,0,0)}
+  25%{transform:translate3d(-1.2%,.8%,0)}
+  50%{transform:translate3d(1%, -1%,0)}
+  75%{transform:translate3d(-.6%, -1.2%,0)}
+  100%{transform:translate3d(0,0,0)}
+}
+
+@media (prefers-reduced-motion: reduce){
+  html,body{animation:none !important;}
+  body::before, body::after{animation:none !important;}
+}
+
+/* ---------- Layout ---------- */
+body .wrap{
+  max-width: 1560px !important;
+  padding: 18px !important;
+  margin: 0 auto !important;
+}
+
+/* ---------- Topbar (Apple glass) ---------- */
+body .topbar{
+  position: sticky !important;
+  top: 14px !important;
+  z-index: 80 !important;
+
+  background: var(--glass) !important;
+  backdrop-filter: blur(18px) saturate(130%);
+  -webkit-backdrop-filter: blur(18px) saturate(130%);
+
+  border: 1px solid var(--line2) !important;
+  border-radius: var(--r) !important;
+  box-shadow: var(--sh) !important;
+
+  padding: 14px 16px !important;
+  overflow: hidden !important;
+}
+
+/* subtle animated edge */
+body .topbar::before{
+  content:"";
+  position:absolute;
+  inset:-2px;
+  background:
+    linear-gradient(90deg, transparent, rgba(192,122,74,.35), transparent);
+  opacity:.35;
+  transform: translateX(-60%);
+  animation: edgeSweep 7.5s ease-in-out infinite;
+  pointer-events:none;
+}
+
+@keyframes edgeSweep{
+  0%{transform:translateX(-70%);}
+  50%{transform:translateX(70%);}
+  100%{transform:translateX(-70%);}
+}
+
+/* brand row */
+body .brand{gap:12px !important;}
+body .brand-title, body .title{
+  font-weight: 1100 !important;
+  letter-spacing:.2px !important;
+  color: var(--p) !important;
+}
+body .brand-sub, body .subtitle{
+  color: var(--m) !important;
+  font-weight: 800 !important;
+}
+
+/* .dot becomes logo badge */
+body .dot{
+  width: 48px !important;
+  height: 48px !important;
+  border-radius: 16px !important;
+
+  background-color: rgba(255,255,255,.95) !important;
+  background-image: var(--logo) !important;
+  background-repeat:no-repeat !important;
+  background-position:center !important;
+  background-size: contain !important;
+
+  border: 1px solid rgba(192,122,74,.35) !important;
+  box-shadow:
+    0 0 0 10px rgba(192,122,74,.14),
+    0 18px 44px rgba(0,0,0,.14) !important;
+}
+
+/* pill */
+body .pill{
+  background: rgba(255,255,255,.70) !important;
+  border: 1px solid rgba(192,122,74,.28) !important;
+  color: var(--p) !important;
+  font-weight: 1000 !important;
+  border-radius: 999px !important;
+}
+
+/* ---------- Tabbar (Mercedes / neon bronze) ---------- */
+body .tabbar{
+  background: var(--glass) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+
+  border: 1px solid rgba(192,122,74,.22) !important;
+  border-radius: var(--r) !important;
+  box-shadow: var(--sh2) !important;
+
+  padding: 10px !important;
+  overflow: hidden !important;
+}
+
+body .tab{
+  border-radius: 14px !important;
+  padding: 10px 12px !important;
+  font-weight: 1000 !important;
+  color: rgba(43,26,23,.90) !important;
+  border: 1px solid transparent !important;
+  transition: transform .12s ease, box-shadow .22s ease, background .22s ease, border-color .22s ease !important;
+}
+
+body .tab:hover{
+  background: rgba(192,122,74,.10) !important;
+  border-color: rgba(192,122,74,.20) !important;
+  transform: translateY(-1px);
+}
+
+body .tab.active{
+  background: linear-gradient(180deg, rgba(192,122,74,.34), rgba(192,122,74,.14)) !important;
+  border-color: rgba(192,122,74,.55) !important;
+  box-shadow: 0 14px 30px rgba(0,0,0,.12) !important;
+}
+
+/* ---------- Cards (floating + hover) ---------- */
+body .card{
+  background: var(--glass2) !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+
+  border: 1px solid rgba(192,122,74,.22) !important;
+  border-radius: var(--r) !important;
+  box-shadow: var(--sh2) !important;
+
+  transform: translateZ(0);
+  transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease !important;
+}
+
+body .card:hover{
+  transform: translateY(-6px) !important;
+  box-shadow: 0 34px 90px rgba(0,0,0,.16) !important;
+  border-color: rgba(192,122,74,.34) !important;
+}
+
+body .card h3{
+  color: var(--p) !important;
+  font-weight: 1100 !important;
+  border-bottom: 1px solid rgba(0,0,0,.08) !important;
+  background: linear-gradient(90deg, rgba(192,122,74,.16), transparent 65%) !important;
+}
+
+/* Dashboard KPIs (if exist) */
+body .dashKpi, body .dashStatusBox, body .dashTotalBadge{
+  background: rgba(255,255,255,.72) !important;
+  border: 1px solid rgba(192,122,74,.20) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 14px 34px rgba(0,0,0,.10) !important;
+}
+body .dashKpi span{color:var(--m) !important;}
+body .dashKpi b{color:var(--p) !important; font-weight:1100 !important;}
+
+/* ---------- Buttons (cinematic) ---------- */
+body .btn{
+  border-radius: 14px !important;
+  font-weight: 1100 !important;
+  letter-spacing: .15px !important;
+  transition: transform .12s ease, filter .22s ease, box-shadow .22s ease !important;
+}
+
+body .btn.primary{
+  background: linear-gradient(180deg, #2B1A17 0%, #140C0B 100%) !important;
+  color:#fff !important;
+  border: 1px solid rgba(192,122,74,.18) !important;
+  box-shadow: 0 18px 44px rgba(0,0,0,.14) !important;
+}
+
+body .btn.secondary{
+  background: rgba(255,255,255,.85) !important;
+  border: 1px solid rgba(192,122,74,.34) !important;
+  color: var(--p) !important;
+}
+
+body .btn.danger{
+  background: linear-gradient(180deg, #B42318 0%, #7F1D1D 100%) !important;
+  color:#fff !important;
+}
+
+body .btn:hover{transform: translateY(-1px);}
+body .btn:active{transform: translateY(0px) scale(.99);}
+
+/* ---------- Inputs ---------- */
+body label{color:var(--m) !important; font-weight:900 !important;}
+body input, body select, body textarea{
+  background: rgba(255,255,255,.86) !important;
+  border: 1px solid rgba(0,0,0,.10) !important;
+  border-radius: 14px !important;
+}
+body input:focus, body select:focus, body textarea:focus{
+  outline:none !important;
+  border-color: rgba(192,122,74,.62) !important;
+  box-shadow: 0 0 0 5px rgba(192,122,74,.20) !important;
+}
+
+/* ---------- Tables ---------- */
+body .tableWrap{
+  background: rgba(255,255,255,.86) !important;
+  border: 1px solid rgba(0,0,0,.08) !important;
+  border-radius: var(--r) !important;
+  box-shadow: var(--sh2) !important;
+}
+body thead th{
+  background: rgba(255,255,255,.95) !important;
+  color: var(--p) !important;
+  border-bottom: 1px solid rgba(0,0,0,.08) !important;
+  font-weight: 1100 !important;
+}
+body tbody tr:hover{background: rgba(192,122,74,.14) !important;}
+
+/* ---------- Modals ---------- */
+body .modalBackdrop{background: rgba(0,0,0,.40) !important;}
+body .modal{
+  background: rgba(255,255,255,.95) !important;
+  border: 1px solid rgba(0,0,0,.10) !important;
+  border-radius: 24px !important;
+  box-shadow: 0 34px 110px rgba(0,0,0,.22) !important;
+}
+body .modalHead{
+  background: linear-gradient(90deg, rgba(192,122,74,.22), rgba(255,255,255,.92) 65%) !important;
+  border-bottom: 1px solid rgba(0,0,0,.08) !important;
+}
+
+/* ---------- Scrollbar ---------- */
+*::-webkit-scrollbar{width:10px;height:10px}
+*::-webkit-scrollbar-thumb{background:rgba(43,26,23,.28);border-radius:999px}
+*::-webkit-scrollbar-track{background:rgba(0,0,0,.05)}
+</style>
+
+
+<style id="mzj-mouse-effects">
+/* =========================================================
+   MZJ — STRONG MOUSE EFFECTS (Premium, visible)
+   - Strong bronze cursor glow + soft trail
+   - Dual ripple: fill + shockwave ring
+   - Strong hover lift + bronze edge highlight
+   - Respects prefers-reduced-motion
+   ========================================================= */
+
+:root{
+  --mzj-accent: rgba(192,122,74,1);
+  --mzj-accent-soft: rgba(192,122,74,.55);
+  --mzj-accent-glow: rgba(192,122,74,.85);
+}
+
+/* ---- Cursor Glow ---- */
+.cursor-glow,
+.cursor-glow2{
+  position:fixed;
+  left:-9999px;
+  top:-9999px;
+  border-radius:50%;
+  pointer-events:none;
+  z-index:999999;
+  transform:translate(-50%,-50%);
+  will-change: left, top, transform, opacity;
+}
+
+.cursor-glow{
+  width:260px;
+  height:260px;
+  background: radial-gradient(circle, rgba(192,122,74,.65), rgba(192,122,74,.22) 40%, transparent 70%);
+  filter: blur(0px);
+  mix-blend-mode: screen;
+  opacity:.85;
+  transition: left .04s linear, top .04s linear, opacity .25s ease;
+}
+
+.cursor-glow2{
+  width:90px;
+  height:90px;
+  background: radial-gradient(circle, rgba(43,26,23,.55), rgba(192,122,74,.35) 45%, transparent 75%);
+  mix-blend-mode: multiply;
+  opacity:.9;
+  transition: left .02s linear, top .02s linear, transform .12s ease;
+}
+
+/* ---- Click ripples ---- */
+.ripple{
+  position:absolute;
+  border-radius:50%;
+  transform:scale(0);
+  animation:rippleFill .85s cubic-bezier(.2,.9,.2,1);
+  background: radial-gradient(circle, rgba(192,122,74,.85) 0%, rgba(192,122,74,.35) 55%, transparent 75%);
+  box-shadow: 0 0 0 1px rgba(192,122,74,.25), 0 18px 42px rgba(0,0,0,.18);
+  pointer-events:none;
+}
+
+.rippleRing{
+  position:absolute;
+  border-radius:50%;
+  transform:scale(.35);
+  opacity:1;
+  animation:rippleRing .9s cubic-bezier(.1,.8,.2,1);
+  border:2px solid rgba(192,122,74,.85);
+  box-shadow: 0 0 22px rgba(192,122,74,.45);
+  background: transparent;
+  pointer-events:none;
+}
+
+@keyframes rippleFill{
+  0%{transform:scale(0);opacity:1}
+  70%{transform:scale(5.6);opacity:.55}
+  100%{transform:scale(7);opacity:0}
+}
+
+@keyframes rippleRing{
+  0%{transform:scale(.35);opacity:1}
+  60%{opacity:.65}
+  100%{transform:scale(6.8);opacity:0}
+}
+
+/* ---- Strong hover lift + bronze edge ---- */
+.btn,
+.tab,
+.subTab,
+.linkBtn{
+  position:relative; /* needed for ripples without affecting layout */
+  transition:
+    transform .16s ease,
+    box-shadow .22s ease,
+    filter .22s ease;
+}
+
+.btn:hover,
+.tab:hover,
+.subTab:hover,
+.linkBtn:hover{
+  transform: translateY(-3px) scale(1.045);
+  filter: brightness(1.02);
+  box-shadow:
+    0 18px 44px rgba(0,0,0,.16),
+    0 0 0 1px rgba(192,122,74,.25),
+    0 0 28px rgba(192,122,74,.22);
+}
+
+.btn::after,
+.tab::after,
+.subTab::after,
+.linkBtn::after{
+  content:"";
+  position:absolute;
+  inset:-2px;
+  border-radius: inherit;
+  pointer-events:none;
+  opacity:0;
+  transition: opacity .2s ease;
+  background: linear-gradient(90deg, transparent, rgba(192,122,74,.42), transparent);
+}
+
+.btn:hover::after,
+.tab:hover::after,
+.subTab:hover::after,
+.linkBtn:hover::after{
+  opacity:.9;
+}
+
+/* ---- Click pulse (more visible) ---- */
+.btn:active,
+.tab:active,
+.subTab:active,
+.linkBtn:active{
+  transform: translateY(0) scale(.97) !important;
+  box-shadow:
+    0 0 0 7px rgba(192,122,74,.24),
+    0 18px 46px rgba(0,0,0,.20),
+    0 0 36px rgba(192,122,74,.22);
+}
+
+/* ---- Reduce motion accessibility ---- */
+@media (prefers-reduced-motion: reduce){
+  .cursor-glow,.cursor-glow2{display:none !important;}
+  .ripple,.rippleRing{animation:none !important; opacity:0 !important;}
+  .btn,.tab,.subTab,.linkBtn{transition:none !important;}
+}
+</style>
+
 </head>
 <body>
 <div class="wrap">
@@ -2369,6 +2852,95 @@ html, body {
     <div class="loader"></div>
   </div>
 </div>
+
+
+<script id="mzj-mouse-effects-js">
+/* =========================================================
+   MZJ — STRONG MOUSE EFFECTS JS
+   - Dual cursor glow follow
+   - Ripple fill + shockwave ring on click
+   - Does not touch app logic (pure UI)
+   ========================================================= */
+
+(function(){
+  // Cursor glow (two layers for stronger presence)
+  const glow1 = document.createElement("div");
+  glow1.className = "cursor-glow";
+  const glow2 = document.createElement("div");
+  glow2.className = "cursor-glow2";
+
+  document.body.appendChild(glow1);
+  document.body.appendChild(glow2);
+
+  let lastX = -9999, lastY = -9999;
+  let down = false;
+
+  document.addEventListener("mousemove", (e) => {
+    lastX = e.clientX;
+    lastY = e.clientY;
+
+    glow1.style.left = lastX + "px";
+    glow1.style.top  = lastY + "px";
+
+    glow2.style.left = lastX + "px";
+    glow2.style.top  = lastY + "px";
+  }, {passive:true});
+
+  document.addEventListener("mousedown", () => {
+    down = true;
+    glow2.style.transform = "translate(-50%,-50%) scale(1.25)";
+    glow1.style.opacity = ".95";
+  });
+
+  document.addEventListener("mouseup", () => {
+    down = false;
+    glow2.style.transform = "translate(-50%,-50%) scale(1)";
+    glow1.style.opacity = ".85";
+  });
+
+  document.addEventListener("mouseleave", () => {
+    glow1.style.opacity = "0";
+    glow2.style.opacity = "0";
+  });
+
+  document.addEventListener("mouseenter", () => {
+    glow1.style.opacity = ".85";
+    glow2.style.opacity = ".9";
+  });
+
+  // Ripple click on buttons/tabs only
+  document.addEventListener("click", (e) => {
+    const target = e.target.closest(".btn,.tab,.subTab,.linkBtn");
+    if(!target) return;
+
+    const rect = target.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height) * 1.25;
+
+    // make sure ripples are visible (no layout shift)
+    const prevPos = getComputedStyle(target).position;
+    if(prevPos === "static") target.style.position = "relative";
+    target.style.overflow = "hidden";
+
+    const mk = (cls) => {
+      const el = document.createElement("span");
+      el.className = cls;
+      el.style.width  = size + "px";
+      el.style.height = size + "px";
+      el.style.left = (e.clientX - rect.left - size/2) + "px";
+      el.style.top  = (e.clientY - rect.top  - size/2) + "px";
+      return el;
+    };
+
+    const fill = mk("ripple");
+    const ring = mk("rippleRing");
+
+    target.appendChild(fill);
+    target.appendChild(ring);
+
+    setTimeout(() => { fill.remove(); ring.remove(); }, 950);
+  }, true);
+})();
+</script>
 
 </body>
 </html>
